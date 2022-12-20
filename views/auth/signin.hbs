@@ -1,0 +1,52 @@
+<div class="row">
+    <div class="col-2">
+        <p class="fw-bolder" style="font-size:1.5rem;">
+            {{fname}}
+        </p>
+    </div>
+
+    <div class="col auto"></div>
+
+    <div class="col-2">
+        <i class="bi bi-three-dots-vertical menu-item text-secondary settings" data-bs-toggle="modal"
+            data-bs-target="#settings" style="font-size:1.5rem;font-weight:bolder;"></i>
+    </div>
+</div>
+
+<div class="row" style="margin:5% auto 5% auto;">
+    <form style="margin:6rem 0;" action="/user/reauth" method="post">
+        <div class="container">
+
+            <div class="col mb-4">
+                <div class="input-group">
+                    <span class="input-group-text" id="basic-addon1">
+                        <i class="bi bi-envelope"></i>
+                    </span>
+
+                    <input type="email" name="email" id="signin-email" class="form-control" placeholder="Email"
+                        required />
+                </div>
+            </div>
+
+            <div class="col mb-4">
+                <div class="input-group">
+                    <span class="input-group-text" id="basic-addon1">
+                        <i class="bi bi-key"></i>
+                    </span>
+                    <input type="password" name="pwd" id="signin-pwd" class="form-control" placeholder="Password"
+                        required />
+                </div>
+            </div>
+
+            <input type="hidden" name="_csrf" value="{{csrfToken}}" readonly>
+
+            <div class="col my-4">
+                <div class="input-group">
+                    <input id="sig-submit-button" type="submit" class="btn btn-primary" type="button"
+                        style="border-radius: 15px;">
+                </div>
+            </div>
+
+        </div>
+    </form>
+</div>

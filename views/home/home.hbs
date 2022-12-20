@@ -1,0 +1,73 @@
+<div class="row">
+    <div class="col-10">
+
+        <div class="row">
+            <div class="col auto text-center">
+                <h3>Site Still Under Contruction</h3>
+                <p>Some features may not work as expected</p>
+                <div class="col-12">
+                    <div class="progress">
+                        <div class="progress-bar" role="progressbar" style="width: 79%" aria-valuenow="25"
+                            aria-valuemin="0" aria-valuemax="100"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <form style="margin:6rem auto;" action="/auth/signin" method="post">
+
+                <div class="container">
+                    <div class="row">
+                        <div class="col-12 my-4">
+                            <div class="input-group">
+                                <span class="input-group-text" id="basic-addon1">
+                                    <i class="bi bi-envelope"></i>
+                                </span>
+                                <input type="email" class="form-control" name="email" id="signin-email"
+                                    placeholder="name@example.com">
+                            </div>
+                        </div>
+
+                        <div class="col-12 mt-4">
+                            <div class="input-group">
+                                <span class="input-group-text" id="basic-addon1">
+                                    <i class="bi bi-key"></i>
+                                </span>
+                                <input type="password" class="form-control" name="pwd" id="signin-pwd"
+                                    placeholder="Password">
+                            </div>
+                        </div>
+
+                        <div class="col-12 my-0 mt-1">
+                            <label>
+                                <a href="/forgotpassword" class="nav-link text-primary">Forgot password?</a>
+                            </label>
+                        </div>
+
+                        <input type="hidden" name="_csrf" value="{{csrfToken}}" readonly>
+
+                        <div class="col-12 my-4">
+                            <button class="btn btn-lg btn-primary" type="submit">Sign in</button>
+                        </div>
+                    </div>
+                </div>
+
+            </form>
+        </div>
+
+    </div>
+
+
+    <div class="col-2">
+        <div class="row">
+            <div class="col-10" style="width:70%;"></div>
+
+            <div class="col-2">
+                <i class="bi bi-three-dots-vertical menu-item text-secondary main-menu-button" data-bs-toggle="modal"
+                    data-bs-target="#mainmenu">
+                </i>
+            </div>
+        </div>
+    </div>
+</div>

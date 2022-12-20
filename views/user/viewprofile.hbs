@@ -1,0 +1,155 @@
+<div class="row">
+    <div class="col-10">
+        {{#if hasDoc}}
+        <form style="margin:1rem 0 5rem 0;">
+            <div class="container">
+                <div class="row">
+                    <div class="col-12 mb-3">
+                        <strong>Name</strong>
+                        <div class="input-group">
+                            <input type="text" name="fname" value="{{user.user.fname}}" class="form-control"
+                                placeholder="First Name" readonly />
+                        </div>
+                    </div>
+
+                    <div class="col-12 mb-3">
+                        <div class="input-group">
+                            <input type="text" name="lname" value="{{user.user.lname}}" class="form-control"
+                                placeholder="Last Name" readonly />
+                        </div>
+                    </div>
+
+                    <div class="col-12 mt-4">
+                        <strong>Email</strong>
+                        <div class="input-group">
+                            <input type="email" name="email" value="{{user.user.email}}" class="form-control"
+                                placeholder="Email" readonly />
+                        </div>
+                    </div>
+
+
+                    <div class="col-12 mt-4">
+                        <strong>Street Address</strong>
+
+                        <div class="input-group mb-3">
+                            <input type="text" name="street" {{#if user.address.street}}value="{{user.address.street}}"
+                                {{/if}} class=" form-control" placeholder="Street address" readonly />
+                        </div>
+
+                        <div class="input-group mb-3">
+                            <input type="text" name="city" {{#if user.address.city}}value="{{user.address.city}}"
+                                {{/if}}class="form-control" placeholder="City" readonly />
+                        </div>
+
+                        <div class="input-group">
+                            <input type="text" name="zipcode" {{#if
+                                user.address.zipcode}}value="{{user.address.zipcode}}" {{/if}} class="form-control"
+                                placeholder="Zipcode" readonly />
+                        </div>
+                    </div>
+
+                    <div class="col-12 mt-4">
+                        <strong>Save Password</strong>
+                        <div class="input-group">
+                            <input class="form-check-input" type="checkbox" {{#if user.passwordSaved}}checked{{/if}}
+                                name="savepwd" disabled />
+                        </div>
+                    </div>
+
+                    <div class="col-12 mt-4">
+                        <strong>Gender</strong>
+                        <div class="input-group">
+                            <input type="text" value="{{user.gender}}" class="form-control" readonly>
+                        </div>
+                    </div>
+
+                    <div class="col-12 my-4">
+                        <strong>Birthday</strong>
+                        <div class="input-group">
+                            <input type="date" name="dob" class="form-control"
+                                value="{{user.dob.year}}-{{user.dob.month}}-{{user.dob.day}}" readonly />
+                        </div>
+                    </div>
+                </div>
+
+                <button type="button" class="btn btn-success" value="Edit" style="border-radius: 15px;">
+                    <a class="text-white" style="text-decoration:none;" href="/user/profile/edit">Edit</a>
+                </button>
+
+                <button type="button" class="btn btn-danger" value="Delete" style="border-radius: 15px;">
+                    <a class="text-white" style="text-decoration:none;" href="/user/profile/delete">Delete</a>
+                </button>
+            </div>
+        </form>
+        {{else}}
+        <form action="/user/profile/create" method="post" style="margin:1rem 0 5rem 0;">
+            <div class="container">
+                <div class="row">
+                    <div class="col-12 mt-4">
+                        <strong>Street Address</strong>
+
+                        <div class="input-group mb-3">
+                            <input type="text" name="street" class="form-control" placeholder="Street address" />
+                        </div>
+
+                        <div class="input-group mb-3">
+                            <input type="text" name="city" class="form-control" placeholder="City" />
+                        </div>
+
+                        <div class="input-group">
+                            <input type="text" name="zipcode" class="form-control" placeholder="Zipcode" />
+                        </div>
+                    </div>
+
+                    <div class="col-12 mt-4">
+                        <strong>Save Password</strong>
+                        <div class="input-group">
+                            <input class="form-check-input" type="checkbox" name="savepwd" />
+                        </div>
+                    </div>
+
+                    <div class="col-12 mt-4">
+                        <strong>Gender</strong>
+                        <div class="input-group">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="male">&nbsp;
+                                <label class="form-check-label" for="flexCheckDefault">
+                                    Male
+                                </label>
+                            </div>&nbsp;&nbsp;&nbsp;
+
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="female">&nbsp;
+                                <label class="form-check-label" for="flexCheckChecked">
+                                    Female
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-12 my-4">
+                        <strong>Birthday</strong>
+                        <div class="input-group">
+                            <input type="date" name="dob" class="form-control" />
+                        </div>
+                    </div>
+                </div>
+
+
+                <input id="reg-submit-button" type="submit" class="btn btn-primary" value="Create" type="button"
+                    style="border-radius: 15px;">
+            </div>
+        </form>
+
+        {{/if}}
+    </div>
+
+    <div class="col-2">
+        <div class="col auto"></div>
+
+        <div class="col-2">
+            <i class="bi bi-three-dots-vertical menu-item text-secondary settings" data-bs-toggle="modal"
+                data-bs-target="#profile" style="font-size:1.5rem;font-weight:bolder;"></i>
+        </div>
+    </div>
+</div>

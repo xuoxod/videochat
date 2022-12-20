@@ -1,0 +1,116 @@
+<div class="row">
+    <div class="col-sm-5 col-md-2">
+        <div class="chat-profile-primary-photo-container d-flex">
+            <i id="primary-photo" class="bi bi-person-fill d-inline-flex m-auto" style="font-size:8rem;"></i>
+        </div>
+    </div>
+
+    <div class="col-sm-5 col-md-8">
+        {{#if hasDoc}}
+        <form id="chat-profile-form" method="post" action="/chat/profile/update" style="margin:1rem 0 5rem 0;">
+            <div class="container">
+                <div class="row">
+                    <div class="col-12 mb-3">
+                        <strong>ID</strong>
+                        <div class="input-group">
+                            <input type="text" id="rmtId" name="rmtid" value="{{uid}}" class="form-control"
+                                placeholder="First Name" readonly />
+                        </div>
+                    </div>
+
+                    <div class="col-12 mb-3">
+                        <strong>Username</strong>
+                        <br class="input-group">
+                        <input type="text" id="uName" name="uname" value="{{profile.uname}}"
+                            class="form-control text-input" placeholder="First Name" />
+                        <br>
+                        <p id="uname-error" class="m-0 text-danger d-none"></p>
+                    </div>
+                </div>
+
+                <div class="col-12 mb-3">
+                    <strong>Display Name</strong>
+                    <select name="displayName" id="displayName">
+                        <option value="fname" {{#if profile.displayName.fname}}selected{{/if}}>First name
+                        </option>
+                        <option value="uname" {{#if profile.displayName.uname}}selected{{/if}}>Username</option>
+                    </select>
+                </div>
+
+                <div class="col-12 mb-3">
+                    <div class="form-check">
+                        <input class="form-check-input cb-input" type="checkbox" value="" {{#if
+                            profile.isVisible}}checked{{/if}} id="isVisible" name="isVisible" />
+                        <label class="form-check-label" for="isVisible">
+                            <strong>Visible</strong>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="col-12 mb-3">
+                    <div class="form-check">
+                        <input class="form-check-input cb-input" type="checkbox" value="" {{#if
+                            profile.public}}checked{{/if}} id="public" name="public" />
+                        <label class="form-check-label" for="isVisible">
+                            <strong>Public</strong>
+                        </label>
+                    </div>
+                </div>
+
+                {{#if profile.friends}}
+                <div class="col-12 mb-4">
+                    <strong>Friends</strong>
+                    <ul class="list-group">
+                        {{#each profile.friends}}
+                        <li class="list-group-item">
+                            {{.}}
+                        </li>
+                        {{/each}}
+                    </ul>
+                </div>
+                {{/if}}
+
+                {{#if profile.blockedUsers}}
+                <div class="col-12 mb-4">
+                    <strong>Blocked Users</strong>
+                    <ul class="list-group">
+                        {{#each profile.blockedUsers}}
+                        <li class="list-group-item">
+                            <div class="input-group">
+                                <span class="input-group-text">
+                                    {{.}}
+                                </span>
+                                <i id="i-{{.}}" class="bi bi-trash-fill unblock"></i>
+                            </div>
+                        </li>
+                        {{/each}}
+                    </ul>
+                </div>
+                {{/if}}
+            </div>
+
+            <button id="submit-button" type="submit" class="btn btn-success" style="border-radius: 15px;">
+                Submit
+            </button>
+
+            <button type="button" class="btn btn-info" style="border-radius: 15px;">
+                <a class="text-white" style="text-decoration:none;" href="/user">Cancel</a>
+            </button>
+
+
+            {{#each unames}}
+            <p class="username d-none">{{uname}}</p>
+            {{/each}}
+        </form>
+        {{/if}}
+    </div>
+
+    <div class="col-sm-auto col-md-2">
+        <div class="col auto"></div>
+
+        <div class="col-2">
+            <i class="bi bi-three-dots-vertical menu-item text-secondary settings" data-bs-toggle="modal"
+                data-bs-target="#chatprofile" style="font-size:1.5rem;font-weight:bolder;"></i>
+        </div>
+    </div>
+</div>
