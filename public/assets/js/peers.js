@@ -58,11 +58,11 @@ const initRoom = async () => {
       }
       return room;
     } catch (err) {
-      dlog(err);
+      dlog(err, `peers script: line 61`);
       return null;
     }
   } else {
-    dlog(`No Twilio`);
+    dlog(`No Twilio`, `peers script: line 65`);
     return null;
   }
 
@@ -75,7 +75,7 @@ const connectedPeers = initRoom();
 if (null != connectedPeers) {
   connectedPeers
     .then((room) => {
-      log(room);
+      tlog(room, `peers script: line 78`);
 
       // Handle local participant
       localParticipantHandler(room);
@@ -101,12 +101,10 @@ if (null != connectedPeers) {
       displayRoomError(err);
     });
 } else {
-  log(`connected peers is null`);
+  tlog(`connected peers is null`, `peers script: line 104`);
 }
 
 function displayRoomError(err) {
-  log(`\n\ninitRoom method caused an error`);
-  tlog(err);
-  log(`\n\n`);
+  tlog(err, `peers script: line 109`);
   return;
 }

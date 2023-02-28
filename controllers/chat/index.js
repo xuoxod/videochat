@@ -389,3 +389,18 @@ export const updateProfilePhoto = asyncHandler(async (req, res) => {
 
   return res.status(200).json({ status: true });
 });
+
+//  @desc           Connection request
+//  @route          GET /chat/connect/request
+//  @access         Private
+export const requestConn = asyncHandler(async (req, res) => {
+  logger.info(`GET: /chat/connect/request`);
+
+  res.render("chat/caller", {
+    title: "connection request",
+    uid: req.user._id,
+    user: req.user,
+    enteredroom: true,
+    signedin: true,
+  });
+});

@@ -5,6 +5,7 @@ import {
   showMessage,
   showCallAlert,
   showCallResponse,
+  showCallRequest,
 } from "./ui.js";
 
 let socketIO = null,
@@ -46,7 +47,8 @@ export const registerSocketEvents = (socket) => {
       userDetails.conntype = e.target.dataset.connectiontype;
 
       dlog(
-        `Sending ${userDetails.conntype} connection request\t Sender: ${userDetails.sender} Receiver: ${userDetails.receiver}`
+        `Sending ${userDetails.conntype} connection request\t Sender: ${userDetails.sender} Receiver: ${userDetails.receiver}`,
+        "wss script"
       );
       socket.emit("userclicked", userDetails);
     };
@@ -107,26 +109,14 @@ export const registerSocketEvents = (socket) => {
 
   socket.on("connectionrequested", (data) => {
     const { strUserDetails } = data;
+
     userDetails = parse(strUserDetails);
+    userDetails.callee = document.querySelector("#rmtid-input").value;
 
-    const callDialog = document.querySelector(
-      `#callrequest-${userDetails.user._id}`
-    );
-    const callRequestTitle = document.querySelector(
-      `#callrequesttitle-${userDetails.user._id}`
-    );
+    /* TODO:
+        display user's connection request in a mini window */
 
-    dlog(
-      `${userDetails.user.fname} is requesting a ${userDetails.conntype} connection with you`
-    );
-
-    if (callDialog) {
-      callDialog.classList.add("hide");
-      callRequestTitle.innerHTML = `${userDetails.user.fname} wants to connect`;
-    } else {
-      dlog(`No such element`);
-      dlog(`#callrequest-${userDetails._id}`);
-    }
+    showCallRequest(userDetails, acceptCall);
   });
 
   socket.on("connectionrequestresponse", (data) => {

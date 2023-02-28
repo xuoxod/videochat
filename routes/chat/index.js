@@ -11,6 +11,7 @@ import {
   updateProfilePhoto,
   blockUser,
   unblockUser,
+  requestConn,
 } from "../../controllers/chat/index.js";
 
 const chat = Router();
@@ -34,6 +35,8 @@ chat.route("/room/connect").get(signedIn, connectRoom);
 chat.route("/block").post(signedIn, blockUser);
 
 chat.route("/unblock").post(signedIn, unblockUser);
+
+chat.route("/connect/request").get(signedIn, requestConn);
 
 // chat.route("/get/blockedlist/:blocker").post(signedIn, getBlockedList);
 

@@ -10,6 +10,7 @@ import {
   addAttribute,
   countChildren,
   removeChild,
+  append,
 } from "./computils.js";
 
 export const updateUsersList = async (
@@ -38,42 +39,98 @@ export const updateUsersList = async (
     ) {
       // Create comps
       const card = newElement("div");
+      const row = newElement("div");
+      const imgCol = newElement("div");
+      const cardImg = newElement("img");
+      const bodyCol = newElement("div");
       const cardBody = newElement("div");
+      const cardBodyLayout = newElement("div");
       const cardTitle = newElement("h5");
       const blockIcon = newElement("i");
       const acceptCallIcon = newElement("i");
+      const connectTypeIcon = newElement("i");
+      const divConnectIcon = newElement("div");
+      const divBlockIcon = newElement("div");
+      const divFriendIcon = newElement("div");
+
+      console.log("user object");
+      console.log(userObject);
 
       const displayName = userObject.displayName.fname
         ? `${userObject.fname}`
         : `${userObject.uname}`;
-      let cardImg;
+
+      cardImg.alt = `${displayName}`;
 
       // Add attributes
-      addAttribute(card, "class", "card text-center");
+      addAttribute(card, "class", "card mb-3");
+      // addAttribute(card, "style", "max-width:540px;");
+      addAttribute(row, "class", "row g-0");
+      // addAttribute(imgCol, "class", "col-sm-12 col-md-4 col-4");
+      // addAttribute(bodyCol, "class", "col-sm-12 col-md-8 col-8");
+      addAttribute(imgCol, "class", "col-4");
+      addAttribute(bodyCol, "class", "col-8");
+      addAttribute(cardBodyLayout, "class", "hstack gap-3");
+      addAttribute(divConnectIcon, "class", "bg-light border rounded");
+      addAttribute(divBlockIcon, "class", "bg-light border rounded");
+      addAttribute(divFriendIcon, "class", "bg-light border rounded");
+      addAttribute(cardImg, "class", "img-fluid rounded-start");
+      // addAttribute(
+      //   cardImg,
+      //   "style",
+      //   "max-width:100%;max-height:100%;margin:0;padding:10px;"
+      // );
       addAttribute(cardBody, "class", "card-body");
       addAttribute(cardTitle, "class", "card-title");
       addAttribute(blockIcon, "class", "bi bi-eye-slash-fill");
+      addAttribute(blockIcon, "data-toggle", "tooltip");
+      addAttribute(blockIcon, "data-placement", "top");
+      addAttribute(blockIcon, "data-html", "true");
+      addAttribute(blockIcon, "title", `Block ${displayName}`);
       addAttribute(acceptCallIcon, "class", "bi bi-check-lg text-success");
 
       if (userObject.photoUrl) {
-        cardImg = newElement("img");
-        addAttribute(cardImg, "class", "card-img-top");
         cardImg.src = userObject.photoUrl;
-        cardImg.alt = `${displayName}`;
       } else {
-        cardImg = newElement("i");
-        addAttribute(cardImg, "class", "bi bi-person-fill col-12 card-img-top");
+        cardImg.src = "/assets/graphics/silhouette.png";
       }
 
       // Append comps
       appendChild(usersParent, card);
-      appendChild(card, cardImg);
-      appendChild(card, cardBody);
+      appendChild(card, row);
+      appendChild(row, imgCol);
+      appendChild(row, bodyCol);
+      appendChild(imgCol, cardImg);
+      appendChild(bodyCol, cardBody);
       appendChild(cardBody, cardTitle);
+      appendChild(cardBody, cardBodyLayout);
+      appendChild(cardBodyLayout, connectTypeIcon);
+      appendChild(cardBodyLayout, blockIcon);
 
-      cardTitle.innterHTML = `<strong>${displayName}</strong>`;
+      cardTitle.innerHTML = `<strong>${displayName}</strong>`;
+
+      detectWebcam((results) => {
+        if (!results) {
+          addAttribute(connectTypeIcon, "id", `connect-${userObject._id}`);
+          addAttribute(connectTypeIcon, "data-connectiontype", "audio");
+          addAttribute(connectTypeIcon, "class", "bi bi-mic-fill");
+          addAttribute(connectTypeIcon, "data-toggle", "tooltip");
+          addAttribute(connectTypeIcon, "data-placement", "top");
+          addAttribute(connectTypeIcon, "data-html", "true");
+          addAttribute(connectTypeIcon, "title", `Connect with ${displayName}`);
+        } else {
+          addAttribute(connectTypeIcon, "id", `connect-${userObject._id}`);
+          addAttribute(connectTypeIcon, "data-connectiontype", "video");
+          addAttribute(connectTypeIcon, "class", "bi bi-camera-video-fill");
+          addAttribute(connectTypeIcon, "data-toggle", "tooltip");
+          addAttribute(connectTypeIcon, "data-placement", "top");
+          addAttribute(connectTypeIcon, "data-html", "true");
+          addAttribute(connectTypeIcon, "title", `Connect with ${displayName}`);
+        }
+      });
 
       // Register click handlers
+      addClickHandler(connectTypeIcon, listItemClickHandler);
     }
   }
 };
@@ -297,4 +354,89 @@ export const showMediaControls = (micControlHandler, videoControlHandler) => {
   // Register click events
   addClickHandler(microphoneIcon, micControlHandler);
   addClickHandler(videoIcon, videoControlHandler);
+};
+
+export const showCallRequest = (userDetails, acceptCall) => {
+  const { user, conntype, callee } = userDetails;
+  const name = user.fname;
+  const msg = `${name} wants to connect`;
+  const messageParent = document.querySelector("#message-container");
+
+  // Conatiners
+  const alert = newElement("div");
+  const container = newElement("div");
+  const imgCol = newElement("div");
+  const paraCol = newElement("div");
+  const acceptButtonCol = newElement("div");
+  const imgColRow = newElement("div");
+  const acceptButtonColRow = newElement("div");
+  const paraColRow = newElement("div");
+
+  // Elements
+  const img = newElement("img");
+  const para = newElement("p");
+  const acceptButton = newElement("button");
+  const closeButton = newElement("button");
+
+  dlog(`${name} is requesting a ${conntype} connection with you`, "ui script");
+  dlog(`user props: ${stringify(user)}`, "ui script");
+  dlog(`callee object: ${stringify(callee)}`, "ui script");
+
+  if (user.photoUrl) {
+    img.src = user.photoUrl;
+  } else {
+    img.src = "/assets/graphics/silhouette.png";
+  }
+
+  // Conatiners
+  addAttribute(
+    alert,
+    "class",
+    "alert alert-primary alert-dismissible fade show"
+  );
+  addAttribute(alert, "role", "alert");
+  addAttribute(alert, "style", "display:inline-block;");
+  addAttribute(container, "class", "container");
+  addAttribute(container, "style", "display:inline-grid;margin:0;");
+  addAttribute(imgColRow, "class", "row");
+  addAttribute(paraColRow, "class", "row");
+  addAttribute(acceptButtonColRow, "class", "row");
+  addAttribute(imgCol, "class", "col-auto");
+  addAttribute(paraCol, "class", "col-auto");
+  addAttribute(acceptButtonCol, "class", "col-auto");
+
+  // Elements
+  addAttribute(img, "class", "img-fluid rounded-50 w-100 h-100 m-0");
+  addAttribute(
+    img,
+    "style",
+    "max-width:50%; max-height: 70%; margin:0; display:inline-block;"
+  );
+  addAttribute(acceptButton, "type", "button");
+  addAttribute(acceptButton, "class", "btn btn-success");
+  addAttribute(closeButton, "type", "button");
+  addAttribute(closeButton, "class", "btn-close");
+  addAttribute(closeButton, "data-bs-dismiss", "alert");
+  addAttribute(closeButton, "aria-label", "Close");
+
+  appendChild(container, imgColRow);
+  appendChild(container, paraColRow);
+  appendChild(container, acceptButtonColRow);
+  appendChild(imgColRow, imgCol);
+  appendChild(paraColRow, paraCol);
+  appendChild(acceptButtonColRow, acceptButtonCol);
+  appendChild(alert, container);
+  appendChild(alert, closeButton);
+  appendChild(messageParent, alert);
+  appendChild(imgCol, img);
+  appendChild(paraCol, para);
+  appendChild(acceptButtonCol, acceptButton);
+
+  para.innerText = `${msg}`;
+  acceptButton.innerText = `Ok`;
+
+  // Register click handlers
+  addClickHandler(acceptButton, () => {
+    acceptCall(user._id, callee, conntype);
+  });
 };
