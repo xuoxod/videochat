@@ -4,6 +4,7 @@ import https from "https";
 import path from "path";
 import dotenv from "dotenv";
 import bodyParser from "body-parser";
+// import cookieSession from "cookie-session";
 import cookieParser from "cookie-parser";
 import passport from "passport";
 import mongoose from "mongoose";
@@ -93,6 +94,17 @@ app.engine(
 );
 
 app.set("view engine", ".hbs");
+
+/* app.use(
+  cookieSession({
+    name: "__session",
+    keys: ["key1"],
+    maxAge: 24 * 60 * 60 * 100,
+    secure: true,
+    httpOnly: true,
+    sameSite: "none",
+  })
+); */
 
 // Middleware setup
 app.use(bodyParser.urlencoded({ extended: false }));

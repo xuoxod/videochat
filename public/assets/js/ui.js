@@ -31,7 +31,7 @@ export const updateUsersList = async (
   for (const user in userList) {
     const userObject = userList[user];
 
-    dlog(stringify(userObject), `UI Script`);
+    dlog(stringify(userObject), `ui script: line 34`);
 
     if (
       userObject.isVisible &&
@@ -39,6 +39,7 @@ export const updateUsersList = async (
     ) {
       // Create comps
       const card = newElement("div");
+      const parentRow = newElement("div");
       const row = newElement("div");
       const imgCol = newElement("div");
       const cardImg = newElement("img");
@@ -63,9 +64,10 @@ export const updateUsersList = async (
       cardImg.alt = `${displayName}`;
 
       // Add attributes
+      addAttribute(parentRow, "class", "col-12 col-md-4 col-lg-4");
       addAttribute(card, "class", "card mb-3");
       // addAttribute(card, "style", "max-width:540px;");
-      addAttribute(row, "class", "row g-0");
+      addAttribute(row, "class", "row g-0 m-0 p-3");
       // addAttribute(imgCol, "class", "col-sm-12 col-md-4 col-4");
       // addAttribute(bodyCol, "class", "col-sm-12 col-md-8 col-8");
       addAttribute(imgCol, "class", "col-4");
@@ -87,6 +89,7 @@ export const updateUsersList = async (
       addAttribute(blockIcon, "data-placement", "top");
       addAttribute(blockIcon, "data-html", "true");
       addAttribute(blockIcon, "title", `Block ${displayName}`);
+      addAttribute(blockIcon, "id", `block-${userObject._id}`);
       addAttribute(acceptCallIcon, "class", "bi bi-check-lg text-success");
 
       if (userObject.photoUrl) {
@@ -96,7 +99,8 @@ export const updateUsersList = async (
       }
 
       // Append comps
-      appendChild(usersParent, card);
+      appendChild(usersParent, parentRow);
+      appendChild(parentRow, card);
       appendChild(card, row);
       appendChild(row, imgCol);
       appendChild(row, bodyCol);
@@ -130,7 +134,15 @@ export const updateUsersList = async (
       });
 
       // Register click handlers
+
       addClickHandler(connectTypeIcon, listItemClickHandler);
+
+      addClickHandler(blockIcon, (e) => {
+        const blockee = e.target.id.split("-")[1];
+        const blocker = currentUser;
+
+        dlog(`${blocker} blocked ${blockee}`, `ui script: line 141`);
+      });
     }
   }
 };
@@ -360,7 +372,7 @@ export const showCallRequest = (userDetails, acceptCall) => {
   const { user, conntype, callee } = userDetails;
   const name = user.fname;
   const msg = `${name} wants to connect`;
-  const messageParent = document.querySelector("#message-container");
+  const messageParent = getElement("my-body");
 
   // Conatiners
   const alert = newElement("div");
@@ -392,12 +404,12 @@ export const showCallRequest = (userDetails, acceptCall) => {
   addAttribute(
     alert,
     "class",
-    "alert alert-primary alert-dismissible fade show"
+    "alert alert-primary alert-dismissible fade show d-inline-flex w-25 p-10"
   );
   addAttribute(alert, "role", "alert");
-  addAttribute(alert, "style", "display:inline-block;");
+  addAttribute(alert, "style", "display:inline-block;position:absolute;");
   addAttribute(container, "class", "container");
-  addAttribute(container, "style", "display:inline-grid;margin:0;");
+  addAttribute(container, "style", "display:inline-grid;margin:0");
   addAttribute(imgColRow, "class", "row");
   addAttribute(paraColRow, "class", "row");
   addAttribute(acceptButtonColRow, "class", "row");
@@ -412,6 +424,7 @@ export const showCallRequest = (userDetails, acceptCall) => {
     "style",
     "max-width:50%; max-height: 70%; margin:0; display:inline-block;"
   );
+  addAttribute(para, "class", "text-center text-wrap");
   addAttribute(acceptButton, "type", "button");
   addAttribute(acceptButton, "class", "btn btn-success");
   addAttribute(closeButton, "type", "button");

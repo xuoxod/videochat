@@ -83,3 +83,8 @@
 .chat-profile-primary-photo-container img {
     display: inline-flex;
 }
+
+.my-body {
+    display: grid;
+    position: relative;
+}
