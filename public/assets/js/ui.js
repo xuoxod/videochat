@@ -87,7 +87,7 @@ export const updateUsersList = async (
       //   "max-width:100%;max-height:100%;margin:0;padding:10px;"
       // );
       addAttribute(cardBody, "class", "card-body");
-      addAttribute(cardTitle, "class", "card-title text-center");
+      addAttribute(cardTitle, "class", "card-title text-center mb-4");
       addAttribute(blockIcon, "id", `block-${userObject._id}`);
       addAttribute(blockIcon, "class", "bi bi-eye-slash-fill");
       addAttribute(blockIcon, "data-toggle", "tooltip");
