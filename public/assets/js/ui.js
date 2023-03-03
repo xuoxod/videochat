@@ -66,10 +66,7 @@ export const updateUsersList = async (
       // Add attributes
       addAttribute(parentRow, "class", "col-12 col-md-4 col-lg-4");
       addAttribute(card, "class", "card mb-3");
-      // addAttribute(card, "style", "max-width:540px;");
       addAttribute(row, "class", "row g-0 m-0 p-3");
-      // addAttribute(imgCol, "class", "col-sm-12 col-md-4 col-4");
-      // addAttribute(bodyCol, "class", "col-sm-12 col-md-8 col-8");
       addAttribute(imgCol, "class", "col-6");
       addAttribute(bodyCol, "class", "col-6");
       addAttribute(
@@ -81,11 +78,6 @@ export const updateUsersList = async (
       addAttribute(divBlockIcon, "class", "bg-light border rounded");
       addAttribute(divFriendIcon, "class", "bg-light border rounded");
       addAttribute(cardImg, "class", "img-fluid rounded-start");
-      // addAttribute(
-      //   cardImg,
-      //   "style",
-      //   "max-width:100%;max-height:100%;margin:0;padding:10px;"
-      // );
       addAttribute(cardBody, "class", "card-body");
       addAttribute(cardTitle, "class", "card-title text-center mb-4");
       addAttribute(blockIcon, "id", `block-${userObject._id}`);
