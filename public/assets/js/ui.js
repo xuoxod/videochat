@@ -137,7 +137,8 @@ export const updateUsersList = async (
         const blockee = e.target.id.split("-")[1];
         const blocker = currentUser;
 
-        dlog(`${blocker} blocked ${blockee}`, `ui script: line 141`);
+        dlog(`${blocker} blocked ${blockee}`, `ui script: line 140`);
+        blockUser(blocker, blockee);
       });
     }
   }
