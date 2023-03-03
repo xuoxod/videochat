@@ -70,9 +70,13 @@ export const updateUsersList = async (
       addAttribute(row, "class", "row g-0 m-0 p-3");
       // addAttribute(imgCol, "class", "col-sm-12 col-md-4 col-4");
       // addAttribute(bodyCol, "class", "col-sm-12 col-md-8 col-8");
-      addAttribute(imgCol, "class", "col-4");
-      addAttribute(bodyCol, "class", "col-8");
-      addAttribute(cardBodyLayout, "class", "hstack gap-3");
+      addAttribute(imgCol, "class", "col-6");
+      addAttribute(bodyCol, "class", "col-6");
+      addAttribute(
+        cardBodyLayout,
+        "class",
+        "d-flex justify-content-center gap-5"
+      );
       addAttribute(divConnectIcon, "class", "bg-light border rounded");
       addAttribute(divBlockIcon, "class", "bg-light border rounded");
       addAttribute(divFriendIcon, "class", "bg-light border rounded");
@@ -83,13 +87,13 @@ export const updateUsersList = async (
       //   "max-width:100%;max-height:100%;margin:0;padding:10px;"
       // );
       addAttribute(cardBody, "class", "card-body");
-      addAttribute(cardTitle, "class", "card-title");
+      addAttribute(cardTitle, "class", "card-title text-center");
+      addAttribute(blockIcon, "id", `block-${userObject._id}`);
       addAttribute(blockIcon, "class", "bi bi-eye-slash-fill");
       addAttribute(blockIcon, "data-toggle", "tooltip");
       addAttribute(blockIcon, "data-placement", "top");
       addAttribute(blockIcon, "data-html", "true");
       addAttribute(blockIcon, "title", `Block ${displayName}`);
-      addAttribute(blockIcon, "id", `block-${userObject._id}`);
       addAttribute(acceptCallIcon, "class", "bi bi-check-lg text-success");
 
       if (userObject.photoUrl) {
