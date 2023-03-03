@@ -112,15 +112,20 @@ export default (io) => {
         log(
           `${userSender.fname} is requesting a ${conntype} connection with ${userReceiver.fname}\n\n`
         );
-        io.to(userSender.sid).emit("clickeduser", {
-          strUser: stringify(userReceiver),
-        });
 
-        const strUserDetails = stringify({ user: userSender, conntype });
+        if (!userReceiver.userIsBlocked(userSender._id)) {
+          io.to(userSender.sid).emit("clickeduser", {
+            strUser: stringify(userReceiver),
+          });
 
-        io.to(userReceiver.sid).emit("connectionrequested", {
-          strUserDetails,
-        });
+          const strUserDetails = stringify({ user: userSender, conntype });
+
+          io.to(userReceiver.sid).emit("connectionrequested", {
+            strUserDetails,
+          });
+        } else {
+          log(`${userSender.fname}'s connection request to ${userReceiver.fname} failed because ${userSender.fname} is blocked.`)
+        }
       }
     });
 
