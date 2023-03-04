@@ -35,7 +35,9 @@ export const registerSocketEvents = (socket) => {
       const user = pUsers[u];
 
       if (user._id != currentUser) {
-        arrUsers.push({ ...user });
+        if (!userBlocked(currentUserBlockedList, user._id)) {
+          arrUsers.push({ ...user });
+        }
       }
     }
 
