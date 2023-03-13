@@ -22,6 +22,10 @@ const chatSchema = new mongoose.Schema(
       type: Boolean,
       default: true,
     },
+    online: {
+      type: Boolean,
+      default: false,
+    },
     photoUrl: {
       type: String,
       default: "",
@@ -40,6 +44,11 @@ const chatSchema = new mongoose.Schema(
       },
     ],
     blockedUsers: [
+      {
+        type: String,
+      },
+    ],
+    blockedBy: [
       {
         type: String,
       },

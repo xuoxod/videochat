@@ -11,7 +11,7 @@ export default (io) => {
   io.on("connection", (socket) => {
     log(`New client connection detected - ID: ${socket.id}`);
 
-    socket.on("registerme", (data) => {
+    socket.on("registerme", async (data) => {
       const { uid } = data;
 
       if (uid) {
@@ -19,37 +19,41 @@ export default (io) => {
         addCUser(uid);
 
         if (!user) {
-          User.findOne({ _id: `${uid}` }, (err, doc) => {
-            if (err) {
-              log(`-----------------------------------`);
-              log(err);
-              log(`-----------------------------------\n`);
-              return;
-            }
+          const doc = await Chat.findOne({ user: `${uid}` }).populate("user");
 
-            if (doc) {
-              const regUser = Object.assign({
-                ...{
-                  fname: doc.fname,
-                  lname: doc.lname,
-                  email: doc.email,
-                  _id: doc._id,
-                  ...doc.member,
-                },
-                ...{ sid: socket.id },
+          let addedUser;
+
+          if (doc) {
+            const regUser = Object.assign({
+              ...{
+                fname: doc.user.fname,
+                lname: doc.user.lname,
+                email: doc.email,
+                _id: doc.user._id,
+                uname: doc.uname,
+                displayName: doc.displayName,
+                isVisible: doc.isVisible,
+                photoUrl: doc.photoUrl,
+                public: doc.public,
+                description: doc.description,
+                friends: doc.friends,
+                blockedUsers: doc.blockedUsers,
+                blockedBy: doc.blockedBy,
+                online: doc.online,
+              },
+              ...{ sid: socket.id },
+            });
+
+            addedUser = userManager.addUser(regUser);
+
+            if (addedUser) {
+              log(`User ${regUser.fname} successfully registered\n\n`);
+              io.to(socket.id).emit("registered", { uid: uid });
+              io.emit("updateonlineuserlist", {
+                users: stringify(userManager.getUsers()),
               });
-
-              const addedUser = userManager.addUser(regUser);
-
-              if (addedUser) {
-                log(`User ${regUser.fname} successfully registered\n\n`);
-                io.to(socket.id).emit("registered", { uid: uid });
-                io.emit("updateonlineuserlist", {
-                  users: stringify(userManager.getUsers()),
-                });
-              }
             }
-          }).populate("member");
+          }
         }
       }
     });
@@ -68,6 +72,7 @@ export default (io) => {
           user.isVisible = userDoc.isVisible;
           user.public = userDoc.public;
           user.blockedUsers = userDoc.blockedUsers;
+          user.blockedBy = userDoc.blockedBy;
           user.friends = userDoc.friends;
           user.displayName = userDoc.displayName;
           user.photoUrl = userDoc.photoUrl;
@@ -89,6 +94,7 @@ export default (io) => {
                 user.isVisible = chat.isVisible;
                 user.public = chat.public;
                 user.blockedUsers = chat.blockedUsers;
+                user.blockedBy = userDoc.blockedBy;
                 user.friends = chat.friends;
                 user.displayName = chat.displayName;
 
@@ -113,19 +119,15 @@ export default (io) => {
           `${userSender.fname} is requesting a ${conntype} connection with ${userReceiver.fname}\n\n`
         );
 
-        if (!userReceiver.userIsBlocked(userSender._id)) {
-          io.to(userSender.sid).emit("clickeduser", {
-            strUser: stringify(userReceiver),
-          });
+        io.to(userSender.sid).emit("clickeduser", {
+          strUser: stringify(userReceiver),
+        });
 
-          const strUserDetails = stringify({ user: userSender, conntype });
+        const strUserDetails = stringify({ user: userSender, conntype });
 
-          io.to(userReceiver.sid).emit("connectionrequested", {
-            strUserDetails,
-          });
-        } else {
-          log(`${userSender.fname}'s connection request to ${userReceiver.fname} failed because ${userSender.fname} is blocked.`)
-        }
+        io.to(userReceiver.sid).emit("connectionrequested", {
+          strUserDetails,
+        });
       }
     });
 
@@ -237,11 +239,22 @@ export default (io) => {
       }
     });
 
-    socket.on("disconnectme", (data) => {
+    socket.on("disconnectme", async (data) => {
       const { uid } = data;
+      const doc = await Chat.findOneAndUpdate(
+        { user: `${uid}` },
+        { online: false },
+        { new: true }
+      );
+
+      const user = userManager.getUser(uid);
+      const fname = user.fname;
+
+      log(`${fname} disconnected\n${stringify(doc)}`);
+
       const removedUser = userManager.removeUser(uid);
       if (removedUser) {
-        log(`User removed successfully: ${uid}`);
+        log(`User ${fname} removed successfully`);
         io.emit("updateonlineuserlist", {
           users: stringify(userManager.getUsers()),
         });
@@ -256,6 +269,7 @@ export default (io) => {
       if (userBlocker && userBlockee) {
         dlog(`${userBlocker.fname} has blocked ${userBlockee.fname}`);
         userBlocker.blockedUsers.push(blockee);
+        userBlockee.blockedBy.push(blocker);
 
         io.emit("updateonlineuserlist", {
           users: stringify(userManager.getUsers()),
@@ -273,6 +287,10 @@ export default (io) => {
 
         userBlocker.blockedUsers = userBlocker.blockedUsers.filter(
           (x) => x != blockee
+        );
+
+        userBlockee.blockedBy = userBlockee.blockedBy.filter(
+          (x) => x != blocker
         );
 
         io.emit("updateonlineuserlist", {

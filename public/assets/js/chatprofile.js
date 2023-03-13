@@ -160,7 +160,7 @@ function unblockUser(blockerUid, blockeeUid) {
           dlog(`${blockerUid} unblocked ${blockeeUid}`);
           location.href = `/chat/profile/view/${blockerUid}`;
         } else {
-          dlog(`Something went wrong blocking user`);
+          dlog(`Something went wrong unblocking user`);
         }
         return;
       }

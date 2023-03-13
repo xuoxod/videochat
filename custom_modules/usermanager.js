@@ -43,8 +43,6 @@ class UM {
       }
     }
   };
-
-  userIsBlocked = (uid) => this.users.find((x) => x._id == uid) || false;
 }
 
 export default UM;

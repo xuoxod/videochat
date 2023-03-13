@@ -57,63 +57,51 @@ const passportConfig = (passport) => {
       (req, email, password, done) => {
         console.log(`\n\n\t\tMade it to passport local-register\n\n`);
 
-        User.findOne(
-          {
-            email: `${email}`,
-          },
-          (err, user) => {
-            if (err) {
-              console.log(`\n\tPassport local-register error`);
-              console.log(err);
-              console.log(`\n\n`);
-              return done(null, false, { message: `${err}` });
-            }
+        const user = User.findOne({
+          email: `${email}`,
+        });
 
-            if (user) {
-              console.log(`\n\tEmail is already registered`);
-              return done(null, false, {
-                message: `Email is already registered`,
-              });
+        if (user) {
+          console.log(`\n\tEmail is already registered`);
+          return done(null, false, {
+            message: `Email is already registered`,
+          });
+        } else {
+          const { email, pwd, pwd2, fname, lname } = req.body;
+          const newUser = new User({
+            email,
+            fname,
+            lname,
+          });
+
+          createHash(pwd, (results) => {
+            if (results.status) {
+              const { original, payload } = results;
+
+              console.log(
+                `\n\tHash Successful\n\t\tOriginal: ${original}\n\t\tPayload: ${payload}`
+              );
+
+              newUser.password = payload;
+
+              newUser
+                .save()
+                .then((doc) => {
+                  return done(null, doc);
+                })
+                .catch((err) => {
+                  console.log(`\n\tPassport local-register save newUser error`);
+                  console.log(err);
+                  console.log(`\n\n`);
+                  return done(null, false, { message: `${err}` });
+                });
             } else {
-              const { email, pwd, pwd2, fname, lname } = req.body;
-              const newUser = new User({
-                email,
-                fname,
-                lname,
-              });
-
-              createHash(pwd, (results) => {
-                if (results.status) {
-                  const { original, payload } = results;
-
-                  console.log(
-                    `\n\tHash Successful\n\t\tOriginal: ${original}\n\t\tPayload: ${payload}`
-                  );
-
-                  newUser.password = payload;
-
-                  newUser
-                    .save()
-                    .then((doc) => {
-                      return done(null, doc);
-                    })
-                    .catch((err) => {
-                      console.log(
-                        `\n\tPassport local-register save newUser error`
-                      );
-                      console.log(err);
-                      console.log(`\n\n`);
-                      return done(null, false, { message: `${err}` });
-                    });
-                } else {
-                  const { error } = results;
-                  console.log(`\n\tHash Error\n\t\t${error}\n`);
-                  return done(null, false, { message: `${error}` });
-                }
-              });
+              const { error } = results;
+              console.log(`\n\tHash Error\n\t\t${error}\n`);
+              return done(null, false, { message: `${error}` });
             }
-          }
-        );
+          });
+        }
       }
     )
   );
@@ -122,10 +110,10 @@ const passportConfig = (passport) => {
     done(null, user.id);
   });
 
-  passport.deserializeUser((id, done) => {
-    User.findById(id, (err, user) => {
-      done(err, user);
-    });
+  passport.deserializeUser(async (id, done) => {
+    const user = await User.findById(id);
+
+    return done(null, user);
   });
 };
 

@@ -134,17 +134,21 @@ export const getRoomToken = asyncHandler(async (req, res) => {
 //  @access         Private
 export const enterRoom = asyncHandler(async (req, res) => {
   logger.info(`GET: /chat/room/enter`);
-  const user = req.user.withoutPassword();
-  user.fname = cap(user.fname);
-  user.lname = cap(user.lname);
 
   try {
-    dlog(`${req.user.fname} entered chat room`);
+    const doc = await Chat.findOneAndUpdate(
+      { user: req.user._id },
+      { online: true },
+      { new: true }
+    ).populate("user");
+    doc.user.fname = cap(doc.user.fname);
+    doc.user.lname = cap(doc.user.lname);
+    dlog(`${doc.user.fname} has entered chat room`);
 
     res.render("chat/room", {
       title: "Room Dammit",
-      uid: user._id,
-      user,
+      uid: doc.user._id,
+      fname: doc.user.fname,
       enteredroom: true,
       signedin: true,
     });
@@ -210,15 +214,23 @@ export const blockUser = asyncHandler(async (req, res) => {
 
   const { blocker, blockee } = req.body;
 
-  dlog(`${blocker} adding ${blockee} to blocked list`);
-
   try {
-    const chatUser = await Chat.updateOne(
+    // Add blockee to blocker's blockedUsers list
+    const blockerBlockedUserList = await Chat.updateOne(
       { user: `${blocker}` },
       { $push: { blockedUsers: `${blockee}` } }
     );
-    dlog(chatUser);
-    dlog(`---------------------------------------\n\n`);
+
+    dlog(`${blocker} added ${blockee} to blockedUser list`);
+
+    // Add blocker to blockee's blockedBy list
+    const blockeeBlockedByList = await Chat.updateOne(
+      { user: `${blockee}` },
+      { $push: { blockedBy: `${blocker}` } }
+    );
+
+    dlog(`${blockee} added ${blocker} to blockedBy list`);
+
     return res.json({ status: true });
   } catch (err) {
     dlog(`Server side error blocking user`);
@@ -235,15 +247,22 @@ export const unblockUser = asyncHandler(async (req, res) => {
 
   const { blocker, blockee } = req.body;
 
-  dlog(`${blocker} removing ${blockee} from the blocked list`);
-
   try {
-    const chatUser = await Chat.updateOne(
+    // Remove blockee from blockers blockedUsers list
+    const blockedrBlockedUserList = await Chat.updateOne(
       { user: `${blocker}` },
       { $pull: { blockedUsers: `${blockee}` } }
     );
-    dlog(chatUser);
-    dlog(`---------------------------------------\n\n`);
+    dlog(`${blocker} removed ${blockee} from the blockedUser list`);
+
+    // Remove blocker from blockee's blockedBy list
+    const blockeeBlockedByList = await Chat.updateOne(
+      { user: `${blockee}` },
+      { $pull: { blockedBy: `${blocker}` } }
+    );
+
+    dlog(`${blockee} removed ${blocker} from the blockedBy list`);
+
     return res.json({ status: true });
   } catch (err) {
     dlog(`Server side error blocking user`);
@@ -256,37 +275,36 @@ export const unblockUser = asyncHandler(async (req, res) => {
 //  @route          GET /chat/profile/create
 //  @access         Private
 export const createProfile = asyncHandler(async (req, res) => {
-  logger.info(`GET: /chat/profle/create`);
+  logger.info(`GET: /chat/profile/create`);
 
   const { uid } = req.params;
 
   dlog(`Route Parameter: ${uid}\n`);
 
-  Chat.findOne({ user: `${uid}` }, (err, doc) => {
-    if (err) {
-      console.log(`------------------------------------`);
-      console.log(err);
-      console.log(`------------------------------------\n`);
-      res.json({ status: false });
-    }
+  const doc = await await Chat.findOneAndUpdate(
+    { user: `${uid}` },
+    { online: true },
+    { new: true }
+  );
 
-    if (!doc) {
-      Chat.create({
-        user: `${uid}`,
-        uname: `uname-${uid}`,
-        displayName: { fname: true, uname: false },
-        photoUrl: "",
-        description: "",
-        isVisible: true,
-        public: false,
-        blockedUsers: [],
-        friends: [],
-      });
-      res.json({ status: true, hasDoc: false, doc: stringify(doc) });
-    } else {
-      res.json({ status: true, hasDoc: true, doc: stringify(doc) });
-    }
-  }).populate("user");
+  if (doc) {
+    res.json({ status: true, hasDoc: true, doc: stringify(doc) });
+  } else {
+    const createdDoc = await Chat.create({
+      user: `${uid}`,
+      uname: `uname-${uid}`,
+      displayName: { fname: true, uname: false },
+      photoUrl: "",
+      description: "",
+      isVisible: true,
+      public: false,
+      online: true,
+      blockedUsers: [],
+      friends: [],
+      blockedBy: [],
+    });
+    res.json({ status: true, hasDoc: false, doc: stringify(doc) });
+  }
 });
 
 //  @desc           View user chat profile
@@ -299,36 +317,30 @@ export const viewProfile = asyncHandler(async (req, res) => {
 
   dlog(`Route Parameter: ${uid}\n`);
 
-  Chat.findOne({ user: `${uid}` }, (err, doc) => {
-    if (err) {
-      console.log(`------------------------------------`);
-      console.log(err);
-      console.log(`------------------------------------\n`);
-      res.json({ status: false });
-    }
+  const doc = await Chat.findOne({ user: `${uid}` }).populate("user");
 
-    if (!doc) {
-      res.render({
-        title: `Profile`,
-        hasDoc: false,
-        chatprofile: true,
-        signedin: true,
-      });
-    } else {
-      Chat.find((err, docs) => {
-        log(`${doc.user.fname}'s profile:\t${stringify(doc)}`);
-        res.render("chat/viewprofile", {
-          title: `${doc.user.fname}`,
-          hasDoc: true,
-          profile: doc,
-          uid,
-          chatprofile: true,
-          signedin: true,
-          unames: docs,
-        });
-      }).select("uname");
-    }
-  }).populate("user");
+  if (!doc) {
+    res.render({
+      title: `Profile`,
+      hasDoc: false,
+      chatprofile: true,
+      signedin: true,
+    });
+  } else {
+    log(`${doc.user.fname}'s profile`);
+
+    const docs = await Chat.find().select("uname");
+
+    res.render("chat/viewprofile", {
+      title: `${doc.user.fname}`,
+      hasDoc: true,
+      profile: doc,
+      uid,
+      chatprofile: true,
+      signedin: true,
+      unames: docs,
+    });
+  }
 });
 
 //  @desc           Update user chat profile

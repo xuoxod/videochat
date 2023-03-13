@@ -43,14 +43,9 @@ export const readUserProfile = asyncHandler(async (req, res) => {
   req.user.fname = cap(req.user.fname);
   req.user.lname = cap(req.user.lname);
 
-  Profile.findOne({ user: `${uid}` }, (err, doc) => {
-    if (err) {
-      log(err);
-      return res.redirect("/user");
-    }
+  const doc = await Profile.findOne({ user: `${uid}` }).populate("user");
 
-    // console.log(typeof doc);
-
+  if (doc) {
     res.render("user/viewprofile", {
       title: `Profile`,
       user: doc,
@@ -58,7 +53,15 @@ export const readUserProfile = asyncHandler(async (req, res) => {
       hasDoc: size(doc) > 0,
       profile: true,
     });
-  }).populate("user");
+  } else {
+    res.render("user/viewprofile", {
+      title: `Profile`,
+      user: doc,
+      doc: req.user,
+      hasDoc: false,
+      profile: false,
+    });
+  }
 });
 
 //  @desc           View user's profile
@@ -138,7 +141,9 @@ export const updateUserProfile = asyncHandler(async (req, res) => {
     },
   };
 
-  let doc = await Profile.findOneAndUpdate({ user: `${uid}` }, profileUpdate);
+  let doc = await Profile.findOneAndUpdate({ user: `${uid}` }, profileUpdate, {
+    new: true,
+  });
 
   log(`Updated Profile: ${stringify(doc)}`);
 

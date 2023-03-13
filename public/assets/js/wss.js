@@ -35,14 +35,12 @@ export const registerSocketEvents = (socket) => {
       const user = pUsers[u];
 
       if (user._id != currentUser) {
-        if (!userBlocked(currentUserBlockedList, user._id)) {
-          arrUsers.push({ ...user });
-        }
+        arrUsers.push({ ...user });
       }
     }
 
     const listItemClickHandler = (e) => {
-      dlog(`${e.target.id} was clicked`);
+      dlog(`List item ${e.target.id} was clicked`, `${document.title}`);
       userDetails = {};
       userDetails.receiver = e.target.id.trim().split("-")[1];
       userDetails.sender = document.querySelector("#rmtid-input").value;
@@ -59,12 +57,8 @@ export const registerSocketEvents = (socket) => {
       arrUsers,
       listItemClickHandler,
       detectWebcam,
-      acceptCall,
-      rejectCall,
       blockUser,
-      userBlocked,
-      currentUserBlockedList,
-      unblockUser
+      userBlocked
     );
   });
 
@@ -155,6 +149,32 @@ export const registerSocketEvents = (socket) => {
     const { roomName, connectionType, sender, receiver } = userDetails;
     getRoomTokenAndEnterRoom(roomName, connectionType, sender, receiver._id);
   });
+
+  socket.on("updateyourblockedbylist", (data) => {
+    const { list } = data;
+
+    const listItemClickHandler = (e) => {
+      dlog(`List item ${e.target.id} was clicked`, `${document.title}`);
+      userDetails = {};
+      userDetails.receiver = e.target.id.trim().split("-")[1];
+      userDetails.sender = document.querySelector("#rmtid-input").value;
+      userDetails.conntype = e.target.dataset.connectiontype;
+
+      dlog(
+        `Sending ${userDetails.conntype} connection request\t Sender: ${userDetails.sender} Receiver: ${userDetails.receiver}`,
+        "wss script"
+      );
+      socket.emit("userclicked", userDetails);
+    };
+
+    updateUsersList(
+      list,
+      listItemClickHandler,
+      detectWebcam,
+      blockUser,
+      userBlocked
+    );
+  });
 };
 
 addEventListener("beforeunload", (event) => {
@@ -221,6 +241,47 @@ function blockUser(blockerUid, blockeeUid) {
           socketIO.emit("iblockedauser", userDetails);
         } else {
           dlog(`Something went wrong blocking user`);
+        }
+        return;
+      }
+    };
+
+    xmlHttp.send(`blocker=${blockerUid}&blockee=${blockeeUid}`, true);
+  } catch (err) {
+    tlog(err);
+    return;
+  }
+}
+
+function unblockUser(blockerUid, blockeeUid) {
+  let xmlHttp;
+
+  try {
+    xmlHttp = new XMLHttpRequest();
+
+    xmlHttp.open("POST", "/chat/unblock", true);
+
+    xmlHttp.setRequestHeader(
+      "Content-type",
+      "application/x-www-form-urlencoded"
+    );
+
+    xmlHttp.onload = () => {
+      const responseText = xmlHttp.responseText;
+
+      if (responseText) {
+        // log(`\n\tResponse Text: ${stringify(responseText)}\n`);
+        const responseJson = parse(responseText);
+        const status = responseJson.status;
+
+        if (status) {
+          dlog(`${blockerUid} unblocked ${blockeeUid}`);
+          userDetails = {};
+          userDetails.blocker = blockerUid;
+          userDetails.blockee = blockeeUid;
+          socketIO.emit("iunblockedauser", userDetails);
+        } else {
+          dlog(`Something went wrong unblocking user`);
         }
         return;
       }
@@ -339,45 +400,4 @@ function cloakMe() {
 function userBlocked(arrList, uid) {
   const index = arrList.findIndex((x) => x == uid);
   return index != -1;
-}
-
-function unblockUser(blockerUid, blockeeUid) {
-  let xmlHttp;
-
-  try {
-    xmlHttp = new XMLHttpRequest();
-
-    xmlHttp.open("POST", "/chat/unblock", true);
-
-    xmlHttp.setRequestHeader(
-      "Content-type",
-      "application/x-www-form-urlencoded"
-    );
-
-    xmlHttp.onload = () => {
-      const responseText = xmlHttp.responseText;
-
-      if (responseText) {
-        // log(`\n\tResponse Text: ${stringify(responseText)}\n`);
-        const responseJson = parse(responseText);
-        const status = responseJson.status;
-
-        if (status) {
-          dlog(`${blockerUid} unblocked ${blockeeUid}`);
-          userDetails = {};
-          userDetails.blocker = blockerUid;
-          userDetails.blockee = blockeeUid;
-          socketIO.emit("iunblockedauser", userDetails);
-        } else {
-          dlog(`Something went wrong blocking user`);
-        }
-        return;
-      }
-    };
-
-    xmlHttp.send(`blocker=${blockerUid}&blockee=${blockeeUid}`, true);
-  } catch (err) {
-    tlog(err);
-    return;
-  }
 }

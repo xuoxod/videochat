@@ -17,12 +17,8 @@ export const updateUsersList = async (
   userList,
   listItemClickHandler,
   detectWebcam,
-  acceptCall,
-  rejectCall,
   blockUser,
-  userBlocked,
-  currentUserBlockedList,
-  unblockUser
+  userBlocked
 ) => {
   const usersParent = document.querySelector("#users-parent");
   const currentUser = getElement("rmtid-input").value;
@@ -30,7 +26,9 @@ export const updateUsersList = async (
   removeChildren(usersParent);
   for (const user in userList) {
     const userObject = userList[user];
+    const blockedByList = userObject.blockedBy;
 
+    // if (blockedByIndex == -1) {
     dlog(stringify(userObject), `ui script: line 34`);
 
     if (
@@ -66,6 +64,7 @@ export const updateUsersList = async (
       // Add attributes
       addAttribute(parentRow, "class", "col-12 col-md-4 col-lg-4");
       addAttribute(card, "class", "card mb-3");
+      addAttribute(card, "id", `card-${userObject._id}`);
       addAttribute(row, "class", "row g-0 m-0 p-3");
       addAttribute(imgCol, "class", "col-6");
       addAttribute(bodyCol, "class", "col-6");
@@ -137,10 +136,12 @@ export const updateUsersList = async (
         const blockee = e.target.id.split("-")[1];
         const blocker = currentUser;
 
-        dlog(`${blocker} blocked ${blockee}`, `ui script: line 140`);
+        dlog(`${blocker} blocked ${blockee}`, `ui script: line 139`);
+        card.remove();
         blockUser(blocker, blockee);
       });
     }
+    // }
   }
 };
 
