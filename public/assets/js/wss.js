@@ -1,5 +1,6 @@
 import { parse, stringify } from "./utils.js";
 import { log, dlog, tlog } from "./clientutils.js";
+import { getElement, addAttribute, addClickHandler } from "./computils.js";
 import {
   updateUsersList,
   showMessage,
@@ -393,9 +394,103 @@ function getRoomTokenAndEnterRoom(
   }
 }
 
-function cloakMe() {
-  dlog(`Going invisible`);
-}
+export const cloakMe = () => {
+  dlog(`Going invisible`, `wss script: line 398`);
+  const uid = document.querySelector("#rmtid-input").value;
+  let xmlHttp;
+
+  try {
+    xmlHttp = new XMLHttpRequest();
+
+    xmlHttp.open("POST", "/chat/user/hide", true);
+
+    xmlHttp.setRequestHeader(
+      "Content-type",
+      "application/x-www-form-urlencoded"
+    );
+
+    xmlHttp.onload = () => {
+      const responseText = xmlHttp.responseText;
+
+      if (responseText) {
+        const responseJson = parse(responseText);
+        const status = responseJson.status;
+
+        if (status) {
+          const userDoc = responseJson.doc;
+          userDetails = {};
+          userDetails.uid = uid;
+          userDetails.doc = userDoc;
+
+          const hidemeLink = getElement("hideme");
+          hidemeLink.innerText = "Show";
+          hidemeLink.removeEventListener("click", cloakMe);
+          addClickHandler(hidemeLink, uncloakMe);
+
+          socketIO.emit("makemeinvisible", userDetails);
+        } else {
+          const reason = responseJson.reason;
+          dlog(`${reason}`);
+        }
+        return;
+      }
+    };
+
+    xmlHttp.send(`userId=${uid}`, true);
+  } catch (err) {
+    tlog(err);
+    return;
+  }
+};
+
+export const uncloakMe = () => {
+  dlog(`Going visible`, `wss script: line 447`);
+  const uid = document.querySelector("#rmtid-input").value;
+  let xmlHttp;
+
+  try {
+    xmlHttp = new XMLHttpRequest();
+
+    xmlHttp.open("POST", "/chat/user/unhide", true);
+
+    xmlHttp.setRequestHeader(
+      "Content-type",
+      "application/x-www-form-urlencoded"
+    );
+
+    xmlHttp.onload = () => {
+      const responseText = xmlHttp.responseText;
+
+      if (responseText) {
+        const responseJson = parse(responseText);
+        const status = responseJson.status;
+
+        if (status) {
+          const userDoc = responseJson.doc;
+          userDetails = {};
+          userDetails.uid = uid;
+          userDetails.doc = userDoc;
+
+          const hidemeLink = getElement("hideme");
+          hidemeLink.innerText = "Hide";
+          hidemeLink.removeEventListener("click", uncloakMe);
+          addClickHandler(hidemeLink, cloakMe);
+
+          socketIO.emit("makemevisible", userDetails);
+        } else {
+          const reason = responseJson.reason;
+          dlog(`${reason}`);
+        }
+        return;
+      }
+    };
+
+    xmlHttp.send(`userId=${uid}`, true);
+  } catch (err) {
+    tlog(err);
+    return;
+  }
+};
 
 function userBlocked(arrList, uid) {
   const index = arrList.findIndex((x) => x == uid);

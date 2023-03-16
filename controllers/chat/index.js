@@ -151,6 +151,7 @@ export const enterRoom = asyncHandler(async (req, res) => {
       fname: doc.user.fname,
       enteredroom: true,
       signedin: true,
+      isvisible: doc.isVisible,
     });
   } catch (err) {
     tlog(err);
@@ -415,4 +416,62 @@ export const requestConn = asyncHandler(async (req, res) => {
     enteredroom: true,
     signedin: true,
   });
+});
+
+//  @desc           Hide user
+//  @route          POST /chat/user/hide
+//  @access         Private
+export const hideUser = asyncHandler(async (req, res) => {
+  logger.info(`POST: /chat/user/hide`);
+
+  const { userId } = req.body;
+
+  try {
+    let doc = await Chat.findOneAndUpdate(
+      { user: `${userId}` },
+      { isVisible: false }
+    );
+
+    doc = await Chat.findOne({ user: `${userId}` }).populate("user");
+
+    if (doc) {
+      res.json({ status: true, doc });
+    } else {
+      res.json({ status: false, reason: `Unable to update user ${userId}` });
+    }
+  } catch (err) {
+    log(`\n--------------------------------------------------`);
+    log(err);
+    log(`--------------------------------------------------\n`);
+    res.json({ status: false, reason: `Unable to update user ${userId}` });
+  }
+});
+
+//  @desc           Unhide user
+//  @route          POST /chat/user/unhide
+//  @access         Private
+export const unhideUser = asyncHandler(async (req, res) => {
+  logger.info(`POST: /chat/user/unhide`);
+
+  const { userId } = req.body;
+
+  try {
+    let doc = await Chat.findOneAndUpdate(
+      { user: `${userId}` },
+      { isVisible: true }
+    );
+
+    doc = await Chat.findOne({ user: `${userId}` }).populate("user");
+
+    if (doc) {
+      res.json({ status: true, doc: doc });
+    } else {
+      res.json({ status: false, reason: `Unable to update user ${userId}` });
+    }
+  } catch (err) {
+    log(`\n--------------------------------------------------`);
+    log(err);
+    log(`--------------------------------------------------\n`);
+    res.json({ status: false, reason: `Unable to update user ${userId}` });
+  }
 });

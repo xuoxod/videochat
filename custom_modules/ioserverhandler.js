@@ -298,6 +298,88 @@ export default (io) => {
         });
       }
     });
+
+    socket.on("makemeinvisible", async (data) => {
+      const { uid, doc } = data;
+      const user = userManager.getUser(uid);
+
+      if (user) {
+        dlog(`${user.fname} is invisible`, `ioserver: line 307`);
+
+        const regUser = Object.assign({
+          ...{
+            fname: doc.user.fname,
+            lname: doc.user.lname,
+            email: doc.email,
+            _id: doc.user._id,
+            uname: doc.uname,
+            displayName: doc.displayName,
+            isVisible: doc.isVisible,
+            photoUrl: doc.photoUrl,
+            public: doc.public,
+            description: doc.description,
+            friends: doc.friends,
+            blockedUsers: doc.blockedUsers,
+            blockedBy: doc.blockedBy,
+            online: doc.online,
+          },
+          ...{ sid: user.sid },
+        });
+
+        const removedUser = userManager.removeUser(uid);
+
+        if (removedUser) {
+          const addedUser = userManager.addUser(regUser);
+
+          if (addedUser) {
+            io.emit("updateonlineuserlist", {
+              users: stringify(userManager.getUsers()),
+            });
+          }
+        }
+      }
+    });
+
+    socket.on("makemevisible", async (data) => {
+      const { uid, doc } = data;
+      const user = userManager.getUser(uid);
+
+      if (user) {
+        dlog(`${user.fname} is visible`, `ioserver: line 348`);
+
+        const regUser = Object.assign({
+          ...{
+            fname: doc.user.fname,
+            lname: doc.user.lname,
+            email: doc.email,
+            _id: doc.user._id,
+            uname: doc.uname,
+            displayName: doc.displayName,
+            isVisible: doc.isVisible,
+            photoUrl: doc.photoUrl,
+            public: doc.public,
+            description: doc.description,
+            friends: doc.friends,
+            blockedUsers: doc.blockedUsers,
+            blockedBy: doc.blockedBy,
+            online: doc.online,
+          },
+          ...{ sid: user.sid },
+        });
+
+        const removedUser = userManager.removeUser(uid);
+
+        if (removedUser) {
+          const addedUser = userManager.addUser(regUser);
+
+          if (addedUser) {
+            io.emit("updateonlineuserlist", {
+              users: stringify(userManager.getUsers()),
+            });
+          }
+        }
+      }
+    });
   });
 };
 

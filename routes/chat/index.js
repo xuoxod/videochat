@@ -12,6 +12,8 @@ import {
   blockUser,
   unblockUser,
   requestConn,
+  hideUser,
+  unhideUser,
 } from "../../controllers/chat/index.js";
 
 const chat = Router();
@@ -37,6 +39,10 @@ chat.route("/block").post(signedIn, blockUser);
 chat.route("/unblock").post(signedIn, unblockUser);
 
 chat.route("/connect/request").get(signedIn, requestConn);
+
+chat.route("/user/hide").post(signedIn, hideUser);
+
+chat.route("/user/unhide").post(signedIn, unhideUser);
 
 // chat.route("/get/blockedlist/:blocker").post(signedIn, getBlockedList);
 
