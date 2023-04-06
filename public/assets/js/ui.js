@@ -13,143 +13,148 @@ import {
   append,
 } from "./computils.js";
 
-import { cloakMe, uncloakMe } from "./wss.js";
+import { cloakMe, uncloakMe } from "./__wss.js";
 
 export const updateUsersList = async (
   userList,
   listItemClickHandler,
   detectWebcam,
   blockUser,
-  userBlocked
+  blockedBy
 ) => {
   const usersParent = document.querySelector("#users-parent");
   const currentUser = getElement("rmtid-input").value;
 
+  // if (userList.length > 0) {
   removeChildren(usersParent);
   for (const user in userList) {
     const userObject = userList[user];
 
-    // if (blockedByIndex == -1) {
-    dlog(stringify(userObject), `ui script: line 34`);
+    dlog(stringify(userObject), `ui script: line 33`);
 
     if (userObject.isVisible) {
-      if (!userBlocked(userObject.blockedUsers, currentUser)) {
-        // Create comps
-        const card = newElement("div");
-        const parentRow = newElement("div");
-        const row = newElement("div");
-        const imgCol = newElement("div");
-        const cardImg = newElement("img");
-        const bodyCol = newElement("div");
-        const cardBody = newElement("div");
-        const cardBodyLayout = newElement("div");
-        const cardTitle = newElement("h5");
-        const blockIcon = newElement("i");
-        const acceptCallIcon = newElement("i");
-        const connectTypeIcon = newElement("i");
-        const divConnectIcon = newElement("div");
-        const divBlockIcon = newElement("div");
-        const divFriendIcon = newElement("div");
+      const blockedUsersIndex = userObject.blockedUsers.findIndex(
+        (x) => x == currentUser
+      );
 
-        console.log("user object");
-        console.log(userObject);
-
-        const displayName = userObject.displayName.fname
-          ? `${userObject.fname}`
-          : `${userObject.uname}`;
-
-        cardImg.alt = `${displayName}`;
-
-        // Add attributes
-        addAttribute(parentRow, "class", "col-12 col-md-4 col-lg-4");
-        addAttribute(card, "class", "card mb-3");
-        addAttribute(card, "id", `card-${userObject._id}`);
-        addAttribute(row, "class", "row g-0 m-0 p-3");
-        addAttribute(imgCol, "class", "col-6");
-        addAttribute(bodyCol, "class", "col-6");
-        addAttribute(
-          cardBodyLayout,
-          "class",
-          "d-flex justify-content-center gap-5"
+      if (blockedUsersIndex == -1) {
+        const blockedByIndex = userObject.blockedBy.findIndex(
+          (x) => x == currentUser
         );
-        addAttribute(divConnectIcon, "class", "bg-light border rounded");
-        addAttribute(divBlockIcon, "class", "bg-light border rounded");
-        addAttribute(divFriendIcon, "class", "bg-light border rounded");
-        addAttribute(cardImg, "class", "img-fluid rounded-start");
-        addAttribute(cardBody, "class", "card-body");
-        addAttribute(cardTitle, "class", "card-title text-center mb-4");
-        addAttribute(blockIcon, "id", `block-${userObject._id}`);
-        addAttribute(blockIcon, "class", "bi bi-eye-slash-fill");
-        addAttribute(blockIcon, "data-toggle", "tooltip");
-        addAttribute(blockIcon, "data-placement", "top");
-        addAttribute(blockIcon, "data-html", "true");
-        addAttribute(blockIcon, "title", `Block ${displayName}`);
-        addAttribute(acceptCallIcon, "class", "bi bi-check-lg text-success");
 
-        if (userObject.photoUrl) {
-          cardImg.src = userObject.photoUrl;
-        } else {
-          cardImg.src = "/assets/graphics/silhouette.png";
-        }
+        if (blockedByIndex == -1) {
+          // Create comps
+          const card = newElement("div");
+          const parentRow = newElement("div");
+          const row = newElement("div");
+          const imgCol = newElement("div");
+          const cardImg = newElement("img");
+          const bodyCol = newElement("div");
+          const cardBody = newElement("div");
+          const cardBodyLayout = newElement("div");
+          const cardTitle = newElement("h5");
+          const blockIcon = newElement("i");
+          const acceptCallIcon = newElement("i");
+          const connectTypeIcon = newElement("i");
+          const divConnectIcon = newElement("div");
+          const divBlockIcon = newElement("div");
+          const divFriendIcon = newElement("div");
 
-        // Append comps
-        appendChild(usersParent, parentRow);
-        appendChild(parentRow, card);
-        appendChild(card, row);
-        appendChild(row, imgCol);
-        appendChild(row, bodyCol);
-        appendChild(imgCol, cardImg);
-        appendChild(bodyCol, cardBody);
-        appendChild(cardBody, cardTitle);
-        appendChild(cardBody, cardBodyLayout);
-        appendChild(cardBodyLayout, connectTypeIcon);
-        appendChild(cardBodyLayout, blockIcon);
+          const displayName = userObject.displayName.fname
+            ? `${userObject.fname}`
+            : `${userObject.uname}`;
 
-        cardTitle.innerHTML = `<strong>${displayName}</strong>`;
+          cardImg.alt = `${displayName}`;
 
-        detectWebcam((results) => {
-          if (!results) {
-            addAttribute(connectTypeIcon, "id", `connect-${userObject._id}`);
-            addAttribute(connectTypeIcon, "data-connectiontype", "audio");
-            addAttribute(connectTypeIcon, "class", "bi bi-mic-fill");
-            addAttribute(connectTypeIcon, "data-toggle", "tooltip");
-            addAttribute(connectTypeIcon, "data-placement", "top");
-            addAttribute(connectTypeIcon, "data-html", "true");
-            addAttribute(
-              connectTypeIcon,
-              "title",
-              `Connect with ${displayName}`
-            );
+          // Add attributes
+          addAttribute(parentRow, "class", "col-12 col-md-4 col-lg-4");
+          addAttribute(card, "class", "card mb-3");
+          addAttribute(card, "id", `card-${userObject._id}`);
+          addAttribute(row, "class", "row g-0 m-0 p-3");
+          addAttribute(imgCol, "class", "col-6");
+          addAttribute(bodyCol, "class", "col-6");
+          addAttribute(
+            cardBodyLayout,
+            "class",
+            "d-flex justify-content-center gap-5"
+          );
+          addAttribute(divConnectIcon, "class", "bg-light border rounded");
+          addAttribute(divBlockIcon, "class", "bg-light border rounded");
+          addAttribute(divFriendIcon, "class", "bg-light border rounded");
+          addAttribute(cardImg, "class", "img-fluid rounded-start");
+          addAttribute(cardBody, "class", "card-body");
+          addAttribute(cardTitle, "class", "card-title text-center mb-4");
+          addAttribute(blockIcon, "id", `block-${userObject._id}`);
+          addAttribute(blockIcon, "class", "bi bi-eye-slash-fill");
+          addAttribute(blockIcon, "data-toggle", "tooltip");
+          addAttribute(blockIcon, "data-placement", "top");
+          addAttribute(blockIcon, "data-html", "true");
+          addAttribute(blockIcon, "title", `Block ${displayName}`);
+          addAttribute(acceptCallIcon, "class", "bi bi-check-lg text-success");
+
+          if (userObject.photoUrl) {
+            cardImg.src = userObject.photoUrl;
           } else {
-            addAttribute(connectTypeIcon, "id", `connect-${userObject._id}`);
-            addAttribute(connectTypeIcon, "data-connectiontype", "video");
-            addAttribute(connectTypeIcon, "class", "bi bi-camera-video-fill");
-            addAttribute(connectTypeIcon, "data-toggle", "tooltip");
-            addAttribute(connectTypeIcon, "data-placement", "top");
-            addAttribute(connectTypeIcon, "data-html", "true");
-            addAttribute(
-              connectTypeIcon,
-              "title",
-              `Connect with ${displayName}`
-            );
+            cardImg.src = "/assets/graphics/silhouette.png";
           }
-        });
 
-        // Register click handlers
+          // Append comps
+          appendChild(usersParent, parentRow);
+          appendChild(parentRow, card);
+          appendChild(card, row);
+          appendChild(row, imgCol);
+          appendChild(row, bodyCol);
+          appendChild(imgCol, cardImg);
+          appendChild(bodyCol, cardBody);
+          appendChild(cardBody, cardTitle);
+          appendChild(cardBody, cardBodyLayout);
+          appendChild(cardBodyLayout, connectTypeIcon);
+          appendChild(cardBodyLayout, blockIcon);
 
-        addClickHandler(connectTypeIcon, listItemClickHandler);
+          cardTitle.innerHTML = `<strong>${displayName}</strong>`;
 
-        addClickHandler(blockIcon, (e) => {
-          const blockee = e.target.id.split("-")[1];
-          const blocker = currentUser;
+          detectWebcam((results) => {
+            if (!results) {
+              addAttribute(connectTypeIcon, "id", `connect-${userObject._id}`);
+              addAttribute(connectTypeIcon, "data-connectiontype", "audio");
+              addAttribute(connectTypeIcon, "class", "bi bi-mic-fill");
+              addAttribute(connectTypeIcon, "data-toggle", "tooltip");
+              addAttribute(connectTypeIcon, "data-placement", "top");
+              addAttribute(connectTypeIcon, "data-html", "true");
+              addAttribute(
+                connectTypeIcon,
+                "title",
+                `Connect with ${displayName}`
+              );
+            } else {
+              addAttribute(connectTypeIcon, "id", `connect-${userObject._id}`);
+              addAttribute(connectTypeIcon, "data-connectiontype", "video");
+              addAttribute(connectTypeIcon, "class", "bi bi-camera-video-fill");
+              addAttribute(connectTypeIcon, "data-toggle", "tooltip");
+              addAttribute(connectTypeIcon, "data-placement", "top");
+              addAttribute(connectTypeIcon, "data-html", "true");
+              addAttribute(
+                connectTypeIcon,
+                "title",
+                `Connect with ${displayName}`
+              );
+            }
+          });
 
-          dlog(`${blocker} blocked ${blockee}`, `ui script: line 139`);
-          card.remove();
-          blockUser(blocker, blockee);
-        });
+          // Register click handlers
+
+          addClickHandler(connectTypeIcon, listItemClickHandler);
+
+          addClickHandler(blockIcon, (e) => {
+            const blockee = e.target.id.split("-")[1];
+            const blocker = currentUser;
+
+            dlog(`${blocker} blocked ${blockee}`, `ui script: line 156`);
+            blockUser(blocker, blockee);
+          });
+        }
       }
     }
-    // }
   }
 };
 

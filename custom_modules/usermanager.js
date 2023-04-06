@@ -21,7 +21,7 @@ class UM {
       delete this.users[uid];
       return this.getUser(uid) == false;
     }
-    return true;
+    return false;
   };
 
   getUsers = () => this.users;
@@ -43,6 +43,8 @@ class UM {
       }
     }
   };
+
+  usersCount = () => Object.keys(this.users).length;
 }
 
 export default UM;

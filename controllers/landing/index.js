@@ -8,9 +8,28 @@ const logger = bunyan.createLogger({ name: "Landing Controller" });
 // @access      Public
 export const landingPage = asyncHandler(async (req, res) => {
   logger.info(`GET /`);
-  log(req.method);
-  log(req.url);
-  log(req.headers);
+  const method = req.method;
+  const url = req.url;
+  const host = req.headers["host"];
+  const dnt = req.headers["dnt"];
+  const accept = req.headers["accept"];
+  const agent = req.headers["user-agent"];
+  const secSite = req.headers["sec-fetch-site"];
+  const secMobile = req.headers["sec-ch-ua-mobile"] == "?1" ? true : false;
+  const platform = req.headers["sec-ch-ua-platform"];
+  const referer = req.headers["referer"] || "none";
+  const acceptedEnc = req.headers["accept-encoding"];
+  const cookie = req.headers["cookie"];
+  const ua = req.headers["sec-ch-ua"];
+
+  log(`\nHost:\t${host}`);
+  log(`User Agent:\t${ua}`);
+  log(`Referer:\t${referer}`);
+  log(`Cookie:\t${cookie}`);
+  log(`Platform:\t${platform}`);
+  log(`Mobile:\t${secMobile}`);
+  log(`Encoding:\t${acceptedEnc}`);
+  log(`Fetch Site:\t${secSite}\n`);
 
   try {
     req.flash("success_msg", "Hey there");

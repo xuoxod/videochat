@@ -9,20 +9,38 @@ const connectedUsers = [];
 
 export default (io) => {
   io.on("connection", (socket) => {
-    dlog(`connection event fired`, `ioserverhandler`);
+    log(`New client connection detected - ID: ${socket.id}`);
 
     socket.on("registerme", async (data) => {
-      dlog(`registerme event fired`, `ioserverhandler`);
-      const { uid, doc } = data;
+      const { uid } = data;
 
       if (uid) {
         const user = userManager.getUser(uid);
         addCUser(uid);
 
         if (!user) {
+          const doc = await Chat.findOne({ user: `${uid}` }).populate("user");
+
           let addedUser;
 
           if (doc) {
+            const _id = doc.user._id;
+            const blockedUsers = doc.blockedUsers;
+
+            if (userManager.usersCount > 0) {
+              for (const ou in userManager.getUsers()) {
+                const onlineUser = ou;
+                const userIsBlocked =
+                  blockedUsers.find((x) => x == onlineUser._id) || null;
+
+                if (null == userIsBlocked) {
+                  onlineUser.blockedBy = onlineUser.blockedBy.filter(
+                    (x) => x != _id
+                  );
+                }
+              }
+            }
+
             const regUser = Object.assign({
               ...{
                 fname: doc.user.fname,
@@ -54,16 +72,11 @@ export default (io) => {
               });
             }
           }
-        } else {
-          log(`User ${user.fname} is already registered\n\n`);
-          user.sid = socket.id;
-          io.to(user.sid).emit("registered");
-        }
+        } 
       }
     });
 
     socket.on("updateuser", (data) => {
-      dlog(`updateuser event fired`, `ioserverhandler`);
       const { uid, doc, hasDoc } = data;
 
       const user = userManager.getUser(uid);
@@ -114,7 +127,6 @@ export default (io) => {
     });
 
     socket.on("userclicked", (data) => {
-      dlog(`userclicked event fired`, `ioserverhandler`);
       const { sender, receiver, conntype } = data;
       log(`${sender} requesting a ${conntype} connection with ${receiver}`);
       const userSender = userManager.getUser(sender);
@@ -138,7 +150,6 @@ export default (io) => {
     });
 
     socket.on("connectionrequest", (data) => {
-      dlog(`connectionrequest event fired`, `ioserverhandler`);
       const { sender, receiver } = data;
 
       const userSender = userManager.getUser(sender);
@@ -164,7 +175,6 @@ export default (io) => {
     });
 
     socket.on("callaccepted", (data) => {
-      dlog(`callaccepted event fired`, `ioserverhandler`);
       const { sender, receiver, connType } = data;
       const userSender = userManager.getUser(sender);
       const userReceiver = userManager.getUser(receiver);
@@ -191,7 +201,6 @@ export default (io) => {
     });
 
     socket.on("callrejected", (data) => {
-      dlog(`callrejected event fired`, `ioserverhandler`);
       const { sender, receiver } = data;
       const userSender = userManager.getUser(sender);
       const userReceiver = userManager.getUser(receiver);
@@ -215,7 +224,6 @@ export default (io) => {
     });
 
     socket.on("noresponsetocall", (data) => {
-      dlog(`noresponsetocall event fired`, `ioserverhandler`);
       const { sender, receiver } = data;
       const userSender = userManager.getUser(sender);
       const userReceiver = userManager.getUser(receiver);
@@ -228,7 +236,6 @@ export default (io) => {
     });
 
     socket.on("enterroom", (data) => {
-      dlog(`enterroom event fired`, `ioserverhandler`);
       const { sender, receiver, roomName, connectionType, from } = data;
       const userSender = userManager.getUser(sender);
 
@@ -251,7 +258,6 @@ export default (io) => {
     });
 
     socket.on("disconnectme", async (data) => {
-      dlog(`disconnectme event fired`, `ioserverhandler`);
       const { uid } = data;
       const doc = await Chat.findOneAndUpdate(
         { user: `${uid}` },
@@ -274,86 +280,6 @@ export default (io) => {
     });
 
     socket.on("iblockedauser", (data) => {
-      dlog(`iblockedauser event fired`, `ioserverhandler`);
-      const { blocker, blockee } = data;
-      const { blockerUid, blockerDoc } = blocker;
-      const { blockeeUid, blockeeDoc } = blockee;
-
-      const userBlocker = userManager.getUser(blockerUid);
-      const userBlockee = userManager.getUser(blockeeUid);
-
-      if (userBlocker && userBlockee) {
-        const addBlockerDoc = Object.assign({
-          ...{
-            fname: blockerDoc.user.fname,
-            lname: blockerDoc.user.lname,
-            email: blockerDoc.email,
-            _id: blockerDoc.user._id,
-            uid: blockerDoc.user._id,
-            uname: blockerDoc.uname,
-            displayName: blockerDoc.displayName,
-            isVisible: blockerDoc.isVisible,
-            photoUrl: blockerDoc.photoUrl,
-            public: blockerDoc.public,
-            description: blockerDoc.description,
-            friends: blockerDoc.friends,
-            blockedUsers: blockerDoc.blockedUsers,
-            blockedBy: blockerDoc.blockedBy,
-            online: blockerDoc.online,
-          },
-          ...{ sid: userBlocker.sid },
-        });
-
-        const addBlockeeDoc = Object.assign({
-          ...{
-            fname: blockeeDoc.user.fname,
-            lname: blockeeDoc.user.lname,
-            email: blockeeDoc.email,
-            _id: blockeeDoc.user._id,
-            uid: blockeeDoc.user._id,
-            uname: blockeeDoc.uname,
-            displayName: blockeeDoc.displayName,
-            isVisible: blockeeDoc.isVisible,
-            photoUrl: blockeeDoc.photoUrl,
-            public: blockeeDoc.public,
-            description: blockeeDoc.description,
-            friends: blockeeDoc.friends,
-            blockedUsers: blockeeDoc.blockedUsers,
-            blockedBy: blockeeDoc.blockedBy,
-            online: blockeeDoc.online,
-          },
-          ...{ sid: userBlockee.sid },
-        });
-
-        dlog(`\n\tAdd Blocker Doc\n\t${stringify(addBlockerDoc)}\n`);
-        dlog(`\n\tAdd Blockee Doc\n\t${stringify(addBlockeeDoc)}\n`);
-
-        const removedBlockerDoc = userManager.removeUser(blockerUid);
-        const removedBlockeeDoc = userManager.removeUser(blockeeUid);
-
-        if (removedBlockerDoc && removedBlockeeDoc) {
-          const addedBlocker = userManager.addUser(addBlockerDoc);
-          const addedBlockee = userManager.addUser(addBlockeeDoc);
-
-          dlog(
-            `${userBlocker.fname} blocked ${userBlockee.fname}`,
-            `ioserver: line 246`
-          );
-
-          if (addedBlocker && addedBlockee) {
-            io.to(addBlockeeDoc.sid).emit("updateonlineuserlist", {
-              users: stringify(userManager.getUsers()),
-            });
-
-            io.to(addBlockerDoc.sid).emit("updateonlineuserlist", {
-              users: stringify(userManager.getUsers()),
-            });
-          }
-        }
-      }
-    });
-
-    socket.on("_iblockedauser", (data) => {
       const { blocker, blockee } = data;
       const { blockerUid, blockerDoc } = blocker;
       const { blockeeUid, blockeeDoc } = blockee;
@@ -415,7 +341,7 @@ export default (io) => {
 
           dlog(
             `${userBlocker.fname} blocked ${userBlockee.fname}`,
-            `ioserver: line 246`
+            `ioserver: line 265`
           );
 
           if (addedBlocker && addedBlockee) {
@@ -425,92 +351,29 @@ export default (io) => {
       }
     });
 
-    socket.on("iunblockedauser", async (data) => {
-      dlog(`iunblockedauser event fired`, `ioserverhandler`);
+    socket.on("iunblockedauser", (data) => {
       const { blocker, blockee } = data;
-
-      const blockerDoc = await Chat.findOneAndUpdate(
-        { user: `${blocker}` },
-        { $pop: { blockedUsers: `${blockee}` } },
-        { new: true }
-      ).populate("user");
-
-      const blockeeDoc = await Chat.findOneAndUpdate(
-        { user: `${blockee}` },
-        { $pop: { blockedBy: `${blocker}` } },
-        { new: true }
-      ).populate("user");
-
       const userBlocker = userManager.getUser(blocker);
       const userBlockee = userManager.getUser(blockee);
 
       if (userBlocker && userBlockee) {
-        dlog(`\n\tBlocker Doc\n\t${stringify(blockerDoc)}\n`);
-        dlog(`\n\tBlockee Doc\n\t${stringify(blockeeDoc)}\n`);
+        dlog(`${userBlocker.fname} has unblocked ${userBlockee.fname}`);
 
-        const addedBlockerDoc = Object.assign({
-          ...{
-            fname: blockerDoc.user.fname,
-            lname: blockerDoc.user.lname,
-            email: blockerDoc.email,
-            _id: blockerDoc.user._id,
-            uid: blockerDoc.user._id,
-            uname: blockerDoc.uname,
-            displayName: blockerDoc.displayName,
-            isVisible: blockerDoc.isVisible,
-            photoUrl: blockerDoc.photoUrl,
-            public: blockerDoc.public,
-            description: blockerDoc.description,
-            friends: blockerDoc.friends,
-            blockedUsers: blockerDoc.blockedUsers,
-            blockedBy: blockerDoc.blockedBy,
-            online: blockerDoc.online,
-          },
-          ...{ sid: userBlocker.sid },
+        userBlocker.blockedUsers = userBlocker.blockedUsers.filter(
+          (x) => x != blockee
+        );
+
+        userBlockee.blockedBy = userBlockee.blockedBy.filter(
+          (x) => x != blocker
+        );
+
+        io.emit("updateonlineuserlist", {
+          users: stringify(userManager.getUsers()),
         });
-
-        const addedBlockeeDoc = Object.assign({
-          ...{
-            fname: blockeeDoc.user.fname,
-            lname: blockeeDoc.user.lname,
-            email: blockeeDoc.email,
-            _id: blockeeDoc.user._id,
-            uid: blockeeDoc.user._id,
-            uname: blockeeDoc.uname,
-            displayName: blockeeDoc.displayName,
-            isVisible: blockeeDoc.isVisible,
-            photoUrl: blockeeDoc.photoUrl,
-            public: blockeeDoc.public,
-            description: blockeeDoc.description,
-            friends: blockeeDoc.friends,
-            blockedUsers: blockeeDoc.blockedUsers,
-            blockedBy: blockeeDoc.blockedBy,
-            online: blockeeDoc.online,
-          },
-          ...{ sid: userBlockee.sid },
-        });
-
-        const removedBlockerDoc = userManager.removeUser(blocker);
-        const removedBlockeeDoc = userManager.removeUser(blockee);
-
-        if (removedBlockerDoc && removedBlockeeDoc) {
-          const addedBlocker = userManager.addUser(addedBlockerDoc);
-          const addedBlockee = userManager.addUser(addedBlockeeDoc);
-
-          dlog(
-            `${userBlocker.fname} unblocked ${userBlockee.fname}`,
-            `ioserver: line 246`
-          );
-
-          if (addedBlocker && addedBlockee) {
-            io.emit("updateonlineuserlist", stringify(userManager.getUsers()));
-          }
-        }
       }
     });
 
     socket.on("makemeinvisible", async (data) => {
-      dlog(`makemeinvisible event fired`, `ioserverhandler`);
       const { uid, doc } = data;
       const user = userManager.getUser(uid);
 
@@ -553,7 +416,6 @@ export default (io) => {
     });
 
     socket.on("makemevisible", async (data) => {
-      dlog(`makemevisible event fired`, `ioserverhandler`);
       const { uid, doc } = data;
       const user = userManager.getUser(uid);
 

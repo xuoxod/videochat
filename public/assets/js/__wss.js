@@ -16,31 +16,33 @@ export const registerSocketEvents = (socket) => {
   socketIO = socket;
 
   socket.on("connect", () => {
-    dlog(`connect event fired`, `wss.js`);
-    getChatUserProfile((results) => {
-      const { status, doc } = results;
+    dlog(`\n\tSuccessfully connected to socket.io server\n`);
+    userDetails = {};
+    userDetails.uid = document.querySelector("#rmtid-input").value;
+    socket.emit("registerme", userDetails);
+  });
 
-      if (status) {
-        userDetails = {};
-        userDetails.doc = doc;
-        userDetails.uid = document.querySelector("#rmtid-input").value;
-        socket.emit("registerme", userDetails);
-      }
-    });
+  socket.on("registered",()=>{
+    dlog(`I'm regiestered`,`wss script: line 26`)
   });
 
   socket.on("updateonlineuserlist", (data) => {
-    dlog(`updateonlineuserlist event fired`, `wss.js`);
-    const { users } = data;
+    const { users, msg } = data;
     const pUsers = parse(users);
     const currentUser = document.querySelector("#rmtid-input").value;
     const currentUserBlockedUsers = pUsers[currentUser].blockedUsers;
     const arrUsers = [];
 
-    /* dlog(
-      `Updated user list:\n\t${users}/n`,
-      `wss script: updateonlineuserlist event fired`
-    ); */
+    if (msg) {
+      alert(msg);
+    }
+
+    dlog(
+      `${pUsers[currentUser].fname} blocked users ${stringify(
+        currentUserBlockedUsers
+      )}\nID: ${currentUser}`,
+      `wss script: line 32`
+    );
 
     for (const u in pUsers) {
       const user = pUsers[u];
@@ -78,7 +80,6 @@ export const registerSocketEvents = (socket) => {
   });
 
   socket.on("registered", (data) => {
-    dlog(`registered event fired`, `wss.js`);
     const { uid } = data;
     dlog(`I am registered`);
 
@@ -110,7 +111,6 @@ export const registerSocketEvents = (socket) => {
   });
 
   socket.on("clickeduser", (data) => {
-    dlog(`clickeduser event fired`, `wss.js`);
     const { strUser } = data;
     const user = parse(strUser);
     userDetails = {};
@@ -121,7 +121,6 @@ export const registerSocketEvents = (socket) => {
   });
 
   socket.on("connectionrequested", (data) => {
-    dlog(`connectionrequested event fired`, `wss.js`);
     const { strUserDetails } = data;
 
     userDetails = parse(strUserDetails);
@@ -134,7 +133,6 @@ export const registerSocketEvents = (socket) => {
   });
 
   socket.on("connectionrequestresponse", (data) => {
-    dlog(`connectionrequestresponse event fired`, `wss.js`);
     const { responseData } = data;
     const userReponseData = parse(responseData);
     const { receiver, response, roomName, connType, sender } = userReponseData;
@@ -196,14 +194,6 @@ export const registerSocketEvents = (socket) => {
   });
 };
 
-addEventListener("beforeunload", (event) => {
-  dlog(`\\tbeforeunload window event fired`, `wss.js`);
-  userDetails = {};
-  userDetails.uid = document.querySelector("#rmtid-input").value;
-  socketIO.emit("disconnectme", userDetails);
-  return;
-});
-
 function detectWebcam(callback) {
   let md = navigator.mediaDevices;
   if (!md || !md.enumerateDevices) return callback(false);
@@ -247,8 +237,7 @@ function blockUser(blockerUid, blockeeUid) {
       const responseText = xmlHttp.responseText;
 
       if (responseText) {
-        // log(`\n\tResponse Text: ${stringify(responseText)}\n`);
-        dlog(`Received ajax response`, `script: wss.js | method: blockUser`);
+        log(`\n\tResponse Text: ${stringify(responseText)}\n`);
         const responseJson = parse(responseText);
         const status = responseJson.status;
 
@@ -413,52 +402,6 @@ function getRoomTokenAndEnterRoom(
   }
 }
 
-function blockedBy(blockedByList, blocker) {
-  const blockerIndex = blockedByList.findIndex((x) => x == blocker);
-  return blockerIndex != -1;
-}
-
-function getChatUserProfile(cb) {
-  let xmlHttp;
-
-  try {
-    xmlHttp = new XMLHttpRequest();
-
-    xmlHttp.open("POST", `/chat/profile`);
-
-    xmlHttp.setRequestHeader(
-      "Content-type",
-      "application/x-www-form-urlencoded"
-    );
-
-    xmlHttp.onload = () => {
-      const responseText = xmlHttp.responseText;
-
-      if (responseText) {
-        // log(`\n\tResponse Text: ${stringify(responseText)}\n`);
-        const responseJson = parse(responseText);
-        const status = responseJson.status;
-        const doc = responseJson.doc;
-
-        if (status) {
-          dlog(
-            `Got user profile\n`,
-            "wss script: xhr request | method: getChatUserProfile"
-          );
-          return cb({ status: status, doc: doc });
-        } else {
-          return cb({ status: false, msg: `Got nothing` });
-        }
-      }
-    };
-    const uid = document.querySelector("#rmtid-input").value;
-    xmlHttp.send(`uid=${uid}`, true);
-  } catch (err) {
-    tlog(err);
-    return cb({ status: false, err: err, msg: `Got nothing` });
-  }
-}
-
 export const cloakMe = () => {
   dlog(`Going invisible`, `wss script: line 398`);
   const uid = document.querySelector("#rmtid-input").value;
@@ -556,3 +499,8 @@ export const uncloakMe = () => {
     return;
   }
 };
+
+function blockedBy(blockedByList, blocker) {
+  const blockerIndex = blockedByList.findIndex((x) => x == blocker);
+  return blockerIndex != -1;
+}

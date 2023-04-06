@@ -211,28 +211,58 @@ export const getBlockedList = asyncHandler(async (req, res) => {
 //  @route          POST /chat/block/
 //  @access         Private
 export const blockUser = asyncHandler(async (req, res) => {
-  logger.info(`POST: /user/block`);
+  logger.info(`POST: /chat/user/block`);
 
   const { blocker, blockee } = req.body;
 
   try {
     // Add blockee to blocker's blockedUsers list
-    const blockerBlockedUserList = await Chat.updateOne(
+    const blockerBlockedUserList = await Chat.findOneAndUpdate(
       { user: `${blocker}` },
-      { $push: { blockedUsers: `${blockee}` } }
-    );
+      { $push: { blockedUsers: `${blockee}` } },
+      { new: true }
+    ).populate("user");
 
-    dlog(`${blocker} added ${blockee} to blockedUser list`);
+    // dlog(`Blocker List:\t${blockerBlockedUserList} `);
 
     // Add blocker to blockee's blockedBy list
-    const blockeeBlockedByList = await Chat.updateOne(
+    const blockeeBlockedByList = await Chat.findOneAndUpdate(
       { user: `${blockee}` },
-      { $push: { blockedBy: `${blocker}` } }
+      { $push: { blockedBy: `${blocker}` } },
+      { new: true }
+    ).populate("user");
+
+    // dlog(`Blocked By List:\t${blockeeBlockedByList} `);
+
+    return res.json({
+      status: true,
+      blockerdoc: blockerBlockedUserList,
+      blockeedoc: blockeeBlockedByList,
+    });
+  } catch (err) {
+    dlog(`Server side error happened while attempting to block user`);
+    dlog(err);
+    return res.json({ status: false, cause: err });
+  }
+});
+
+//  @desc           Check if user is blocked
+//  @route          POST /chat/user/isblocked
+//  @access         Private
+export const isUserBlocked = asyncHandler(async (req, res) => {
+  logger.info(`POST: /chat/user/isblocked`);
+
+  const { blocker, blockee } = req.body;
+
+  try {
+    // Add blockee to blocker's blockedUsers list
+    const userBlocker = await Chat.findOne({ user: `${blocker}` });
+    const blockedUserIndex = userBlocker.blockedUsers.findIndex(
+      (x) => x == blockee
     );
+    const userIsBlocked = blockedUserIndex != -1 ? true : false;
 
-    dlog(`${blockee} added ${blocker} to blockedBy list`);
-
-    return res.json({ status: true });
+    return res.json({ status: true, isBlocked: userIsBlocked });
   } catch (err) {
     dlog(`Server side error blocking user`);
     dlog(err);
@@ -252,19 +282,25 @@ export const unblockUser = asyncHandler(async (req, res) => {
     // Remove blockee from blockers blockedUsers list
     const blockedrBlockedUserList = await Chat.updateOne(
       { user: `${blocker}` },
-      { $pull: { blockedUsers: `${blockee}` } }
+      { $pull: { blockedUsers: `${blockee}` } },
+      { new: true }
     );
     dlog(`${blocker} removed ${blockee} from the blockedUser list`);
 
     // Remove blocker from blockee's blockedBy list
     const blockeeBlockedByList = await Chat.updateOne(
       { user: `${blockee}` },
-      { $pull: { blockedBy: `${blocker}` } }
+      { $pull: { blockedBy: `${blocker}` } },
+      { new: true }
     );
 
     dlog(`${blockee} removed ${blocker} from the blockedBy list`);
 
-    return res.json({ status: true });
+    return res.json({
+      status: true,
+      blockerdoc: blockedrBlockedUserList,
+      blockeedoc: blockeeBlockedByList,
+    });
   } catch (err) {
     dlog(`Server side error blocking user`);
     dlog(err);
@@ -321,7 +357,7 @@ export const viewProfile = asyncHandler(async (req, res) => {
   const doc = await Chat.findOne({ user: `${uid}` }).populate("user");
 
   if (!doc) {
-    res.render({
+    res.render("chat/viewprofile", {
       title: `Profile`,
       hasDoc: false,
       chatprofile: true,
@@ -341,6 +377,25 @@ export const viewProfile = asyncHandler(async (req, res) => {
       signedin: true,
       unames: docs,
     });
+  }
+});
+
+//  @desc           Get user chat profile
+//  @route          GET /chat/profile
+//  @access         Private
+export const getChatUserProfile = asyncHandler(async (req, res) => {
+  logger.info(`GET: /chat/profile`);
+
+  const { uid } = req.body;
+
+  dlog(`rmt-id:\t${uid}`);
+
+  const doc = await Chat.findOne({ user: `${uid}` }).populate("user");
+
+  if (doc) {
+    return res.json({ status: true, doc: doc });
+  } else {
+    return res.json({ status: false });
   }
 });
 
@@ -443,7 +498,10 @@ export const hideUser = asyncHandler(async (req, res) => {
     log(`\n--------------------------------------------------`);
     log(err);
     log(`--------------------------------------------------\n`);
-    res.json({ status: false, reason: `Unable to update user ${userId}` });
+    res.json({
+      status: false,
+      reason: `Error occurred while attempting to hide user ${userId}`,
+    });
   }
 });
 
@@ -472,6 +530,32 @@ export const unhideUser = asyncHandler(async (req, res) => {
     log(`\n--------------------------------------------------`);
     log(err);
     log(`--------------------------------------------------\n`);
-    res.json({ status: false, reason: `Unable to update user ${userId}` });
+    res.json({
+      status: false,
+      reason: `Error ocurred while attempting to unhide user ${userId}`,
+    });
+  }
+});
+
+//  @desc           Update user's online status'
+//  @route          POST /chat/user/onlinestatus/update
+//  @access         Private
+export const updateUsersOnlineStatus = asyncHandler(async (req, res) => {
+  logger.info(`POST: /chat/user/onlinestatus/update`);
+
+  const { rmtid, onlinestatus } = req.body;
+
+  try {
+    let doc = await Chat.findOneAndUpdate(
+      { user: `${rmtid}` },
+      { online: onlinestatus }
+    );
+
+    return res.json({ status: true });
+  } catch (err) {
+    log(`\n--------------------------------------------------`);
+    log(err);
+    log(`--------------------------------------------------\n`);
+    return res.json({ status: false, err: err });
   }
 });

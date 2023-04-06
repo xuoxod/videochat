@@ -1,7 +1,7 @@
 export const log = console.log.bind(console);
 export const dlog = (arg = "", label = "clientutils") => {
   console.group(label);
-  console.log(`\n${arg}`);
+  console.log(`${arg}`);
   console.groupEnd();
 };
 export const tlog = (arg = "", label = "clientutils.js") => {

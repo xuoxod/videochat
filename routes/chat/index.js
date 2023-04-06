@@ -14,6 +14,9 @@ import {
   requestConn,
   hideUser,
   unhideUser,
+  isUserBlocked,
+  getChatUserProfile,
+  updateUsersOnlineStatus,
 } from "../../controllers/chat/index.js";
 
 const chat = Router();
@@ -43,6 +46,12 @@ chat.route("/connect/request").get(signedIn, requestConn);
 chat.route("/user/hide").post(signedIn, hideUser);
 
 chat.route("/user/unhide").post(signedIn, unhideUser);
+
+chat.route("/user/isblocked").post(signedIn, isUserBlocked);
+
+chat.route("/profile").post(signedIn, getChatUserProfile);
+
+chat.route("/user/onlinestatus/update").post(signedIn, updateUsersOnlineStatus);
 
 // chat.route("/get/blockedlist/:blocker").post(signedIn, getBlockedList);
 

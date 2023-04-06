@@ -1,0 +1,59 @@
+
+
+Wed Mar 22 00:09:15 2023
+Command line: TestDisk
+
+TestDisk 7.1, Data Recovery Utility, July 2019
+Christophe GRENIER <grenier@cgsecurity.org>
+https://www.cgsecurity.org
+OS: Linux, kernel 5.19.0-35-generic (#36~22.04.1-Ubuntu SMP PREEMPT_DYNAMIC Fri Feb 17 15:17:25 UTC 2) x86_64
+Compiler: GCC 11.2
+ext2fs lib: 1.46.5, ntfs lib: libntfs-3g, reiserfs lib: none, ewf lib: none, curses lib: ncurses 6.3
+Warning: can't get size for Disk /dev/mapper/control - 0 B - 0 sectors, sector size=512
+Warning: can't get size for Disk /dev/loop7 - 0 B - 0 sectors (RO), sector size=512
+Hard disk list
+Disk /dev/mmcblk0 - 62 GB / 58 GiB - CHS 1908480 4 16, sector size=512
+Disk /dev/mapper/cryptoswap - 2147 MB / 2048 MiB - 4194304 sectors, sector size=512
+Disk /dev/mapper/keystore-rpool - 507 MB / 484 MiB - 991232 sectors, sector size=512
+Disk /dev/dm-0 - 507 MB / 484 MiB - 991232 sectors, sector size=512
+Disk /dev/dm-1 - 2147 MB / 2048 MiB - 4194304 sectors, sector size=512
+Disk /dev/loop0 - 4096 B - 8 sectors (RO), sector size=512
+Disk /dev/loop1 - 9396 KB / 9176 KiB - 18352 sectors (RO), sector size=512
+Disk /dev/loop10 - 474 MB / 452 MiB - 926512 sectors (RO), sector size=512
+Disk /dev/loop11 - 482 MB / 460 MiB - 942640 sectors (RO), sector size=512
+Disk /dev/loop12 - 96 MB / 91 MiB - 187776 sectors (RO), sector size=512
+Disk /dev/loop13 - 38 MB / 37 MiB - 75960 sectors (RO), sector size=512
+Disk /dev/loop14 - 48 MB / 45 MiB - 94064 sectors (RO), sector size=512
+Disk /dev/loop15 - 52 MB / 49 MiB - 102048 sectors (RO), sector size=512
+Disk /dev/loop16 - 311 KB / 304 KiB - 608 sectors (RO), sector size=512
+Disk /dev/loop17 - 438 KB / 428 KiB - 856 sectors (RO), sector size=512
+Disk /dev/loop18 - 52 MB / 49 MiB - 102072 sectors (RO), sector size=512
+Disk /dev/loop19 - 76 MB / 72 MiB - 149312 sectors (RO), sector size=512
+Disk /dev/loop2 - 251 MB / 239 MiB - 491264 sectors (RO), sector size=512
+Disk /dev/loop20 - 66 MB / 63 MiB - 129672 sectors (RO), sector size=512
+Disk /dev/loop3 - 122 MB / 116 MiB - 239176 sectors (RO), sector size=512
+Disk /dev/loop4 - 122 MB / 116 MiB - 239128 sectors (RO), sector size=512
+Disk /dev/loop5 - 66 MB / 63 MiB - 129608 sectors (RO), sector size=512
+Disk /dev/loop6 - 76 MB / 72 MiB - 149312 sectors (RO), sector size=512
+Disk /dev/loop8 - 253 MB / 241 MiB - 494824 sectors (RO), sector size=512
+Disk /dev/loop9 - 363 MB / 346 MiB - 709280 sectors (RO), sector size=512
+
+Partition table type (auto): EFI GPT
+Disk /dev/mmcblk0 - 62 GB / 58 GiB
+Partition table type: EFI GPT
+
+Interface Advanced
+hdr_size=92
+hdr_lba_self=1
+hdr_lba_alt=122142719 (expected 122142719)
+hdr_lba_start=34
+hdr_lba_end=122142686
+hdr_lba_table=2
+hdr_entries=128
+hdr_entsz=128
+ 1 P EFI System                  2048    1050623    1048576 [EFI System Partition]
+ 2 P Linux Swap               1050624    5244927    4194304
+ 3 P Solaris /boot            5244928    9439231    4194304
+ 4 P Solaris /                9439232  122142686  112703455
+
+TestDisk exited normally.

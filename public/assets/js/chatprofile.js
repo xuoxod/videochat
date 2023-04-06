@@ -158,6 +158,10 @@ function unblockUser(blockerUid, blockeeUid) {
 
         if (status) {
           dlog(`${blockerUid} unblocked ${blockeeUid}`);
+          const blockerdoc = responseJson.blockerdoc;
+          const blockeedoc = responseJson.blockeedoc;
+
+          /* TODO: Send back these two documents to update online user's data */
           location.href = `/chat/profile/view/${blockerUid}`;
         } else {
           dlog(`Something went wrong unblocking user`);

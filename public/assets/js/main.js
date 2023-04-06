@@ -8,7 +8,7 @@ if (window) {
   const userAgent = nav.userAgent;
   const vendor = nav.vendor;
 
-  log(`Platform:\t${platform}`);
+  log(`\nPlatform:\t${platform}`);
   log(`Languages:\t${langs}`);
   log(`Language:\t${lang}`);
   log(`UAgent:\t${userAgent}`);
