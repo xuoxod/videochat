@@ -21,9 +21,16 @@ export const registerSocketEvents = (socket) => {
       const { status, doc } = results;
 
       if (status) {
+        const unblockedUserId = getElement("unblockeduser").value;
+
+        if (unblockedUserId) {
+          dlog(`Unblocking user ID: ${unblockedUserId}`);
+        }
         userDetails = {};
         userDetails.doc = doc;
         userDetails.uid = document.querySelector("#rmtid-input").value;
+        userDetails.unblockedUser = unblockedUserId != null;
+        userDetails.unblockeduserid = getElement("unblockeduser").value;
         socket.emit("registerme", userDetails);
       }
     });
@@ -75,6 +82,23 @@ export const registerSocketEvents = (socket) => {
       blockUser,
       blockedBy
     );
+  });
+
+  socket.on("updateyourself", () => {
+    dlog(`updateyourself event fired`, `wss.js`);
+    getChatUserProfile((response) => {
+      const { status, doc } = response;
+
+      dlog(`Got my profile:\t${stringify(response)}`);
+
+      if (status) {
+        userDetails.doc = doc;
+        socketIO.emit("updateme", userDetails);
+      } else {
+        dlog(`Did not update profile`);
+        return;
+      }
+    });
   });
 
   socket.on("registered", (data) => {

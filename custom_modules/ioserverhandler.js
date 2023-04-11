@@ -13,7 +13,20 @@ export default (io) => {
 
     socket.on("registerme", async (data) => {
       dlog(`registerme event fired`, `ioserverhandler`);
-      const { uid, doc } = data;
+      const { uid, doc, unblockedUser } = data;
+
+      if (unblockedUser) {
+        const { unblockeduserid } = data;
+
+        if (unblockeduserid) {
+          const unblockedUser = userManager.getUser(unblockeduserid);
+
+          if (unblockedUser) {
+            dlog(`Unblocking user ${unblockedUser.fname}`);
+            io.to(unblockedUser.sid).emit("updateyourself");
+          }
+        }
+      }
 
       if (uid) {
         const user = userManager.getUser(uid);
@@ -27,7 +40,7 @@ export default (io) => {
               ...{
                 fname: doc.user.fname,
                 lname: doc.user.lname,
-                email: doc.email,
+                email: doc.user.email,
                 _id: doc.user._id,
                 uid: doc.user._id,
                 uname: doc.uname,
@@ -109,6 +122,52 @@ export default (io) => {
               }
             }
           }).populate("user");
+        }
+      }
+    });
+
+    socket.on("updateme", (data) => {
+      dlog(`updateme event fired`, `ioserverhandler`);
+      const { doc } = data;
+
+      dlog(`updateme event emitter. Doc:\t${stringify(doc)}\n\n`);
+      const user = userManager.getUser(doc.user._id);
+
+      if (user) {
+        dlog(`${user.fname} had been updated`, `ioserverhandler`);
+
+        const regUser = Object.assign({
+          ...{
+            fname: doc.user.fname,
+            lname: doc.user.lname,
+            email: doc.user.email,
+            _id: doc.user._id,
+            uid: doc.user._id,
+            uname: doc.uname,
+            displayName: doc.displayName,
+            isVisible: doc.isVisible,
+            photoUrl: doc.photoUrl,
+            public: doc.public,
+            description: doc.description,
+            friends: doc.friends,
+            blockedUsers: doc.blockedUsers,
+            blockedBy: doc.blockedBy,
+            online: doc.online,
+          },
+          ...{ sid: user.sid },
+        });
+
+        const removedUser = userManager.removeUser(user.uid);
+
+        if (removedUser) {
+          const addedUser = userManager.addUser(regUser);
+
+          if (addedUser) {
+            log(`User ${regUser.fname} successfully updated\n\n`);
+            io.emit("updateonlineuserlist", {
+              users: stringify(userManager.getUsers()),
+            });
+          }
         }
       }
     });

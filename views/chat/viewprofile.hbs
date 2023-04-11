@@ -101,6 +101,9 @@
             {{#each unames}}
             <p class="username d-none">{{uname}}</p>
             {{/each}}
+
+
+            <input type="hidden" id="unblocked-user" value="{{#if unblockedUser}}{{unblockeduser}}{{/if}}">
         </form>
         {{/if}}
     </div>

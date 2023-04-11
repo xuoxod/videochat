@@ -141,9 +141,19 @@ export const enterRoom = asyncHandler(async (req, res) => {
       { online: true },
       { new: true }
     ).populate("user");
+
     doc.user.fname = cap(doc.user.fname);
     doc.user.lname = cap(doc.user.lname);
     dlog(`${doc.user.fname} has entered chat room`);
+
+    const { unblockeduserid } = req.query;
+
+    if (unblockeduserid) {
+      dlog(
+        `Unblocked User ID: ${unblockeduserid}\n\n`,
+        `chat controller: enterRoom`
+      );
+    }
 
     res.render("chat/room", {
       title: "Room Dammit",
@@ -152,6 +162,8 @@ export const enterRoom = asyncHandler(async (req, res) => {
       enteredroom: true,
       signedin: true,
       isvisible: doc.isVisible,
+      unblockedUserId: unblockeduserid != null,
+      unblockeduserid,
     });
   } catch (err) {
     tlog(err);
@@ -280,7 +292,7 @@ export const unblockUser = asyncHandler(async (req, res) => {
 
   try {
     // Remove blockee from blockers blockedUsers list
-    const blockedrBlockedUserList = await Chat.updateOne(
+    const blockedrBlockedUserList = await Chat.findOneAndUpdate(
       { user: `${blocker}` },
       { $pull: { blockedUsers: `${blockee}` } },
       { new: true }
@@ -288,7 +300,7 @@ export const unblockUser = asyncHandler(async (req, res) => {
     dlog(`${blocker} removed ${blockee} from the blockedUser list`);
 
     // Remove blocker from blockee's blockedBy list
-    const blockeeBlockedByList = await Chat.updateOne(
+    const blockeeBlockedByList = await Chat.findOneAndUpdate(
       { user: `${blockee}` },
       { $pull: { blockedBy: `${blocker}` } },
       { new: true }
@@ -351,8 +363,14 @@ export const viewProfile = asyncHandler(async (req, res) => {
   logger.info(`GET: /chat/profle/view/uid`);
 
   const { uid } = req.params;
+  const { unblockeduser } = req.query;
 
-  dlog(`Route Parameter: ${uid}\n`);
+  if (unblockeduser) {
+    dlog(
+      `Unblocked User ID: ${unblockeduser}\n\n`,
+      `chat controller: viewProfile`
+    );
+  }
 
   const doc = await Chat.findOne({ user: `${uid}` }).populate("user");
 
@@ -364,8 +382,6 @@ export const viewProfile = asyncHandler(async (req, res) => {
       signedin: true,
     });
   } else {
-    log(`${doc.user.fname}'s profile`);
-
     const docs = await Chat.find().select("uname");
 
     res.render("chat/viewprofile", {
@@ -376,15 +392,17 @@ export const viewProfile = asyncHandler(async (req, res) => {
       chatprofile: true,
       signedin: true,
       unames: docs,
+      unblockedUser: unblockeduser != null,
+      unblockeduser,
     });
   }
 });
 
 //  @desc           Get user chat profile
-//  @route          GET /chat/profile
+//  @route          POST /chat/profile
 //  @access         Private
 export const getChatUserProfile = asyncHandler(async (req, res) => {
-  logger.info(`GET: /chat/profile`);
+  logger.info(`POST: /chat/profile`);
 
   const { uid } = req.body;
 

@@ -19,6 +19,8 @@ const unblockUserIcons = getElements(".unblock");
 const originalUsername = uNameInput.value.trim();
 const usernames = getElements(".username");
 const unames = [];
+const unblocked = getElement("unblocked-user");
+const goback = getElement("goback");
 
 usernames.forEach((u) => {
   // const username = u.innerHTML.split("-")[1];
@@ -103,6 +105,14 @@ addClickHandler(photo, (e) => {
   }
 });
 
+addClickHandler(goback, (e) => {
+  if (unblocked.value) {
+    location.href = `/chat/room/enter?unblockeduserid=${unblocked.value}`;
+  } else {
+    location.href = `/chat/room/enter?unblockeduserid=${false}`;
+  }
+});
+
 unblockUserIcons.forEach((icon) => {
   addClickHandler(icon, (e) => {
     const target = e.target.id.split("-")[1];
@@ -161,8 +171,16 @@ function unblockUser(blockerUid, blockeeUid) {
           const blockerdoc = responseJson.blockerdoc;
           const blockeedoc = responseJson.blockeedoc;
 
-          /* TODO: Send back these two documents to update online user's data */
-          location.href = `/chat/profile/view/${blockerUid}`;
+          unblocked.value = `${blockeedoc}`;
+
+          dlog(
+            `Blockee Doc:\t${stringify(blockeedoc)}`,
+            `chatprofile: unblockUser`
+          );
+
+          /* TODO: Send back the unblocked user's ID */
+
+          location.href = `/chat/profile/view/${blockerUid}?unblockeduser=${blockeedoc.user}`;
         } else {
           dlog(`Something went wrong unblocking user`);
         }
