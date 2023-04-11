@@ -130,7 +130,6 @@ export default (io) => {
       dlog(`updateme event fired`, `ioserverhandler`);
       const { doc } = data;
 
-      dlog(`updateme event emitter. Doc:\t${stringify(doc)}\n\n`);
       const user = userManager.getUser(doc.user._id);
 
       if (user) {
