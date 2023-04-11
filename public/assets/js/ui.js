@@ -30,8 +30,6 @@ export const updateUsersList = async (
   for (const user in userList) {
     const userObject = userList[user];
 
-    dlog(stringify(userObject), `ui script: line 33`);
-
     if (userObject.isVisible) {
       const blockedUsersIndex = userObject.blockedUsers.findIndex(
         (x) => x == currentUser

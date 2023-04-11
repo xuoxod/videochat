@@ -23,15 +23,13 @@ export const registerSocketEvents = (socket) => {
       if (status) {
         const unblockedUserId = getElement("unblockeduser").value;
 
-        if (unblockedUserId) {
-          dlog(`Unblocking user ID: ${unblockedUserId}`);
-        }
         userDetails = {};
         userDetails.doc = doc;
         userDetails.uid = document.querySelector("#rmtid-input").value;
         userDetails.unblockedUser = unblockedUserId != null;
         userDetails.unblockeduserid = getElement("unblockeduser").value;
         socket.emit("registerme", userDetails);
+        getElement("unblockeduser").value = "";
       }
     });
   });
@@ -43,11 +41,6 @@ export const registerSocketEvents = (socket) => {
     const currentUser = document.querySelector("#rmtid-input").value;
     const currentUserBlockedUsers = pUsers[currentUser].blockedUsers;
     const arrUsers = [];
-
-    /* dlog(
-      `Updated user list:\n\t${users}/n`,
-      `wss script: updateonlineuserlist event fired`
-    ); */
 
     for (const u in pUsers) {
       const user = pUsers[u];
@@ -89,8 +82,6 @@ export const registerSocketEvents = (socket) => {
     getChatUserProfile((response) => {
       const { status, doc } = response;
 
-      dlog(`Got my profile:\t${stringify(response)}`);
-
       if (status) {
         userDetails.doc = doc;
         socketIO.emit("updateme", userDetails);
@@ -104,7 +95,6 @@ export const registerSocketEvents = (socket) => {
   socket.on("registered", (data) => {
     dlog(`registered event fired`, `wss.js`);
     const { uid } = data;
-    dlog(`I am registered`);
 
     try {
       const xmlHttp = new XMLHttpRequest();
@@ -115,7 +105,6 @@ export const registerSocketEvents = (socket) => {
         const { status, doc, hasDoc } = parse(xmlHttp.responseText);
 
         if (status) {
-          dlog(`chat profile created`);
           userDetails = {};
           userDetails.uid = document.querySelector("#rmtid-input").value;
           userDetails.doc = doc;
@@ -194,19 +183,14 @@ export const registerSocketEvents = (socket) => {
   });
 
   socket.on("updateyourblockedbylist", (data) => {
+    dlog(`updateyourblockedbylist event fired`, `wss.js`);
     const { list } = data;
 
     const listItemClickHandler = (e) => {
-      dlog(`List item ${e.target.id} was clicked`, `${document.title}`);
       userDetails = {};
       userDetails.receiver = e.target.id.trim().split("-")[1];
       userDetails.sender = document.querySelector("#rmtid-input").value;
       userDetails.conntype = e.target.dataset.connectiontype;
-
-      dlog(
-        `Sending ${userDetails.conntype} connection request\t Sender: ${userDetails.sender} Receiver: ${userDetails.receiver}`,
-        "wss script"
-      );
       socket.emit("userclicked", userDetails);
     };
 
@@ -271,8 +255,6 @@ function blockUser(blockerUid, blockeeUid) {
       const responseText = xmlHttp.responseText;
 
       if (responseText) {
-        // log(`\n\tResponse Text: ${stringify(responseText)}\n`);
-        dlog(`Received ajax response`, `script: wss.js | method: blockUser`);
         const responseJson = parse(responseText);
         const status = responseJson.status;
 
@@ -362,7 +344,7 @@ function createRoom(roomName) {
         if (status) {
           dlog(
             `room:\t${roomName} successfully created.`,
-            "createRoom xhr post"
+            "wss.js: createRoom"
           );
         } else {
           const cause = responseJson.cause;
@@ -371,7 +353,7 @@ function createRoom(roomName) {
 
           dlog(
             `Cause:\t${cause}\nDetails:\t${detail}\nError:\n\t${err}\n\n`,
-            `createRoom xhr post`
+            `wss.js: createRoom`
           );
         }
         return;
@@ -407,7 +389,6 @@ function getRoomTokenAndEnterRoom(
       const responseText = xmlHttp.responseText;
 
       if (responseText) {
-        // log(`\n\tResponse Text: ${stringify(responseText)}\n`);
         const responseJson = parse(responseText);
         const status = responseJson.status;
         const _roomName = responseJson.roomName;
@@ -417,11 +398,6 @@ function getRoomTokenAndEnterRoom(
         const _token = responseJson.token;
 
         if (status) {
-          dlog(
-            `roomName:\t${_roomName}\nConn Type:\t${_connectionType}\nSender:\t${_senderId}\nReceiver:\t${_receiverId}\nToken:\t${_token}\n`,
-            "sender xhr request"
-          );
-
           location.href = `/chat/room/connect?roomName=${roomName}&connectionType=${connectionType}&senderId=${senderId}&receiverId=${receiverId}&token=${_token}`;
         }
       }
@@ -459,16 +435,11 @@ function getChatUserProfile(cb) {
       const responseText = xmlHttp.responseText;
 
       if (responseText) {
-        // log(`\n\tResponse Text: ${stringify(responseText)}\n`);
         const responseJson = parse(responseText);
         const status = responseJson.status;
         const doc = responseJson.doc;
 
         if (status) {
-          dlog(
-            `Got user profile\n`,
-            "wss script: xhr request | method: getChatUserProfile"
-          );
           return cb({ status: status, doc: doc });
         } else {
           return cb({ status: false, msg: `Got nothing` });
