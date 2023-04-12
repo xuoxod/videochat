@@ -560,9 +560,11 @@ if (getElement("isvisible") && getElement("hideme")) {
 
   if (!isVisible) {
     hidemeLink.removeEventListener("click", cloakMe);
+    hidemeLink.innerText = "Show";
     addClickHandler(hidemeLink, uncloakMe);
   } else {
     hidemeLink.removeEventListener("click", uncloakMe);
+    hidemeLink.innerText = "Hide";
     addClickHandler(hidemeLink, cloakMe);
   }
 }
