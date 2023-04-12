@@ -205,7 +205,7 @@ export const registerSocketEvents = (socket) => {
 };
 
 addEventListener("beforeunload", (event) => {
-  dlog(`\\tbeforeunload window event fired`, `wss.js`);
+  dlog(`\tbeforeunload window event fired`, `wss.js`);
   userDetails = {};
   userDetails.uid = document.querySelector("#rmtid-input").value;
   socketIO.emit("disconnectme", userDetails);
@@ -455,7 +455,7 @@ function getChatUserProfile(cb) {
 }
 
 export const cloakMe = () => {
-  dlog(`Going invisible`, `wss script: line 398`);
+  dlog(`Going invisible`, `wss: cloakMe`);
   const uid = document.querySelector("#rmtid-input").value;
   let xmlHttp;
 
@@ -482,10 +482,12 @@ export const cloakMe = () => {
           userDetails.uid = uid;
           userDetails.doc = userDoc;
 
-          const hidemeLink = getElement("hideme");
-          hidemeLink.innerText = "Show";
-          hidemeLink.removeEventListener("click", cloakMe);
-          addClickHandler(hidemeLink, uncloakMe);
+          if (getElement("hideme")) {
+            const hidemeLink = getElement("hideme");
+            hidemeLink.innerText = "Show";
+            hidemeLink.removeEventListener("click", cloakMe);
+            addClickHandler(hidemeLink, uncloakMe);
+          }
 
           socketIO.emit("makemeinvisible", userDetails);
         } else {
@@ -551,3 +553,16 @@ export const uncloakMe = () => {
     return;
   }
 };
+
+if (getElement("isvisible") && getElement("hideme")) {
+  const isVisible = getElement("isvisible").value.trim() == "true";
+  const hidemeLink = getElement("hideme");
+
+  if (!isVisible) {
+    hidemeLink.removeEventListener("click", cloakMe);
+    addClickHandler(hidemeLink, uncloakMe);
+  } else {
+    hidemeLink.removeEventListener("click", uncloakMe);
+    addClickHandler(hidemeLink, cloakMe);
+  }
+}

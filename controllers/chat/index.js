@@ -405,9 +405,6 @@ export const getChatUserProfile = asyncHandler(async (req, res) => {
   logger.info(`POST: /chat/profile`);
 
   const { uid } = req.body;
-
-  dlog(`rmt-id:\t${uid}`);
-
   const doc = await Chat.findOne({ user: `${uid}` }).populate("user");
 
   if (doc) {

@@ -146,8 +146,6 @@ export const updateUsersList = async (
           addClickHandler(blockIcon, (e) => {
             const blockee = e.target.id.split("-")[1];
             const blocker = currentUser;
-
-            dlog(`${blocker} blocked ${blockee}`, `ui script: line 156`);
             blockUser(blocker, blockee);
           });
         }
@@ -462,16 +460,3 @@ export const showCallRequest = (userDetails, acceptCall) => {
     acceptCall(user._id, callee, conntype);
   });
 };
-
-if (getElement("isvisible") && getElement("hideme")) {
-  const isVisible = getElement("isvisible").value.trim() == "true";
-  const hidemeLink = getElement("hideme");
-
-  if (!isVisible) {
-    hidemeLink.removeEventListener("click", cloakMe);
-    addClickHandler(hidemeLink, uncloakMe);
-  } else {
-    hidemeLink.removeEventListener("click", uncloakMe);
-    addClickHandler(hidemeLink, cloakMe);
-  }
-}
