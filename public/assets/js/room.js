@@ -1,12 +1,7 @@
-import { registerSocketEvents, cloakMe } from "./wss.js";
-import { addClickHandler, getElement } from "./computils.js";
+import { registerSocketEvents } from "./wss.js";
+
 // init socket connection
 const socket = io("/");
 
+// register socket events
 registerSocketEvents(socket);
-
-addClickHandler(
-  getElement("hideme", (e) => {
-    cloakMe();
-  })
-);

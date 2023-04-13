@@ -573,7 +573,10 @@ export default (io) => {
       const user = userManager.getUser(uid);
 
       if (user) {
-        dlog(`${user.fname} is invisible`, `ioserver: line 307`);
+        dlog(
+          `${user.fname} is invisible`,
+          `ioserverhandler: makemeinvisible emitter`
+        );
 
         const regUser = Object.assign({
           ...{
@@ -616,7 +619,10 @@ export default (io) => {
       const user = userManager.getUser(uid);
 
       if (user) {
-        dlog(`${user.fname} is visible`, `ioserver: line 348`);
+        dlog(
+          `${user.fname} is visible`,
+          `ioserverhandler: makemevisible emitter`
+        );
 
         const regUser = Object.assign({
           ...{

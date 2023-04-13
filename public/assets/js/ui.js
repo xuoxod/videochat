@@ -13,8 +13,6 @@ import {
   append,
 } from "./computils.js";
 
-import { cloakMe, uncloakMe } from "./__wss.js";
-
 export const updateUsersList = async (
   userList,
   listItemClickHandler,
@@ -43,7 +41,7 @@ export const updateUsersList = async (
         if (blockedByIndex == -1) {
           // Create comps
           const card = newElement("div");
-          const parentRow = newElement("div");
+          const cardCol = newElement("div");
           const row = newElement("div");
           const imgCol = newElement("div");
           const cardImg = newElement("img");
@@ -65,7 +63,7 @@ export const updateUsersList = async (
           cardImg.alt = `${displayName}`;
 
           // Add attributes
-          addAttribute(parentRow, "class", "col-12 col-md-4 col-lg-4");
+          addAttribute(cardCol, "class", "col-12 col-md-4 col-lg-4");
           addAttribute(card, "class", "card mb-3");
           addAttribute(card, "id", `card-${userObject._id}`);
           addAttribute(row, "class", "row g-0 m-0 p-3");
@@ -97,8 +95,8 @@ export const updateUsersList = async (
           }
 
           // Append comps
-          appendChild(usersParent, parentRow);
-          appendChild(parentRow, card);
+          appendChild(usersParent, cardCol);
+          appendChild(cardCol, card);
           appendChild(card, row);
           appendChild(row, imgCol);
           appendChild(row, bodyCol);

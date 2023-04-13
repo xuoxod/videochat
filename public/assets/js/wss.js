@@ -454,7 +454,7 @@ function getChatUserProfile(cb) {
   }
 }
 
-export const cloakMe = () => {
+const cloakMe = () => {
   dlog(`Going invisible`, `wss.js: cloakMe`);
   const uid = document.querySelector("#rmtid-input").value;
   let xmlHttp;
@@ -505,7 +505,7 @@ export const cloakMe = () => {
   }
 };
 
-export const uncloakMe = () => {
+const uncloakMe = () => {
   dlog(`Going visible`, `wss.js: uncloakMe`);
   const uid = document.querySelector("#rmtid-input").value;
   let xmlHttp;
