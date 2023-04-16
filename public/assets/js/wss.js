@@ -482,13 +482,6 @@ const cloakMe = () => {
           userDetails.uid = uid;
           userDetails.doc = userDoc;
 
-          if (getElement("hideme")) {
-            const hidemeLink = getElement("hideme");
-            hidemeLink.innerText = "Show";
-            hidemeLink.removeEventListener("click", cloakMe);
-            addClickHandler(hidemeLink, uncloakMe);
-          }
-
           socketIO.emit("makemeinvisible", userDetails);
         } else {
           const reason = responseJson.reason;
@@ -533,11 +526,6 @@ const uncloakMe = () => {
           userDetails.uid = uid;
           userDetails.doc = userDoc;
 
-          const hidemeLink = getElement("hideme");
-          hidemeLink.innerText = "Hide";
-          hidemeLink.removeEventListener("click", uncloakMe);
-          addClickHandler(hidemeLink, cloakMe);
-
           socketIO.emit("makemevisible", userDetails);
         } else {
           const reason = responseJson.reason;
@@ -554,21 +542,6 @@ const uncloakMe = () => {
   }
 };
 
-if (getElement("isvisible") && getElement("hideme")) {
-  const isVisible = getElement("isvisible").value.trim() == "true";
-  const hidemeLink = getElement("hideme");
-
-  if (!isVisible) {
-    hidemeLink.removeEventListener("click", cloakMe);
-    hidemeLink.innerText = "Show";
-    addClickHandler(hidemeLink, uncloakMe);
-  } else {
-    hidemeLink.removeEventListener("click", uncloakMe);
-    hidemeLink.innerText = "Hide";
-    addClickHandler(hidemeLink, cloakMe);
-  }
-}
-
 if (
   getElement("isvisible") &&
   getElement("cloak") &&
@@ -582,7 +555,7 @@ if (
   cloakLabel.innerHTML = cloakButton.checked
     ? "<strong><small>Online</strong></small>"
     : "<strong><small>Offline</small></strong>";
-  cloakButton.removeEventListener("click", cloakMe);
+
   addClickHandler(cloakButton, (e) => {
     const target = e.target;
 
