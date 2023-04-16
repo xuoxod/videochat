@@ -1,4 +1,5 @@
 import { isArray, isObject, isNull, size, stringify } from "./utils.js";
+import { dlog, tlog } from "./printer.js";
 
 class UM {
   constructor() {
@@ -6,7 +7,7 @@ class UM {
   }
 
   addUser = (newUser) => {
-    console.log(`Adding user ${stringify(newUser)}`);
+    dlog(`Adding user ${stringify(newUser.fname)}`, `usermanager: addUser`);
     if (!(newUser._id in this.users)) {
       console.log(`Added user ${newUser.fname} to the user list`);
       this.users[`${newUser._id}`] = newUser;
@@ -16,6 +17,7 @@ class UM {
   };
 
   removeUser = (uid) => {
+    dlog(`Removing user ${stringify(uid)}`, `usermanager: removeUser`);
     if (uid in this.users) {
       console.log(`Removing by uid`);
       delete this.users[uid];
@@ -29,13 +31,14 @@ class UM {
   getUser = (uid) => this.users[uid] || false;
 
   updateUser = (uid, property) => {
+    dlog(`Update user ${stringify(uid)}`, `usermanager: updateUser`);
     const user = this.getUser(uid) || null;
 
     if (null != user) {
       if (isNull(property)) {
         return false;
       } else if (isObject(property)) {
-        if (size(property) > 1) {
+        if (size(property) > 0) {
           for (const p in property) {
             user[p] = property[p];
           }

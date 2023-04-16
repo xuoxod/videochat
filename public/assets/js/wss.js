@@ -568,3 +568,32 @@ if (getElement("isvisible") && getElement("hideme")) {
     addClickHandler(hidemeLink, cloakMe);
   }
 }
+
+if (
+  getElement("isvisible") &&
+  getElement("cloak") &&
+  getElement("cloak-label")
+) {
+  const isVisible = getElement("isvisible").value.trim() == "true";
+  const cloakButton = getElement("cloak");
+  const cloakLabel = getElement("cloak-label");
+
+  cloakButton.checked = isVisible;
+  cloakLabel.innerHTML = cloakButton.checked
+    ? "<strong><small>Online</strong></small>"
+    : "<strong><small>Offline</small></strong>";
+  cloakButton.removeEventListener("click", cloakMe);
+  addClickHandler(cloakButton, (e) => {
+    const target = e.target;
+
+    cloakLabel.innerHTML = target.checked
+      ? "<strong><small>Online</small></strong>"
+      : "<strong><small>Offline</small></strong>";
+
+    if (target.checked) {
+      uncloakMe();
+    } else {
+      cloakMe();
+    }
+  });
+}
