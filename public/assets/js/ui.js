@@ -28,7 +28,7 @@ export const updateUsersList = async (
   for (const user in userList) {
     const userObject = userList[user];
 
-    if (userObject.isVisible) {
+    if (userObject.online) {
       const blockedUsersIndex = userObject.blockedUsers.findIndex(
         (x) => x == currentUser
       );

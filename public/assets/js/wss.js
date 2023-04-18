@@ -16,20 +16,27 @@ export const registerSocketEvents = (socket) => {
   socketIO = socket;
 
   socket.on("connect", () => {
-    dlog(`connect event fired`, `wss.js`);
+    dlog(`connect event fired`, `wss.js: registerSocketEvents`);
+
     getChatUserProfile((results) => {
       const { status, doc } = results;
 
       if (status) {
-        const unblockedUserId = getElement("unblockeduser").value;
-
         userDetails = {};
         userDetails.doc = doc;
         userDetails.uid = document.querySelector("#rmtid-input").value;
-        userDetails.unblockedUser = unblockedUserId != null;
-        userDetails.unblockeduserid = getElement("unblockeduser").value;
+
+        if (getElement("unblockeduser")) {
+          const unblockedUserId = getElement("unblockeduser").value;
+          userDetails.unblockedUser = unblockedUserId != null;
+          userDetails.unblockeduserid = getElement("unblockeduser").value;
+        }
+
         socket.emit("registerme", userDetails);
-        getElement("unblockeduser").value = "";
+
+        if (getElement("unblockeduser")) {
+          getElement("unblockeduser").value = "";
+        }
       }
     });
   });
@@ -38,15 +45,16 @@ export const registerSocketEvents = (socket) => {
     dlog(`updateonlineuserlist event fired`, `wss.js`);
     const { users } = data;
     const pUsers = parse(users);
-    const currentUser = document.querySelector("#rmtid-input").value;
-    const currentUserBlockedUsers = pUsers[currentUser].blockedUsers;
+    const currentUserInputValue = document.querySelector("#rmtid-input").value;
+    const currentUser = pUsers[currentUserInputValue];
+    const currentUserBlockedUsers = currentUser.blockedUsers;
     const arrUsers = [];
 
     for (const u in pUsers) {
       const user = pUsers[u];
       const uid = user._id;
 
-      if (uid != currentUser) {
+      if (uid != currentUserInputValue) {
         arrUsers.push({
           ...user,
           isBlocked: currentUserBlockedUsers.findIndex((x) => x == uid) != -1,
@@ -77,22 +85,30 @@ export const registerSocketEvents = (socket) => {
     );
   });
 
-  socket.on("updateyourself", () => {
-    dlog(`updateyourself event fired`, `wss.js`);
-    getChatUserProfile((response) => {
-      const { status, doc } = response;
+  socket.on("onlinestatus", (data) => {
+    dlog(`onlinestatus event fired`, `wss.js: registerSocketEvents`);
+    const { onlineStatus } = data;
 
-      if (status) {
-        userDetails.doc = doc;
-        socketIO.emit("updateme", userDetails);
-      } else {
-        dlog(`Did not update profile`);
-        return;
-      }
-    });
+    dlog(`My online status: ${onlineStatus}`, `wss.js: RegisterSocketEvents`);
   });
 
   socket.on("registered", (data) => {
+    dlog(`registered event fired`, `wss.js: registerSocketEvents: registered`);
+    const { doc } = data;
+    const pDoc = parse(doc);
+    try {
+      dlog(
+        `You are now registered as ${pDoc.uname}`,
+        `wss.js: registerSocketEvents: registered`
+      );
+      getElement("online").value = pDoc.online;
+    } catch (err) {
+      dlog(`${err}`, `wss.js: registered`);
+      return;
+    }
+  });
+
+  socket.on("_registered", (data) => {
     dlog(`registered event fired`, `wss.js`);
     const { uid } = data;
 
@@ -421,6 +437,8 @@ function blockedBy(blockedByList, blocker) {
 function getChatUserProfile(cb) {
   let xmlHttp;
 
+  dlog(`Requesting my profile`, `wss.js: getChatUserProfile`);
+
   try {
     xmlHttp = new XMLHttpRequest();
 
@@ -438,6 +456,11 @@ function getChatUserProfile(cb) {
         const responseJson = parse(responseText);
         const status = responseJson.status;
         const doc = responseJson.doc;
+
+        dlog(
+          `Received a response for my profile request`,
+          `wss.js: getChatUserProfile: xmlHttp response`
+        );
 
         if (status) {
           return cb({ status: status, doc: doc });
@@ -542,19 +565,30 @@ const uncloakMe = () => {
   }
 };
 
-if (
-  getElement("isvisible") &&
-  getElement("cloak") &&
-  getElement("cloak-label")
-) {
-  const isVisible = getElement("isvisible").value.trim() == "true";
+const checkOnlineStatus = () => {
+  if (
+    getElement("online") &&
+    getElement("cloak") &&
+    getElement("cloak-label")
+  ) {
+    const online = getElement("online").value.trim() == "true";
+    const cloakButton = getElement("cloak");
+    const cloakLabel = getElement("cloak-label");
+
+    if (online) {
+      cloakLabel.innerHTML = "<strong><small>Online</strong></small>";
+      cloakButton.checked = true;
+    } else {
+      cloakLabel.innerHTML = "<strong><small>Offline</small></strong>";
+      cloakButton.checked = false;
+    }
+  }
+};
+
+if (getElement("cloak") && getElement("cloak-label")) {
+  const onlineInput = getElement("online");
   const cloakButton = getElement("cloak");
   const cloakLabel = getElement("cloak-label");
-
-  cloakButton.checked = isVisible;
-  cloakLabel.innerHTML = cloakButton.checked
-    ? "<strong><small>Online</strong></small>"
-    : "<strong><small>Offline</small></strong>";
 
   addClickHandler(cloakButton, (e) => {
     const target = e.target;
@@ -563,6 +597,8 @@ if (
       ? "<strong><small>Online</small></strong>"
       : "<strong><small>Offline</small></strong>";
 
+    onlineInput.value = target.checked ? "true" : "false";
+
     if (target.checked) {
       uncloakMe();
     } else {
@@ -570,3 +606,5 @@ if (
     }
   });
 }
+
+window.onload = checkOnlineStatus();

@@ -91,10 +91,9 @@ export const size = (arg = null) => {
       typeof arg == "string"
     ) {
       return arg.length;
-    } else {
-      return NaN;
     }
   }
+  return NaN;
 };
 
 export const isObject = (data) =>

@@ -136,24 +136,15 @@ export const enterRoom = asyncHandler(async (req, res) => {
   logger.info(`GET: /chat/room/enter`);
 
   try {
-    const doc = await Chat.findOneAndUpdate(
-      { user: req.user._id },
-      { online: true },
-      { new: true }
-    ).populate("user");
+    const doc = await Chat.findOne({ user: req.user._id }).populate("user");
 
     doc.user.fname = cap(doc.user.fname);
     doc.user.lname = cap(doc.user.lname);
-    dlog(`${doc.user.fname} has entered chat room`);
 
     const { unblockeduserid } = req.query;
+    let isUnblockedUser = req.query.unblockeduserid ? true : false;
 
-    if (unblockeduserid) {
-      dlog(
-        `Unblocked User ID: ${unblockeduserid}\n\n`,
-        `chat controller: enterRoom`
-      );
-    }
+    dlog(`Online? ${doc.online}`, `chat controller: enterRoom`);
 
     res.render("chat/room", {
       title: "Room Dammit",
@@ -161,12 +152,12 @@ export const enterRoom = asyncHandler(async (req, res) => {
       fname: doc.user.fname,
       enteredroom: true,
       signedin: true,
-      isvisible: doc.isVisible,
-      unblockedUserId: unblockeduserid != null,
+      online: doc.online,
+      unblockedUserId: isUnblockedUser,
       unblockeduserid,
     });
   } catch (err) {
-    tlog(err);
+    tlog(err, `chat controller: enterRoom`);
     res.status(200).json({ status: JSON.stringify(err) });
   }
 });
@@ -334,10 +325,10 @@ export const createProfile = asyncHandler(async (req, res) => {
     { user: `${uid}` },
     { online: true },
     { new: true }
-  );
+  ).populate("user");
 
   if (doc) {
-    res.json({ status: true, hasDoc: true, doc: stringify(doc) });
+    res.json({ status: true, hasDoc: true, doc: doc });
   } else {
     const createdDoc = await Chat.create({
       user: `${uid}`,
@@ -352,7 +343,7 @@ export const createProfile = asyncHandler(async (req, res) => {
       friends: [],
       blockedBy: [],
     });
-    res.json({ status: true, hasDoc: false, doc: stringify(doc) });
+    res.json({ status: true, hasDoc: false, doc: doc });
   }
 });
 
@@ -383,6 +374,8 @@ export const viewProfile = asyncHandler(async (req, res) => {
     });
   } else {
     const docs = await Chat.find().select("uname");
+
+    dlog(`Is Visible? ${doc.isVisible}`, `chat controller: viewProfile`);
 
     res.render("chat/viewprofile", {
       title: `${doc.user.fname}`,
@@ -499,7 +492,7 @@ export const hideUser = asyncHandler(async (req, res) => {
   try {
     let doc = await Chat.findOneAndUpdate(
       { user: `${userId}` },
-      { isVisible: false }
+      { online: false }
     );
 
     doc = await Chat.findOne({ user: `${userId}` }).populate("user");
@@ -531,7 +524,7 @@ export const unhideUser = asyncHandler(async (req, res) => {
   try {
     let doc = await Chat.findOneAndUpdate(
       { user: `${userId}` },
-      { isVisible: true }
+      { online: true }
     );
 
     doc = await Chat.findOne({ user: `${userId}` }).populate("user");

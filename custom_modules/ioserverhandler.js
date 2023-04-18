@@ -61,7 +61,7 @@ export default (io) => {
 
             if (addedUser) {
               log(`User ${regUser.fname} successfully registered\n\n`);
-              io.to(socket.id).emit("registered", { uid: uid });
+              io.to(socket.id).emit("registered", { doc: stringify(doc) });
               io.emit("updateonlineuserlist", {
                 users: stringify(userManager.getUsers()),
               });
@@ -75,53 +75,53 @@ export default (io) => {
       }
     });
 
-    socket.on("updateuser", (data) => {
+    socket.on("updateuser", async (data) => {
       dlog(`updateuser event fired`, `ioserverhandler`);
       const { uid, doc, hasDoc } = data;
 
-      const user = userManager.getUser(uid);
+      let user = userManager.getUser(uid);
 
       if (user) {
-        // log(`Updating user ${user.fname}\n\n`);
         if (hasDoc) {
-          const userDoc = parse(doc);
+          dlog(`${user.fname}'s updated doc\t\t${stringify(doc)}`);
 
-          user.uname = userDoc.uname;
-          user.isVisible = userDoc.isVisible;
-          user.public = userDoc.public;
-          user.blockedUsers = userDoc.blockedUsers;
-          user.blockedBy = userDoc.blockedBy;
-          user.friends = userDoc.friends;
-          user.displayName = userDoc.displayName;
-          user.photoUrl = userDoc.photoUrl;
-          user.description = userDoc.description;
-
-          io.emit("updateonlineuserlist", {
-            users: stringify(userManager.getUsers()),
+          const regUser = Object.assign({
+            ...{
+              fname: doc.user.fname,
+              lname: doc.user.lname,
+              email: doc.email,
+              _id: doc.user._id,
+              uid: doc.user._id,
+              uname: doc.uname,
+              displayName: doc.displayName,
+              isVisible: doc.isVisible,
+              photoUrl: doc.photoUrl,
+              public: doc.public,
+              description: doc.description,
+              friends: doc.friends,
+              blockedUsers: doc.blockedUsers,
+              blockedBy: doc.blockedBy,
+              online: doc.online,
+            },
+            ...{ sid: user.sid },
           });
-        } else {
-          Chat.findOne({ user: uid }, (err, chat) => {
-            if (err) {
-              log(`--------------------------------------`);
-              log(err);
-              log(`---------------------------------------\n`);
-              return;
-            } else {
-              if (chat) {
-                user.uname = chat.uname;
-                user.isVisible = chat.isVisible;
-                user.public = chat.public;
-                user.blockedUsers = chat.blockedUsers;
-                user.blockedBy = userDoc.blockedBy;
-                user.friends = chat.friends;
-                user.displayName = chat.displayName;
 
-                io.emit("updateonlineuserlist", {
-                  users: stringify(userManager.getUsers()),
-                });
-              }
+          const removedUser = userManager.removeUser(uid);
+
+          if (removedUser) {
+            user = null;
+            const addedUser = userManager.addUser(regUser);
+
+            if (addedUser) {
+              io.emit("updateonlineuserlist", {
+                users: stringify(userManager.getUsers()),
+              });
+
+              io.to(regUser.sid).emit("onlinestatus", {
+                onlineStatus: regUser.online,
+              });
             }
-          }).populate("user");
+          }
         }
       }
     });
@@ -311,16 +311,10 @@ export default (io) => {
     socket.on("disconnectme", async (data) => {
       dlog(`disconnectme event fired`, `ioserverhandler`);
       const { uid } = data;
-      const doc = await Chat.findOneAndUpdate(
-        { user: `${uid}` },
-        { online: false },
-        { new: true }
-      );
-
       const user = userManager.getUser(uid);
       const fname = user.fname;
 
-      log(`${fname} disconnected\n${stringify(doc)}`);
+      log(`${fname} disconnected\n${stringify(user)}`);
 
       const removedUser = userManager.removeUser(uid);
       if (removedUser) {
