@@ -160,14 +160,16 @@ export default (io) => {
 
           if (addedUser) {
             log(`User ${regUser.fname} successfully updated\n\n`);
-            const unblockedByUser = userManager.getUser(unblockedBy);
 
             io.emit("updateonlineuserlist", {
               users: stringify(userManager.getUsers()),
             });
 
-            if (unblockedByUser) {
-              io.to(unblockedByUser.sid).emit("clearunblocked");
+            if (unblockedBy) {
+              const unblockedByUser = userManager.getUser(unblockedBy);
+              if (unblockedByUser) {
+                io.to(unblockedByUser.sid).emit("clearunblocked");
+              }
             }
           }
         }
