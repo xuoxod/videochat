@@ -34,11 +34,36 @@ export const registerSocketEvents = (socket) => {
 
         socket.emit("registerme", userDetails);
 
-        if (getElement("unblockeduser")) {
+        /* if (getElement("unblockeduser")) {
           getElement("unblockeduser").value = "";
-        }
+        } */
       }
     });
+  });
+
+  socket.on("updateyourself", (data) => {
+    dlog(`updateyourself event fired`, `wss.js: updateyourself`);
+    const { unblockedBy } = data;
+
+    getChatUserProfile((results) => {
+      const { status, doc } = results;
+
+      if (status) {
+        userDetails = {};
+        userDetails.unblockedBy = unblockedBy;
+        userDetails.doc = doc;
+
+        socketIO.emit("updateme", userDetails);
+      }
+    });
+  });
+
+  socket.on("clearunblocked", () => {
+    dlog(`clearunblocked event fired`, `wss.js: clearunblocked`);
+    if (getElement("unblockeduser")) {
+      getElement("unblockeduser").value = "";
+      getElement("unblockeduser").remove();
+    }
   });
 
   socket.on("updateonlineuserlist", (data) => {
@@ -85,13 +110,6 @@ export const registerSocketEvents = (socket) => {
     );
   });
 
-  socket.on("onlinestatus", (data) => {
-    dlog(`onlinestatus event fired`, `wss.js: registerSocketEvents`);
-    const { onlineStatus } = data;
-
-    dlog(`My online status: ${onlineStatus}`, `wss.js: RegisterSocketEvents`);
-  });
-
   socket.on("registered", (data) => {
     dlog(`registered event fired`, `wss.js: registerSocketEvents: registered`);
     const { doc } = data;
@@ -104,36 +122,6 @@ export const registerSocketEvents = (socket) => {
       getElement("online").value = pDoc.online;
     } catch (err) {
       dlog(`${err}`, `wss.js: registered`);
-      return;
-    }
-  });
-
-  socket.on("_registered", (data) => {
-    dlog(`registered event fired`, `wss.js`);
-    const { uid } = data;
-
-    try {
-      const xmlHttp = new XMLHttpRequest();
-
-      xmlHttp.onload = () => {
-        // location.href = `/chat/profile/create/${uid}`;
-
-        const { status, doc, hasDoc } = parse(xmlHttp.responseText);
-
-        if (status) {
-          userDetails = {};
-          userDetails.uid = document.querySelector("#rmtid-input").value;
-          userDetails.doc = doc;
-          userDetails.hasDoc = hasDoc;
-          socket.emit("updateuser", userDetails);
-        }
-      };
-
-      xmlHttp.open("GET", `/chat/profile/create/${uid}`);
-
-      xmlHttp.send(true);
-    } catch (err) {
-      dlog(err);
       return;
     }
   });
@@ -196,27 +184,6 @@ export const registerSocketEvents = (socket) => {
     userDetails = parse(data);
     const { roomName, connectionType, sender, receiver } = userDetails;
     getRoomTokenAndEnterRoom(roomName, connectionType, sender, receiver._id);
-  });
-
-  socket.on("updateyourblockedbylist", (data) => {
-    dlog(`updateyourblockedbylist event fired`, `wss.js`);
-    const { list } = data;
-
-    const listItemClickHandler = (e) => {
-      userDetails = {};
-      userDetails.receiver = e.target.id.trim().split("-")[1];
-      userDetails.sender = document.querySelector("#rmtid-input").value;
-      userDetails.conntype = e.target.dataset.connectiontype;
-      socket.emit("userclicked", userDetails);
-    };
-
-    updateUsersList(
-      list,
-      listItemClickHandler,
-      detectWebcam,
-      blockUser,
-      blockedBy
-    );
   });
 };
 

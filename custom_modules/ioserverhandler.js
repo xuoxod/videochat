@@ -15,20 +15,17 @@ export default (io) => {
       dlog(`registerme event fired`, `ioserverhandler`);
       const { uid, doc, unblockedUser } = data;
 
-      if (unblockedUser) {
-        const { unblockeduserid } = data;
-
-        if (unblockeduserid) {
+      if (uid) {
+        if (unblockedUser) {
+          const { unblockeduserid } = data;
           const unblockedUser = userManager.getUser(unblockeduserid);
 
-          if (unblockedUser) {
-            dlog(`Unblocking user ${unblockedUser.fname}`);
-            io.to(unblockedUser.sid).emit("updateyourself");
-          }
+          dlog(`Unblocking user ${unblockedUser.fname}`);
+          io.to(unblockedUser.sid).emit("updateyourself", {
+            unblockedBy: `${uid}`,
+          });
         }
-      }
 
-      if (uid) {
         const user = userManager.getUser(uid);
         addCUser(uid);
 
@@ -128,7 +125,7 @@ export default (io) => {
 
     socket.on("updateme", (data) => {
       dlog(`updateme event fired`, `ioserverhandler`);
-      const { doc } = data;
+      const { doc, unblockedBy } = data;
 
       const user = userManager.getUser(doc.user._id);
 
@@ -163,9 +160,15 @@ export default (io) => {
 
           if (addedUser) {
             log(`User ${regUser.fname} successfully updated\n\n`);
+            const unblockedByUser = userManager.getUser(unblockedBy);
+
             io.emit("updateonlineuserlist", {
               users: stringify(userManager.getUsers()),
             });
+
+            if (unblockedByUser) {
+              io.to(unblockedByUser.sid).emit("clearunblocked");
+            }
           }
         }
       }

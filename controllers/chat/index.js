@@ -142,20 +142,35 @@ export const enterRoom = asyncHandler(async (req, res) => {
     doc.user.lname = cap(doc.user.lname);
 
     const { unblockeduserid } = req.query;
-    let isUnblockedUser = req.query.unblockeduserid ? true : false;
+    const isUnblockedUser = unblockeduserid != null ? true : false;
 
-    dlog(`Online? ${doc.online}`, `chat controller: enterRoom`);
+    if (isUnblockedUser) {
+      dlog(
+        `Unblocked User ID: ${unblockeduserid}`,
+        `chat controller: enterRoom`
+      );
 
-    res.render("chat/room", {
-      title: "Room Dammit",
-      uid: doc.user._id,
-      fname: doc.user.fname,
-      enteredroom: true,
-      signedin: true,
-      online: doc.online,
-      unblockedUserId: isUnblockedUser,
-      unblockeduserid,
-    });
+      res.render("chat/room", {
+        title: `Room!`,
+        uid: doc.user._id,
+        fname: doc.user.fname,
+        enteredroom: true,
+        signedin: true,
+        theUnblockedUser: `${unblockeduserid}`,
+        online: doc.online,
+        haveAnUnblockedUser: true,
+      });
+    } else {
+      res.render("chat/room", {
+        title: `Room!`,
+        uid: doc.user._id,
+        fname: doc.user.fname,
+        enteredroom: true,
+        signedin: true,
+        online: doc.online,
+        haveAnUnblockedUser: false,
+      });
+    }
   } catch (err) {
     tlog(err, `chat controller: enterRoom`);
     res.status(200).json({ status: JSON.stringify(err) });
