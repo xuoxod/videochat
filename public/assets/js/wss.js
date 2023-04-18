@@ -33,10 +33,6 @@ export const registerSocketEvents = (socket) => {
         }
 
         socket.emit("registerme", userDetails);
-
-        /* if (getElement("unblockeduser")) {
-          getElement("unblockeduser").value = "";
-        } */
       }
     });
   });
