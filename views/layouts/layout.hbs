@@ -26,27 +26,38 @@
 <script src="/assets/js/computils.js" type="module"></script>
 <script src="/assets/js/clientutils.js" type="module"></script>
 {{#if signedin}}
+
 {{#if enteredroom}}
 <script src="/socket.io/socket.io.js"></script>
 <script src="/assets/js/ui.js" type="module"></script>
 <script src="/assets/js/wss.js" type="module"></script>
 <script src="/assets/js/room.js" type="module"></script>
+
 {{#if peers}}
 <script src="/twilio-video.js"></script>
 <script src="/assets/js/peers.js" type="module"></script>
 {{/if}}
+
 {{/if}}
 
 {{#if chatprofile}}
 <script src="/assets/js/chatprofile.js" type="module"></script>
 {{/if}}
+
+{{#if userprofile}}
+<script src="/assets/js/userprofile.js" type="module"></script>
+{{/if}}
+
 {{else}}
+
 {{#if landing}}
 <script src="/assets/js/main.js" type="module"></script>
 {{/if}}
+
 {{#if forgotpassword}}
 <script src="/assets/js/validateemail.js" type="module"></script>
 {{/if}}
+
 {{#if resetpassword}}
 <script src="/assets/js/resetpassword.js" type="module"></script>
 {{/if}}

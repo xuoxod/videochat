@@ -5,14 +5,14 @@
                 <div class="col-12 mb-3">
                     <strong>Name</strong>
                     <div class="input-group">
-                        <input type="text" name="fname" value="{{profile.user.fname}}" class="form-control"
+                        <input type="text" name="fname" value="{{doc.user.fname}}" class="form-control"
                             placeholder="First Name" />
                     </div>
                 </div>
 
                 <div class="col-12 mb-3">
                     <div class="input-group">
-                        <input type="text" name="lname" value="{{profile.user.lname}}" class="form-control"
+                        <input type="text" name="lname" value="{{doc.user.lname}}" class="form-control"
                             placeholder="Last Name" />
                     </div>
                 </div>
@@ -20,7 +20,7 @@
                 <div class="col-12 mt-4">
                     <strong>Email</strong>
                     <div class="input-group">
-                        <input type="email" name="email" value="{{profile.user.email}}" class="form-control"
+                        <input type="email" name="email" value="{{doc.user.email}}" class="form-control"
                             placeholder="Email" />
                     </div>
                 </div>
@@ -30,27 +30,25 @@
                     <strong>Street Address</strong>
 
                     <div class="input-group mb-3">
-                        <input type="text" name="street" {{#if
-                            profile.address.street}}value="{{profile.address.street}}" {{/if}} class=" form-control"
-                            placeholder="Street address" />
+                        <input type="text" name="street" {{#if doc.address.street}}value="{{doc.address.street}}"
+                            {{/if}} class=" form-control" placeholder="Street address" />
                     </div>
 
                     <div class="input-group mb-3">
-                        <input type="text" name="city" {{#if profile.address.city}}value="{{profile.address.city}}"
+                        <input type="text" name="city" {{#if doc.address.city}}value="{{doc.address.city}}"
                             {{/if}}class="form-control" placeholder="City" />
                     </div>
 
                     <div class="input-group">
-                        <input type="text" name="zipcode" {{#if
-                            profile.address.zipcode}}value="{{profile.address.zipcode}}" {{/if}} class="form-control"
-                            placeholder="Zipcode" />
+                        <input type="text" name="zipcode" {{#if doc.address.zipcode}}value="{{doc.address.zipcode}}"
+                            {{/if}} class="form-control" placeholder="Zipcode" />
                     </div>
                 </div>
 
                 <div class="col-12 mt-4">
                     <strong>Save Password</strong>
                     <div class="input-group">
-                        <input class="form-check-input" type="checkbox" {{#if profile.passwordSaved}}checked{{/if}}
+                        <input class="form-check-input" type="checkbox" {{#if doc.passwordSaved}}checked{{/if}}
                             name="savepwd" />
                     </div>
                 </div>
@@ -59,7 +57,7 @@
                     <strong>Gender</strong>
                     <div class="input-group">
                         <div class="form-check">
-                            <input class="form-check-input" type="checkbox" {{#if gender.male}}checked{{/if}}
+                            <input class="form-check-input" type="checkbox" {{#if doc.gender.male}}checked{{/if}}
                                 name="male">&nbsp;
                             <label class="form-check-label" for="flexCheckDefault">
                                 Male
@@ -67,7 +65,7 @@
                         </div>&nbsp;&nbsp;&nbsp;
 
                         <div class="form-check">
-                            <input class="form-check-input" type="checkbox" {{#if gender.female}}check{{/if}}
+                            <input class="form-check-input" type="checkbox" {{#if doc.gender.female}}check{{/if}}
                                 name="female">&nbsp;
                             <label class="form-check-label" for="flexCheckChecked">
                                 Female
@@ -79,8 +77,8 @@
                 <div class="col-12 my-4">
                     <strong>Birthday</strong>
                     <div class="input-group">
-                        <input type="date" name="dob"
-                            value="{{profile.dob.year}}-{{profile.dob.month}}-{{profile.dob.day}}"
+                        <input type="date" name="dob" {{#if
+                            doc.dob}}value="{{doc.dob.year}}-{{doc.dob.month}}-{{doc.dob.day}}" {{/if}}
                             class="form-control" />
                     </div>
                 </div>

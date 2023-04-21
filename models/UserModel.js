@@ -33,7 +33,7 @@ const userSchema = new Schema(
       required: true,
       default: false,
     },
-    settings: {
+    profile: {
       type: Schema.Types.ObjectId,
       ref: "Profile",
     },

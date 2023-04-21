@@ -22,7 +22,7 @@ user.route("/profile").get(signedIn, readUserProfile);
 
 user.route("/profile/edit").get(reauthorize, editUserProfile);
 
-user.route("/profile/delete").get(signedIn, deleteUserProfile);
+user.route("/profile/delete/").get(signedIn, deleteUserProfile);
 
 user.route("/profile/create").post(signedIn, createUserProfile);
 
