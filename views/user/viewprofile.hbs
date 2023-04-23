@@ -58,7 +58,8 @@
                     <div class="col-12 mt-4">
                         <strong>Gender</strong>
                         <div class="input-group">
-                            <input type="text" name="gender" value="{{doc.gender}}" class="form-control" readonly>
+                            <input type="text" name="gender" value="{{#if gender.male}}male{{else}}female{{/if}}"
+                                class="form-control" readonly>
                         </div>
                     </div>
 
@@ -71,13 +72,18 @@
                     </div>
                 </div>
 
-                <button type="button" class="btn btn-success" value="Edit" style="border-radius: 15px;">
-                    <a class="text-white" style="text-decoration:none;" href="/user/profile/edit">Edit</a>
-                </button>
+                <div class="col12 mt-4">
+                    <div class="input-group d-flex justify-content-between">
+                        <button type="button" class="btn btn-success" value="Edit" style="border-radius: 15px;">
+                            <a class="text-white" style="text-decoration:none;" href="/user/profile/edit">Edit</a>
+                        </button>
 
-                <button type="button" class="btn btn-danger" value="Delete" style="border-radius: 15px;">
-                    <a class="text-white" style="text-decoration:none;" href="/user/profile/delete">Delete</a>
-                </button>
+                        <button type="button" class="btn btn-danger" value="Delete" style="border-radius: 15px;">
+                            <a class="text-white" style="text-decoration:none;" href="/user/profile/delete">Delete</a>
+                        </button>
+                    </div>
+                </div>
+
             </div>
         </form>
         {{else}}

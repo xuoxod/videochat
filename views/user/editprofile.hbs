@@ -57,16 +57,16 @@
                     <strong>Gender</strong>
                     <div class="input-group">
                         <div class="form-check">
-                            <input class="form-check-input" type="checkbox" {{#if doc.gender.male}}checked{{/if}}
-                                name="male">&nbsp;
+                            <input class="form-check-input" type="radio" {{#if gender.male}}checked{{/if}} name="gender"
+                                value="male">&nbsp;
                             <label class="form-check-label" for="flexCheckDefault">
                                 Male
                             </label>
                         </div>&nbsp;&nbsp;&nbsp;
 
                         <div class="form-check">
-                            <input class="form-check-input" type="checkbox" {{#if doc.gender.female}}check{{/if}}
-                                name="female">&nbsp;
+                            <input class="form-check-input" type="radio" {{#if gender.female}}checked{{/if}}
+                                name="gender" value="female">&nbsp;
                             <label class="form-check-label" for="flexCheckChecked">
                                 Female
                             </label>
@@ -84,9 +84,18 @@
                 </div>
             </div>
 
+            <div class="col-12 my-4">
 
-            <input id="reg-submit-button" type="submit" class="btn btn-primary" type="button"
-                style="border-radius: 15px;">
+                <div class="input-group d-flex justify-content-between">
+                    <input id="submit-button" type="submit" class="btn btn-primary" type="button"
+                        style="border-radius: 15px;">
+
+                    <a href="/user/profile">
+                        <input id="cancel-button" type="submit" class="btn btn-danger" value="Cancel" type="button"
+                            style="border-radius: 15px;">
+                    </a>
+                </div>
+            </div>
         </div>
     </form>
 </div>
