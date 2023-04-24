@@ -13,7 +13,7 @@ export default (io) => {
 
     socket.on("registerme", async (data) => {
       dlog(`registerme event fired`, `ioserverhandler`);
-      const { uid, doc, unblockedUser } = data;
+      const { uid, doc, unblockedUser, hasDoc } = data;
 
       if (uid) {
         if (unblockedUser) {
@@ -32,7 +32,7 @@ export default (io) => {
         if (!user) {
           let addedUser;
 
-          if (doc) {
+          if (hasDoc) {
             const regUser = Object.assign({
               ...{
                 fname: doc.user.fname,
@@ -67,7 +67,9 @@ export default (io) => {
         } else {
           log(`User ${user.fname} is already registered\n\n`);
           user.sid = socket.id;
-          io.to(user.sid).emit("registered");
+          io.to(user.sid).emit("registered", {
+            doc: userManager.getUser(user._id),
+          });
         }
       }
     });

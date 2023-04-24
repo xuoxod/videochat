@@ -48,6 +48,8 @@ class UM {
   };
 
   usersCount = () => Object.keys(this.users).length;
+
+  userCount = () => this.usersCount();
 }
 
 export default UM;

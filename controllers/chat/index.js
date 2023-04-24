@@ -65,6 +65,7 @@ const getAccessToken = (roomName) => {
 //  @desc           Create room
 //  @route          POST /chat/room/create
 //  @access         Private
+//  @returns        json
 export const createRoom = asyncHandler(async (req, res) => {
   logger.info(`POST: /chat/room/create`);
   const user = req.user.withoutPassword();
@@ -94,6 +95,7 @@ export const createRoom = asyncHandler(async (req, res) => {
 //  @desc           Video Chat
 //  @route          POST /chat/room/gettoken
 //  @access         Private
+//  @returns        json
 export const getRoomToken = asyncHandler(async (req, res) => {
   logger.info(`POST: /chat/room/gettoken`);
   const user = req.user.withoutPassword();
@@ -132,54 +134,110 @@ export const getRoomToken = asyncHandler(async (req, res) => {
 //  @desc           Chat Room
 //  @route          GET /chat/room/enter
 //  @access         Private
+//  @returns        void
 export const enterRoom = asyncHandler(async (req, res) => {
   logger.info(`GET: /chat/room/enter`);
 
   try {
     const doc = await Chat.findOne({ user: req.user._id }).populate("user");
 
-    doc.user.fname = cap(doc.user.fname);
-    doc.user.lname = cap(doc.user.lname);
+    if (doc) {
+      doc.user.fname = cap(doc.user.fname);
+      doc.user.lname = cap(doc.user.lname);
 
-    const { unblockeduserid } = req.query;
-    const isUnblockedUser = unblockeduserid != null ? true : false;
+      const { unblockeduserid } = req.query;
+      const isUnblockedUser = unblockeduserid != null ? true : false;
 
-    if (isUnblockedUser) {
-      dlog(
-        `Unblocked User ID: ${unblockeduserid}`,
-        `chat controller: enterRoom`
-      );
+      if (isUnblockedUser) {
+        dlog(
+          `Unblocked User ID: ${unblockeduserid}`,
+          `chat controller: enterRoom`
+        );
 
-      res.render("chat/room", {
-        title: `Room!`,
-        uid: doc.user._id,
-        fname: doc.user.fname,
-        enteredroom: true,
-        signedin: true,
-        theUnblockedUser: `${unblockeduserid}`,
-        online: doc.online,
-        haveAnUnblockedUser: true,
-      });
+        res.render("chat/room", {
+          title: `Room!`,
+          uid: doc.user._id,
+          fname: doc.user.fname,
+          enteredroom: true,
+          signedin: true,
+          theUnblockedUser: `${unblockeduserid}`,
+          online: doc.online,
+          haveAnUnblockedUser: true,
+        });
+      } else {
+        res.render("chat/room", {
+          title: `Room!`,
+          uid: doc.user._id,
+          fname: doc.user.fname,
+          enteredroom: true,
+          signedin: true,
+          online: doc.online,
+          haveAnUnblockedUser: false,
+        });
+      }
     } else {
-      res.render("chat/room", {
-        title: `Room!`,
-        uid: doc.user._id,
-        fname: doc.user.fname,
-        enteredroom: true,
-        signedin: true,
-        online: doc.online,
-        haveAnUnblockedUser: false,
-      });
+      await Chat.create([
+        {
+          user: `${req.user._id}`,
+          uname: `uname-${req.user._id}`,
+          displayName: { fname: true, uname: false },
+          photoUrl: "",
+          description: "",
+          isVisible: true,
+          public: false,
+          online: true,
+          blockedUsers: [],
+          friends: [],
+          blockedBy: [],
+        },
+      ])
+        .then((doc) => {
+          dlog(`Created chat profile\n\t${doc}`, `chat controller: enterRoom`);
+          res.render("chat/room", {
+            title: `Room!`,
+            uid: doc.user,
+            fname: req.user.fname,
+            enteredroom: true,
+            signedin: true,
+            online: doc.online,
+            haveAnUnblockedUser: false,
+          });
+        })
+        .catch((err) => {
+          dlog(
+            `Error creating Chat profile\n\t${err}\n`,
+            `chat controller: enterRoom`
+          );
+
+          res.render("chat/room", {
+            title: `Room!`,
+            uid: req.user._id,
+            fname: req.user.fname,
+            enteredroom: true,
+            signedin: true,
+            online: true,
+            haveAnUnblockedUser: false,
+          });
+        });
     }
   } catch (err) {
-    tlog(err, `chat controller: enterRoom`);
-    res.status(200).json({ status: JSON.stringify(err) });
+    dlog(err, `chat controller: enterRoom`);
+    res.render("chat/room", {
+      title: `Room!`,
+      uid: req.user._id,
+      fname: req.user.fname,
+      enteredroom: true,
+      signedin: true,
+      online: false,
+      haveAnUnblockedUser: false,
+    });
   }
 });
 
 //  @desc           Chat Room Connect
 //  @route          GET /chat/room/connect
 //  @access         Private
+//  @returns        void
 export const connectRoom = asyncHandler(async (req, res) => {
   logger.info(`GET: /chat/room/connect`);
 
@@ -202,6 +260,7 @@ export const connectRoom = asyncHandler(async (req, res) => {
 //  @desc           Blocked Users
 //  @route          POST /user/get/blockedlist
 //  @access         Private
+//  @returns        json
 export const getBlockedList = asyncHandler(async (req, res) => {
   logger.info(`POST: /user/get/blockedlist/<parameter>`);
 
@@ -228,6 +287,7 @@ export const getBlockedList = asyncHandler(async (req, res) => {
 //  @desc           Add user ID to blocked list
 //  @route          POST /chat/block/
 //  @access         Private
+//  @returns        json
 export const blockUser = asyncHandler(async (req, res) => {
   logger.info(`POST: /chat/user/block`);
 
@@ -267,6 +327,7 @@ export const blockUser = asyncHandler(async (req, res) => {
 //  @desc           Check if user is blocked
 //  @route          POST /chat/user/isblocked
 //  @access         Private
+//  @returns        json
 export const isUserBlocked = asyncHandler(async (req, res) => {
   logger.info(`POST: /chat/user/isblocked`);
 
@@ -291,6 +352,7 @@ export const isUserBlocked = asyncHandler(async (req, res) => {
 //  @desc           Remove user ID from blocked list
 //  @route          POST /chat/unblock/
 //  @access         Private
+//  @returns        json
 export const unblockUser = asyncHandler(async (req, res) => {
   logger.info(`POST: /chat/unblock`);
 
@@ -327,17 +389,19 @@ export const unblockUser = asyncHandler(async (req, res) => {
 });
 
 //  @desc           Create user chat profile
-//  @route          GET /chat/profile/create
+//  @route          GET /chat/profile/create/:uid
 //  @access         Private
+//  @returns        json
 export const createProfile = asyncHandler(async (req, res) => {
-  logger.info(`GET: /chat/profile/create`);
+  logger.info(`GET: /chat/profile/create/:uid`);
 
   const { uid } = req.params;
+  const chatUserId = uid || req.user._id;
 
-  dlog(`Route Parameter: ${uid}\n`);
+  dlog(`Route Parameter: ${chatUserId}\n`);
 
   const doc = await await Chat.findOneAndUpdate(
-    { user: `${uid}` },
+    { user: `${chatUserId}` },
     { online: true },
     { new: true }
   ).populate("user");
@@ -346,8 +410,8 @@ export const createProfile = asyncHandler(async (req, res) => {
     res.json({ status: true, hasDoc: true, doc: doc });
   } else {
     const createdDoc = await Chat.create({
-      user: `${uid}`,
-      uname: `uname-${uid}`,
+      user: `${chatUserId}`,
+      uname: `uname-${chatUserId}`,
       displayName: { fname: true, uname: false },
       photoUrl: "",
       description: "",
@@ -358,13 +422,14 @@ export const createProfile = asyncHandler(async (req, res) => {
       friends: [],
       blockedBy: [],
     });
-    res.json({ status: true, hasDoc: false, doc: doc });
+    res.json({ status: true, hasDoc: true, doc: createdDoc });
   }
 });
 
 //  @desc           View user chat profile
 //  @route          GET /chat/profile/view/uid
 //  @access         Private
+//  @returns        void
 export const viewProfile = asyncHandler(async (req, res) => {
   logger.info(`GET: /chat/profle/view/uid`);
 
@@ -409,22 +474,33 @@ export const viewProfile = asyncHandler(async (req, res) => {
 //  @desc           Get user chat profile
 //  @route          POST /chat/profile
 //  @access         Private
+//  @returns        json or redirect
 export const getChatUserProfile = asyncHandler(async (req, res) => {
   logger.info(`POST: /chat/profile`);
 
   const { uid } = req.body;
-  const doc = await Chat.findOne({ user: `${uid}` }).populate("user");
+  const chatUserId = uid || req.user._id;
+  const doc = await Chat.findOne({ user: `${chatUserId}` }).populate("user");
+
+  /*  if user has a profile then return it or redirect them
+  to the create profile route. */
 
   if (doc) {
-    return res.json({ status: true, doc: doc });
+    return res.json({ status: true, doc: doc, hasDoc: doc != null });
   } else {
-    return res.json({ status: false });
+    // return res.json({ status: false });
+    dlog(
+      `redirecting to /chat/profile/create`,
+      `chat controller: getChatUserProfile`
+    );
+    return res.redirect(`/chat/profile/create/${chatUserId}`);
   }
 });
 
 //  @desc           Update user chat profile
 //  @route          POST /chat/profile/update
 //  @access         Private
+//  @returns        redirect
 export const updateProfile = asyncHandler(async (req, res) => {
   logger.info(`POST: /chat/profle/update`);
   const user = req.user.withoutPassword();
@@ -471,6 +547,7 @@ export const updateProfile = asyncHandler(async (req, res) => {
 //  @desc           Update user chat profile photo
 //  @route          POST /chat/profile/update/photo
 //  @access         Private
+//  @returns        json
 export const updateProfilePhoto = asyncHandler(async (req, res) => {
   logger.info(`POST: /chat/profle/update/photo`);
 
@@ -484,6 +561,7 @@ export const updateProfilePhoto = asyncHandler(async (req, res) => {
 //  @desc           Connection request
 //  @route          GET /chat/connect/request
 //  @access         Private
+//  @returns        void
 export const requestConn = asyncHandler(async (req, res) => {
   logger.info(`GET: /chat/connect/request`);
 
@@ -499,23 +577,28 @@ export const requestConn = asyncHandler(async (req, res) => {
 //  @desc           Hide user
 //  @route          POST /chat/user/hide
 //  @access         Private
+//  @returns        json
 export const hideUser = asyncHandler(async (req, res) => {
   logger.info(`POST: /chat/user/hide`);
 
   const { userId } = req.body;
+  const chatUserId = userId || req.user._id;
 
   try {
     let doc = await Chat.findOneAndUpdate(
-      { user: `${userId}` },
+      { user: `${chatUserId}` },
       { online: false }
     );
 
-    doc = await Chat.findOne({ user: `${userId}` }).populate("user");
+    doc = await Chat.findOne({ user: `${chatUserId}` }).populate("user");
 
     if (doc) {
       res.json({ status: true, doc });
     } else {
-      res.json({ status: false, reason: `Unable to update user ${userId}` });
+      res.json({
+        status: false,
+        reason: `Unable to update user ${chatUserId}`,
+      });
     }
   } catch (err) {
     log(`\n--------------------------------------------------`);
@@ -523,7 +606,7 @@ export const hideUser = asyncHandler(async (req, res) => {
     log(`--------------------------------------------------\n`);
     res.json({
       status: false,
-      reason: `Error occurred while attempting to hide user ${userId}`,
+      reason: `Error occurred while attempting to hide user ${chatUserId}`,
     });
   }
 });
@@ -531,23 +614,28 @@ export const hideUser = asyncHandler(async (req, res) => {
 //  @desc           Unhide user
 //  @route          POST /chat/user/unhide
 //  @access         Private
+//  @returns        json
 export const unhideUser = asyncHandler(async (req, res) => {
   logger.info(`POST: /chat/user/unhide`);
 
   const { userId } = req.body;
+  const chatUserId = userId || req.user._id;
 
   try {
     let doc = await Chat.findOneAndUpdate(
-      { user: `${userId}` },
+      { user: `${chatUserId}` },
       { online: true }
     );
 
-    doc = await Chat.findOne({ user: `${userId}` }).populate("user");
+    doc = await Chat.findOne({ user: `${chatUserId}` }).populate("user");
 
     if (doc) {
       res.json({ status: true, doc: doc });
     } else {
-      res.json({ status: false, reason: `Unable to update user ${userId}` });
+      res.json({
+        status: false,
+        reason: `Unable to update user ${chatUserId}`,
+      });
     }
   } catch (err) {
     log(`\n--------------------------------------------------`);
@@ -555,7 +643,7 @@ export const unhideUser = asyncHandler(async (req, res) => {
     log(`--------------------------------------------------\n`);
     res.json({
       status: false,
-      reason: `Error ocurred while attempting to unhide user ${userId}`,
+      reason: `Error ocurred while attempting to unhide user ${chatUserId}`,
     });
   }
 });
@@ -563,6 +651,7 @@ export const unhideUser = asyncHandler(async (req, res) => {
 //  @desc           Update user's online status'
 //  @route          POST /chat/user/onlinestatus/update
 //  @access         Private
+//  @returns        json
 export const updateUsersOnlineStatus = asyncHandler(async (req, res) => {
   logger.info(`POST: /chat/user/onlinestatus/update`);
 

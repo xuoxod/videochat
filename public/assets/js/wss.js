@@ -19,11 +19,12 @@ export const registerSocketEvents = (socket) => {
     dlog(`connect event fired`, `wss.js: registerSocketEvents`);
 
     getChatUserProfile((results) => {
-      const { status, doc } = results;
+      const { status, doc, hasDoc } = results;
 
       if (status) {
         userDetails = {};
         userDetails.doc = doc;
+        userDetails.hasDoc = hasDoc;
         userDetails.uid = document.querySelector("#rmtid-input").value;
 
         if (getElement("unblockeduser")) {
@@ -419,6 +420,7 @@ function getChatUserProfile(cb) {
         const responseJson = parse(responseText);
         const status = responseJson.status;
         const doc = responseJson.doc;
+        const hasDoc = responseJson.hasDoc;
 
         dlog(
           `Received a response for my profile request`,
@@ -426,7 +428,7 @@ function getChatUserProfile(cb) {
         );
 
         if (status) {
-          return cb({ status: status, doc: doc });
+          return cb({ status: status, doc: doc, hasDoc: hasDoc });
         } else {
           return cb({ status: false, msg: `Got nothing` });
         }

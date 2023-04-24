@@ -15,6 +15,7 @@ const logger = bunyan.createLogger({ name: "User Controller" });
 //  @desc           User Dashboard
 //  @route          GET /user
 //  @access         Private
+//  @returns        void
 export const userDashboard = asyncHandler(async (req, res) => {
   logger.info(`GET: /user`);
 
@@ -37,6 +38,7 @@ export const userDashboard = asyncHandler(async (req, res) => {
 //  @desc           Read user's profile
 //  @route          GET /user/profile
 //  @access         Private
+//  @returns        void
 export const readUserProfile = asyncHandler(async (req, res) => {
   logger.info(`GET: /user/profile`);
   const uid = req.user._id;
@@ -46,28 +48,31 @@ export const readUserProfile = asyncHandler(async (req, res) => {
   const doc = await Profile.findOne({ user: `${uid}` }).populate("user");
   const gender = {};
 
-  if (doc.gender.trim() == "male") {
-    gender.male = true;
-    gender.female = false;
-  } else {
-    gender.male = false;
-    gender.female = true;
-  }
+  if (doc) {
+    if (doc.gender.trim() == "male") {
+      gender.male = true;
+      gender.female = false;
+    } else {
+      gender.male = false;
+      gender.female = true;
+    }
 
-  res.render("user/viewprofile", {
-    title: `My Profile Gee`,
-    doc: doc,
-    gender,
-    user: req.user.withoutPassword(),
-    hasDoc: doc != null,
-    userprofile: true,
-    signedin: true,
-  });
+    res.render("user/viewprofile", {
+      title: `My Profile Gee`,
+      doc: doc,
+      gender,
+      user: req.user.withoutPassword(),
+      hasDoc: doc != null,
+      userprofile: true,
+      signedin: true,
+    });
+  }
 });
 
 //  @desc           View user's profile
 //  @route          GET /user/profile/edit
 //  @access         Private
+//  @returns        void
 export const editUserProfile = asyncHandler(async (req, res) => {
   logger.info(`GET: /user/profile/edit`);
   const uid = req.user._id;
@@ -86,6 +91,7 @@ export const editUserProfile = asyncHandler(async (req, res) => {
 //  @desc           Update user's profile
 //  @route          POST /user/profile/update
 //  @access         Private
+//  @returns        redirect
 export const updateUserProfile = asyncHandler(async (req, res) => {
   logger.info(`POST: /user/profile/update`);
   const uid = req.user._id;
@@ -170,6 +176,7 @@ export const updateUserProfile = asyncHandler(async (req, res) => {
 //  @desc           Reauthenticate User
 //  @route          POST /user/reauth
 //  @access         Private
+//  @returns        void
 export const userReauth = asyncHandler(async (req, res) => {
   logger.info(`POST: /user/reauth`);
 
@@ -204,6 +211,7 @@ export const userReauth = asyncHandler(async (req, res) => {
 //  @desc           Create User Profile
 //  @route          POST /user/profile/create
 //  @access         Private
+//  @returns        redirect
 export const createUserProfile = asyncHandler(async (req, res) => {
   logger.info(`POST: /user/profile/create`);
   const user = req.user.withoutPassword()._id;
@@ -236,6 +244,7 @@ export const createUserProfile = asyncHandler(async (req, res) => {
 //  @desc           Delete user's profile
 //  @route          GET /user/profile/delete
 //  @access         Private
+//  @returns        redirect
 export const deleteUserProfile = asyncHandler(async (req, res) => {
   logger.info(`GET: /user/profile/delete`);
   const uid = req.user._id;
