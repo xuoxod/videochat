@@ -14,63 +14,62 @@ export default (io) => {
     socket.on("registerme", async (data) => {
       dlog(`registerme event fired`, `ioserverhandler`);
       const { uid, doc, unblockedUser, hasDoc } = data;
+      const userId = uid || doc._id;
 
-      if (uid) {
-        if (unblockedUser) {
-          const { unblockeduserid } = data;
-          const unblockedUser = userManager.getUser(unblockeduserid);
+      if (unblockedUser) {
+        const { unblockeduserid } = data;
+        const unblockedUser = userManager.getUser(unblockeduserid);
 
-          dlog(`Unblocking user ${unblockedUser.fname}`);
-          io.to(unblockedUser.sid).emit("updateyourself", {
-            unblockedBy: `${uid}`,
+        dlog(`Unblocking user ${unblockedUser.fname}`);
+        io.to(unblockedUser.sid).emit("updateyourself", {
+          unblockedBy: `${uid}`,
+        });
+      }
+
+      const user = userManager.getUser(userId);
+
+      if (!user) {
+        dlog(`User does not exist\n`);
+        let addedUser;
+
+        if (hasDoc) {
+          const regUser = Object.assign({
+            ...{
+              fname: doc.user.fname,
+              lname: doc.user.lname,
+              email: doc.user.email,
+              _id: doc.user._id,
+              uid: doc.user._id,
+              uname: doc.uname,
+              displayName: doc.displayName,
+              isVisible: doc.isVisible,
+              photoUrl: doc.photoUrl,
+              public: doc.public,
+              description: doc.description,
+              friends: doc.friends,
+              blockedUsers: doc.blockedUsers,
+              blockedBy: doc.blockedBy,
+              online: doc.online,
+            },
+            ...{ sid: socket.id },
           });
-        }
 
-        const user = userManager.getUser(uid);
-        addCUser(uid);
+          addedUser = userManager.addUser(regUser);
 
-        if (!user) {
-          let addedUser;
-
-          if (hasDoc) {
-            const regUser = Object.assign({
-              ...{
-                fname: doc.user.fname,
-                lname: doc.user.lname,
-                email: doc.user.email,
-                _id: doc.user._id,
-                uid: doc.user._id,
-                uname: doc.uname,
-                displayName: doc.displayName,
-                isVisible: doc.isVisible,
-                photoUrl: doc.photoUrl,
-                public: doc.public,
-                description: doc.description,
-                friends: doc.friends,
-                blockedUsers: doc.blockedUsers,
-                blockedBy: doc.blockedBy,
-                online: doc.online,
-              },
-              ...{ sid: socket.id },
+          if (addedUser) {
+            log(`User ${regUser.fname} successfully registered\n\n`);
+            io.to(socket.id).emit("registered", { doc: stringify(doc) });
+            io.emit("updateonlineuserlist", {
+              users: stringify(userManager.getUsers()),
             });
-
-            addedUser = userManager.addUser(regUser);
-
-            if (addedUser) {
-              log(`User ${regUser.fname} successfully registered\n\n`);
-              io.to(socket.id).emit("registered", { doc: stringify(doc) });
-              io.emit("updateonlineuserlist", {
-                users: stringify(userManager.getUsers()),
-              });
-            }
           }
-        } else {
-          log(`User ${user.fname} is already registered\n\n`);
-          user.sid = socket.id;
-          io.to(user.sid).emit("registered", {
-            doc: userManager.getUser(user._id),
-          });
         }
+      } else {
+        log(`User ${user.fname} is already registered\n\n`);
+        user.sid = socket.id;
+        io.to(user.sid).emit("registered", {
+          doc: userManager.getUser(user._id),
+        });
       }
     });
 

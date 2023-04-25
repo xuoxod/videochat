@@ -572,4 +572,4 @@ if (getElement("cloak") && getElement("cloak-label")) {
   });
 }
 
-window.onload = checkOnlineStatus();
+window.onload = setTimeout(() => checkOnlineStatus(), [1500]);

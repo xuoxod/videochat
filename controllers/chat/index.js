@@ -191,15 +191,18 @@ export const enterRoom = asyncHandler(async (req, res) => {
           blockedBy: [],
         },
       ])
-        .then((doc) => {
-          dlog(`Created chat profile\n\t${doc}`, `chat controller: enterRoom`);
+        .then((newDoc) => {
+          dlog(
+            `Created chat profile\n\t${newDoc}`,
+            `chat controller: enterRoom`
+          );
           res.render("chat/room", {
             title: `Room!`,
-            uid: doc.user,
+            uid: newDoc.user,
             fname: req.user.fname,
             enteredroom: true,
             signedin: true,
-            online: doc.online,
+            online: newDoc.online,
             haveAnUnblockedUser: false,
           });
         })
