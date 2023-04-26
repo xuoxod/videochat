@@ -61,12 +61,15 @@ store.on("connected", () => {
 
 // constants
 const csrfProtection = csurf({ cookie: { maxAge: 60 * 60 * 8 } });
+const expiryDate = new Date(Date.now() + 60 * 60 * 1000); // 1 hour
 const sessionMiddleware = session({
+  name: `dEepphake`,
   secret: process.env.SECRET,
   key: process.env.SESSION_NAME,
   resave: true,
   saveUninitialized: true,
   store: store,
+  expires: expiryDate,
 });
 const nanoid = customAlphabet("02468ouqtyminv", 13);
 const __dirname = path.resolve(".");

@@ -17,8 +17,7 @@ export const updateUsersList = async (
   userList,
   listItemClickHandler,
   detectWebcam,
-  blockUser,
-  blockedBy
+  blockUser
 ) => {
   const usersParent = document.querySelector("#users-parent");
   const currentUser = getElement("rmtid-input").value;

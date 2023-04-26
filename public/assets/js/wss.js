@@ -98,13 +98,7 @@ export const registerSocketEvents = (socket) => {
       socket.emit("userclicked", userDetails);
     };
 
-    updateUsersList(
-      arrUsers,
-      listItemClickHandler,
-      detectWebcam,
-      blockUser,
-      blockedBy
-    );
+    updateUsersList(arrUsers, listItemClickHandler, detectWebcam, blockUser);
   });
 
   socket.on("registered", (data) => {
