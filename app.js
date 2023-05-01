@@ -75,7 +75,8 @@ const nanoid = customAlphabet("02468ouqtyminv", 13);
 const __dirname = path.resolve(".");
 const PORT = process.env.SPORT || 443;
 const ADDRESS = process.env.ADDRESS || "0.0.0.0";
-const options = letsencryptOptions();
+const domain = process.env.DOMAIN || null;
+const options = letsencryptOptions(domain);
 
 // Express app
 const app = express();

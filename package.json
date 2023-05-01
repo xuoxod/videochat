@@ -6,7 +6,7 @@
   "type": "module",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "sudo ~/.nvm/versions/node/v18.15.0/bin/node app.js"
+    "start": "sudo ~/.nvm/versions/node/v18.16.0/bin/node app.js"
   },
   "keywords": [],
   "author": "",

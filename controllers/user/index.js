@@ -48,24 +48,10 @@ export const readUserProfile = asyncHandler(async (req, res) => {
   const doc = await Profile.findOne({ user: `${uid}` }).populate("user");
 
   dlog(`User & Profile\n\t${doc}\n`);
-  const gender = {};
-
-  if (doc) {
-    if (doc.hasOwnProperty("gender")) {
-      if (doc.gender.trim() == "male") {
-        gender.male = true;
-        gender.female = false;
-      } else {
-        gender.male = false;
-        gender.female = true;
-      }
-    }
-  }
 
   res.render("user/viewprofile", {
     title: `My Profile Gee`,
     doc: doc,
-    gender,
     user: req.user.withoutPassword(),
     hasDoc: doc != null,
     userprofile: true,
@@ -164,8 +150,10 @@ export const updateUserProfile = asyncHandler(async (req, res) => {
 
   if (gender == "male") {
     profileUpdate.gender = "male";
-  } else {
+  } else if (gender == "female") {
     profileUpdate.gender = "female";
+  } else {
+    profileUpdate.gender = "other";
   }
 
   if (dob) {
