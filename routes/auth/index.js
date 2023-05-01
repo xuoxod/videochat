@@ -21,7 +21,14 @@ auth
   .get(userRegister)
   .post(
     [
-      body("email").isEmail().withMessage("Must provide a valid email"),
+      body("email")
+        .notEmpty()
+        .isEmail()
+        .withMessage("Must provide a valid email"),
+      body("phone")
+        .notEmpty()
+        .isMobilePhone()
+        .withMessage("Must provide a valid phone"),
       body("pwd").notEmpty().withMessage("Must create a password"),
       body("pwd2")
         .notEmpty()

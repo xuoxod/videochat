@@ -14,7 +14,8 @@
 </div>
 
 <div class="row" style="margin:5% auto 5% auto;">
-    <form style="margin:6rem 0;" action="/user/reauth" method="post">
+    <form style="margin:6rem 0;" action={{#if
+        userProfilereauthentication}}"/user/profile/edit/authenticated"{{else}}"/auth/signin"{{/if}} method="post">
         <div class="container">
 
             <div class="col mb-4">

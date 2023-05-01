@@ -54,24 +54,25 @@ const passportConfig = (passport) => {
         passwordField: "pwd",
         passReqToCallback: true,
       },
-      (req, email, password, done) => {
+      async (req, email, password, done) => {
         console.log(`\n\n\t\tMade it to passport local-register\n\n`);
 
-        const user = User.findOne({
+        const user = await User.findOne({
           email: `${email}`,
         });
 
         if (user) {
-          console.log(`\n\tEmail is already registered`);
+          console.log(`\n\tEmail ${email} is already registered\n\t${user}`);
           return done(null, false, {
             message: `Email is already registered`,
           });
         } else {
-          const { email, pwd, pwd2, fname, lname } = req.body;
+          const { email, pwd, pwd2, fname, lname, phone } = req.body;
           const newUser = new User({
             email,
             fname,
             lname,
+            phone,
           });
 
           createHash(pwd, (results) => {

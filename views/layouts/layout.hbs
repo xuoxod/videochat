@@ -36,32 +36,32 @@
 {{#if peers}}
 <script src="/twilio-video.js"></script>
 <script src="/assets/js/peers.js" type="module"></script>
-{{/if}}
+{{/if}} {{!-- end peers --}}
 
-{{/if}}
+{{/if}} {{!-- end enteredroom --}}
 
 {{#if chatprofile}}
 <script src="/assets/js/chatprofile.js" type="module"></script>
-{{/if}}
+{{/if}} {{!-- end chatprofile --}}
 
 {{#if userprofile}}
 <script src="/assets/js/userprofile.js" type="module"></script>
-{{/if}}
+{{/if}} {{!-- end userprofile --}}
 
-{{else}}
+{{else}} {{!-- end if signedin --}}
 
 {{#if landing}}
 <script src="/assets/js/main.js" type="module"></script>
-{{/if}}
+{{/if}} {{!-- end landing --}}
 
 {{#if forgotpassword}}
 <script src="/assets/js/validateemail.js" type="module"></script>
-{{/if}}
+{{/if}} {{!-- end forgotpassword --}}
 
 {{#if resetpassword}}
 <script src="/assets/js/resetpassword.js" type="module"></script>
-{{/if}}
+{{/if}} {{!-- end resetpassword --}}
 
-{{/if}}
+{{/if}} {{!-- end if --}}
 
 </html>

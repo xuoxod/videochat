@@ -53,14 +53,14 @@ export const signedOut = asyncHandler(async (req, res, next) => {
   }
 });
 
-export const reauthorize = asyncHandler(async (req, res, next) => {
+export const reauthenticate = asyncHandler(async (req, res, next) => {
   logger.info(`reauthorize`);
   if (req.isAuthenticated()) {
     const user = req.user.withoutPassword();
 
     res.render("auth/signin", {
       title: "Reauthenticate",
-      reauthenticate: true,
+      userProfilereauthentication: true,
       user: req.user.withoutPassword(),
       csrfToken: req.csrfToken,
     });

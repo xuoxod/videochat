@@ -10,7 +10,7 @@
 
 
 <div class="row">
-    <form action="/auth/register" method="post" style="margin:5rem 0;">
+    <form action="/auth/register" method="post" style="margin: 0;">
         <div class="container">
             <div class="row">
                 <div class="col-12 my-4">
@@ -49,6 +49,18 @@
                 </div>
 
                 <div class="col-12 my-4">
+                    <div class="input-group">
+
+                        <span class="input-group-text" id="basic-addon1">
+                            <i class="bi bi-phone"></i>
+                        </span>
+
+                        <input type="phone" name="phone" id="reg-phone" class="form-control" placeholder="Phone"
+                            required />
+                    </div>
+                </div>
+
+                <div class="col-12 my-4">
                     <div class="input-group"><span class="input-group-text" id="basic-addon1">
                             <i class="bi bi-key"></i>
                         </span>
@@ -72,13 +84,13 @@
                     </div>
                 </div>
             </div>
+
+            <input type="hidden" name="_csrf" value="{{csrfToken}}" required>
+
+            <div class="col-12 my-0">
+                <input id="reg-submit-button" type="submit" class="btn btn-primary" type="button"
+                    style="border-radius: 15px;">
+            </div>
         </div>
-
-
-        <input type="hidden" name="_csrf" value="{{csrfToken}}" required>
-
-
-        <input id="reg-submit-button" type="submit" class="btn btn-primary" type="button" style="border-radius: 15px;">
-
     </form>
 </div>

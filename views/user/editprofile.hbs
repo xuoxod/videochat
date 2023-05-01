@@ -1,4 +1,5 @@
 <div class="row">
+    {{#if hasDoc}}
     <form action="/user/profile/update" method="post" style="margin:1rem 0 5rem 0;">
         <div class="container">
             <div class="row">
@@ -24,7 +25,6 @@
                             placeholder="Email" />
                     </div>
                 </div>
-
 
                 <div class="col-12 mt-4">
                     <strong>Street Address</strong>
@@ -98,4 +98,5 @@
             </div>
         </div>
     </form>
+    {{/if}}
 </div>

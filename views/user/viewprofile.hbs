@@ -27,7 +27,6 @@
                         </div>
                     </div>
 
-
                     <div class="col-12 mt-4">
                         <strong>Street Address</strong>
 
@@ -72,10 +71,11 @@
                     </div>
                 </div>
 
-                <div class="col12 mt-4">
+                <div class="col-12 mt-4">
                     <div class="input-group d-flex justify-content-between">
                         <button type="button" class="btn btn-success" value="Edit" style="border-radius: 15px;">
-                            <a class="text-white" style="text-decoration:none;" href="/user/profile/edit">Edit</a>
+                            <a class="text-white" style="text-decoration:none;"
+                                href="/user/profile/edit/reauthenticate">Edit</a>
                         </button>
 
                         <button type="button" class="btn btn-danger" value="Delete" style="border-radius: 15px;">
@@ -93,14 +93,14 @@
                     <div class="col-12 mb-3">
                         <strong>Name</strong>
                         <div class="input-group">
-                            <input type="text" name="fname" value="{{doc.user.fname}}" class="form-control"
+                            <input type="text" name="fname" value="{{user.fname}}" class="form-control"
                                 placeholder="First Name" />
                         </div>
                     </div>
 
                     <div class="col-12 mb-3">
                         <div class="input-group">
-                            <input type="text" name="lname" value="{{doc.user.lname}}" class="form-control"
+                            <input type="text" name="lname" value="{{user.lname}}" class="form-control"
                                 placeholder="Last Name" />
                         </div>
                     </div>
@@ -108,7 +108,7 @@
                     <div class="col-12 mt-4">
                         <strong>Email</strong>
                         <div class="input-group">
-                            <input type="email" name="email" value="{{doc.user.email}}" class="form-control"
+                            <input type="email" name="email" value="{{user.email}}" class="form-control"
                                 placeholder="Email" />
                         </div>
                     </div>
@@ -155,11 +155,11 @@
                                 value="{{doc.dob.year}}-{{doc.dob.month}}-{{doc.dob.day}}" />
                         </div>
                     </div>
-                </div>
 
-                <div class="row">
-                    <input id="reg-submit-button" type="submit" class="btn btn-primary" value="Create" type="button"
-                        style="border-radius: 15px;">
+                    <div class="col-12 my-0">
+                        <input id="reg-submit-button" type="submit" class="btn btn-primary" value="Create" type="button"
+                            style="border-radius: 15px;">
+                    </div>
                 </div>
             </div>
         </form>

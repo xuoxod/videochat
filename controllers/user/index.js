@@ -46,15 +46,19 @@ export const readUserProfile = asyncHandler(async (req, res) => {
   req.user.lname = cap(req.user.lname);
 
   const doc = await Profile.findOne({ user: `${uid}` }).populate("user");
+
+  dlog(`User & Profile\n\t${doc}\n`);
   const gender = {};
 
-  if (doc != null) {
-    if (doc.gender.trim() == "male") {
-      gender.male = true;
-      gender.female = false;
-    } else {
-      gender.male = false;
-      gender.female = true;
+  if (doc) {
+    if (doc.hasOwnProperty("gender")) {
+      if (doc.gender.trim() == "male") {
+        gender.male = true;
+        gender.female = false;
+      } else {
+        gender.male = false;
+        gender.female = true;
+      }
     }
   }
 
@@ -77,13 +81,26 @@ export const editUserProfile = asyncHandler(async (req, res) => {
   logger.info(`GET: /user/profile/edit`);
   const uid = req.user._id;
 
-  const doc = await User.findOne({ _id: `${uid}` }).populate("profile");
+  const doc = await Profile.findOne({ user: `${uid}` }).populate("user");
+  const gender = {};
+
+  if (doc.gender) {
+    if (doc.gender.trim() == "male") {
+      gender.male = true;
+      gender.female = false;
+    } else {
+      gender.male = false;
+      gender.female = true;
+    }
+  }
 
   res.render("user/editprofile", {
     title: `Profile`,
     doc: doc,
+    gender,
     user: req.user.withoutPassword(),
-    hasProfile: doc != null,
+    hasDoc: doc != null,
+    userprofile: true,
     csrfToken: req.csrfToken,
   });
 });
@@ -97,6 +114,9 @@ export const updateUserProfile = asyncHandler(async (req, res) => {
   const uid = req.user._id;
 
   const data = req.body;
+
+  dlog(`\nprofile update data:\n\t${stringify(data)}\n`);
+
   const { fname, lname, email, street, city, zipcode, savepwd, gender, dob } =
     data;
 
@@ -182,29 +202,13 @@ export const userReauth = asyncHandler(async (req, res) => {
 
   const oUser = req.user;
   const { email, pwd } = req.body;
-  dlog(`\n\tRe-authentication Data\n\t\tEmail: ${email}, Password: ${pwd}\n`);
 
   const matched = await oUser.matchPassword(pwd);
   if (matched) {
-    const doc = await Profile.findOne({ user: req.user._id }).populate("user");
-    const gender = {};
-
-    if (doc.gender.trim() == "male") {
-      gender.male = true;
-      gender.female = false;
-    } else {
-      gender.male = false;
-      gender.female = true;
-    }
-
-    res.render("user/editprofile", {
-      title: `userReauthed`,
-      doc: doc,
-      gender,
-      profileedit: true,
-      user: req.user.withoutPassword(),
-      csrfToken: req.csrfToken,
-    });
+    dlog(`\n\tReauthenticated ${email} === ${oUser.email}\n`);
+    res.redirect("/user/profile/edit");
+  } else {
+    res.redirect("/user/profile");
   }
 });
 
