@@ -57,8 +57,8 @@ export const updateUsersList = async (
           const divFriendIcon = newElement("div");
 
           const displayName = userObject.displayName.fname
-            ? `${userObject.fname}`
-            : `${userObject.uname}`;
+            ? `${cap(userObject.fname)}`
+            : `${cap(userObject.uname)}`;
 
           liImg.alt = `${displayName}`;
 
@@ -386,12 +386,12 @@ export const showCallRequest = (userDetails, acceptCall) => {
 
     // Element Attributes
     addAttribute(divMsg, "class", "w3-cell-row");
-    addAttribute(divButtons, "class", "w3-mobile w3-cell-middle");
-    addAttribute(panel, "class", "w3-panel w3-round-large");
+    addAttribute(divButtons, "class", "w3-mobile w3-cell-center");
+    addAttribute(panel, "class", "w3-panel w3-round-large w3-cell-row");
     addAttribute(
       closeButton,
       "class",
-      "w3-button w3-display-topright w3-text-white w3-opacity-min w3-round-large w3-hover-red"
+      "w3-button w3-display-topright w3-text-white w3-opacity-min w3-circle w3-hover-white w3-text-hover-black"
     );
     addAttribute(closeButton, "style", "background-color:rgba(10,10,10,0.5);");
     addAttribute(
@@ -399,11 +399,11 @@ export const showCallRequest = (userDetails, acceptCall) => {
       "style",
       "background-color:rgba(10,10,10,0.5);background-size:cover;position:absolute;left:0;top:0;height:100%;width:100%;margin:0;"
     );
-    addAttribute(para, "class", "w3-text-white w3-center");
+    addAttribute(para, "class", "w3-text-white w3-center-align");
     addAttribute(
       acceptButton,
       "class",
-      "w3-button w3-text-white w3-border w3-border-white w3-opacity-min w3-round-large w3-hover-green"
+      "w3-button w3-text-white w3-border w3-border-white w3-hover-border-black w3-opacity-min w3-round-large w3-hover-white w3-cell-center"
     );
     addAttribute(acceptButton, "style", "background:transparent;");
 
