@@ -13,7 +13,7 @@ import {
   append,
 } from "./computils.js";
 
-export const updateUsersList = async (
+export const _updateUsersList = async (
   userList,
   listItemClickHandler,
   detectWebcam,
@@ -151,6 +151,133 @@ export const updateUsersList = async (
   }
 };
 
+export const updateUsersList = async (
+  userList,
+  listItemClickHandler,
+  detectWebcam,
+  blockUser
+) => {
+  const usersParent = document.querySelector("#users-parent");
+  const currentUser = getElement("rmtid-input").value;
+
+  // if (userList.length > 0) {
+  removeChildren(usersParent);
+  for (const user in userList) {
+    const userObject = userList[user];
+
+    if (userObject.online) {
+      const blockedUsersIndex = userObject.blockedUsers.findIndex(
+        (x) => x == currentUser
+      );
+
+      if (blockedUsersIndex == -1) {
+        const blockedByIndex = userObject.blockedBy.findIndex(
+          (x) => x == currentUser
+        );
+
+        if (blockedByIndex == -1) {
+          // Create comps
+          const li = newElement("li");
+          const liImg = newElement("img");
+          const divName = newElement("div");
+          const spanName = newElement("span");
+          const divConnect = newElement("div");
+          const iconConnect = newElement("i");
+          const divBlock = newElement("div");
+          const iconBlock = newElement("i");
+          const spanConnect = newElement("span");
+          const cardBody = newElement("div");
+          const cardBodyLayout = newElement("div");
+          const cardTitle = newElement("h5");
+          const acceptCallIcon = newElement("i");
+          const divConnectIcon = newElement("div");
+          const divBlockIcon = newElement("div");
+          const divFriendIcon = newElement("div");
+
+          const displayName = userObject.displayName.fname
+            ? `${userObject.fname}`
+            : `${userObject.uname}`;
+
+          liImg.alt = `${displayName}`;
+
+          // Add attributes
+          addAttribute(li, "class", "w3-bar w3-round-small");
+          addAttribute(li, "id", `li-${userObject._id}`);
+          addAttribute(li, "style", "position:relative;");
+
+          addAttribute(liImg, "class", "w3-bar-item w3-circle");
+          addAttribute(liImg, "style", "width:85px;margin:0;");
+          addAttribute(liImg, "data-toggle", "tooltip");
+          addAttribute(liImg, "data-placement", "top");
+          addAttribute(liImg, "data-html", "true");
+          addAttribute(liImg, "title", `${displayName}`);
+
+          addAttribute(divName, "class", "w3-bar-item");
+          addAttribute(divConnect, "class", "w3-bar-item");
+          addAttribute(divBlock, "class", "w3-bar-item");
+
+          addAttribute(iconBlock, "id", `block-${userObject._id}`);
+          addAttribute(iconBlock, "class", "bi bi-eye-slash-fill");
+          addAttribute(iconBlock, "data-toggle", "tooltip");
+          addAttribute(iconBlock, "data-placement", "top");
+          addAttribute(iconBlock, "data-html", "true");
+          addAttribute(iconBlock, "title", `Block ${displayName}`);
+
+          addAttribute(acceptCallIcon, "class", "bi bi-check-lg text-success");
+
+          if (userObject.photoUrl) {
+            liImg.src = userObject.photoUrl;
+          } else {
+            liImg.src = "/assets/graphics/silhouette.png";
+          }
+
+          // Append comps
+          appendChild(usersParent, li);
+          appendChild(li, liImg);
+          appendChild(li, divName);
+          appendChild(li, divConnect);
+          appendChild(li, divBlock);
+          appendChild(divName, spanName);
+          appendChild(divConnect, iconConnect);
+          appendChild(divBlock, iconBlock);
+
+          spanName.innerHTML = `<strong>${displayName}</strong>`;
+
+          detectWebcam((results) => {
+            if (!results) {
+              addAttribute(iconConnect, "id", `connect-${userObject._id}`);
+              addAttribute(iconConnect, "data-connectiontype", "audio");
+              addAttribute(iconConnect, "class", "bi bi-mic-fill");
+              addAttribute(iconConnect, "data-toggle", "tooltip");
+              addAttribute(iconConnect, "data-placement", "top");
+              addAttribute(iconConnect, "data-html", "true");
+              addAttribute(iconConnect, "title", `Connect with ${displayName}`);
+            } else {
+              addAttribute(iconConnect, "id", `connect-${userObject._id}`);
+              addAttribute(iconConnect, "data-connectiontype", "video");
+              addAttribute(iconConnect, "class", "bi bi-camera-video-fill");
+              addAttribute(iconConnect, "data-toggle", "tooltip");
+              addAttribute(iconConnect, "data-placement", "top");
+              addAttribute(iconConnect, "data-html", "true");
+              addAttribute(iconConnect, "title", `Connect with ${displayName}`);
+            }
+          });
+
+          // Register click handlers
+
+          addClickHandler(iconConnect, listItemClickHandler);
+
+          addClickHandler(iconBlock, (e) => {
+            const blockee = e.target.id.split("-")[1];
+            const blocker = currentUser;
+            blockUser(blocker, blockee);
+          });
+        }
+      }
+    }
+  }
+};
+
 export const showMessage = (userDetails, iconClickHandler) => {
   const { userInfo, hasWebcam, messageBody, alertType } = userDetails;
   const messageParent = document.querySelector("#message-container");
@@ -237,6 +364,9 @@ export const showCallAlert = (userDetails) => {
   const alert = newElement("div");
   const alertCloseButton = newElement("button");
   const strong = newElement("strong");
+  const p = newElement("p");
+
+  dlog(`Alert Type:\t${alertType}`, `ui.js: showCallAlert`);
 
   /* Set attributes */
 
@@ -249,6 +379,9 @@ export const showCallAlert = (userDetails) => {
   addAttribute(alert, "role", "alert");
   addAttribute(alert, "style", "display:inline-flex;");
   addAttribute(alert, "id", "alert");
+
+  // Paragraph element
+  addAttribute(p, "style", "display:inline-flex;");
 
   // Alert close button attributes
   addAttribute(alertCloseButton, "class", "btn-close");
@@ -265,7 +398,8 @@ export const showCallAlert = (userDetails) => {
   appendChild(messageParent, alert);
 
   // Append to alert
-  appendChild(alert, strong);
+  appendChild(p, strong);
+  appendChild(alert, p);
   appendChild(alert, alertCloseButton);
 
   setTimeout(() => {
@@ -372,31 +506,28 @@ export const showMediaControls = (micControlHandler, videoControlHandler) => {
   addClickHandler(videoIcon, videoControlHandler);
 };
 
-export const showCallRequest = (userDetails, acceptCall) => {
+export const _showCallRequest = (userDetails, acceptCall) => {
   const { user, conntype, callee } = userDetails;
   const name = user.fname;
   const msg = `${name} wants to connect`;
   const messageParent = getElement("my-body");
 
-  // Conatiners
-  const alert = newElement("div");
-  const container = newElement("div");
-  const imgCol = newElement("div");
-  const paraCol = newElement("div");
-  const acceptButtonCol = newElement("div");
-  const imgColRow = newElement("div");
-  const acceptButtonColRow = newElement("div");
-  const paraColRow = newElement("div");
-
   // Elements
+  const alert = newElement("div");
+  const container1 = newElement("div");
+  const container1Message = newElement("div");
+  const container2 = newElement("div");
   const img = newElement("img");
   const para = newElement("p");
   const acceptButton = newElement("button");
-  const closeButton = newElement("button");
+  const alertCloseButton = newElement("span");
 
-  dlog(`${name} is requesting a ${conntype} connection with you`, "ui script");
-  dlog(`user props: ${stringify(user)}`, "ui script");
-  dlog(`callee object: ${stringify(callee)}`, "ui script");
+  dlog(
+    `${name} is requesting a ${conntype} connection with you`,
+    "ui.js: showCallRequest"
+  );
+  dlog(`user object: ${stringify(user)}`, "ui.js: showCallRequest");
+  dlog(`callee object: ${stringify(callee)}`, "ui: showCallRequest");
 
   if (user.photoUrl) {
     img.src = user.photoUrl;
@@ -404,56 +535,205 @@ export const showCallRequest = (userDetails, acceptCall) => {
     img.src = "/assets/graphics/silhouette.png";
   }
 
-  // Conatiners
+  // Element Attributes
   addAttribute(
     alert,
     "class",
-    "alert alert-primary alert-dismissible fade show d-inline-flex w-25 p-10"
+    "w3-panel w3-border w3-border-blue w3-card-4 w3-round w3-center w3-display-container"
   );
-  addAttribute(alert, "role", "alert");
-  addAttribute(alert, "style", "display:inline-block;position:absolute;");
-  addAttribute(container, "class", "container");
-  addAttribute(container, "style", "display:inline-grid;margin:0");
-  addAttribute(imgColRow, "class", "row");
-  addAttribute(paraColRow, "class", "row");
-  addAttribute(acceptButtonColRow, "class", "row");
-  addAttribute(imgCol, "class", "col-auto");
-  addAttribute(paraCol, "class", "col-auto");
-  addAttribute(acceptButtonCol, "class", "col-auto");
-
-  // Elements
-  addAttribute(img, "class", "img-fluid rounded-50 w-100 h-100 m-0");
+  addAttribute(alertCloseButton, "class", "w3-button w3-display-topright");
+  addAttribute(container1, "class", "w3-cell-row");
+  addAttribute(container2, "class", "w3-cell-row");
+  addAttribute(container2, "style", "margin:5px 0px;");
+  addAttribute(container1Message, "class", "w3-display-container");
   addAttribute(
     img,
-    "style",
-    "max-width:50%; max-height: 70%; margin:0; display:inline-block;"
+    "class",
+    "w3-image thumbnail w3-display-topleft w3-margin 0"
   );
-  addAttribute(para, "class", "text-center text-wrap");
-  addAttribute(acceptButton, "type", "button");
-  addAttribute(acceptButton, "class", "btn btn-success");
-  addAttribute(closeButton, "type", "button");
-  addAttribute(closeButton, "class", "btn-close");
-  addAttribute(closeButton, "data-bs-dismiss", "alert");
-  addAttribute(closeButton, "aria-label", "Close");
+  addAttribute(para, "class", "w3-display-topcenter w3-margin 0");
+  addAttribute(acceptButton, "class", "w3-cell-middle");
+  addAttribute(img, "style", "max-width:calc(100vw / 10);margin:0;");
+  addAttribute(
+    acceptButton,
+    "class",
+    "w3-button w3-border w3-border-green w3-tiny"
+  );
 
-  appendChild(container, imgColRow);
-  appendChild(container, paraColRow);
-  appendChild(container, acceptButtonColRow);
-  appendChild(imgColRow, imgCol);
-  appendChild(paraColRow, paraCol);
-  appendChild(acceptButtonColRow, acceptButtonCol);
-  appendChild(alert, container);
-  appendChild(alert, closeButton);
-  appendChild(messageParent, alert);
-  appendChild(imgCol, img);
-  appendChild(paraCol, para);
-  appendChild(acceptButtonCol, acceptButton);
-
-  para.innerText = `${msg}`;
+  // Element Inner Text
   acceptButton.innerText = `Ok`;
+  para.innerText = `${name} wants to connect with you`;
 
-  // Register click handlers
+  // Element Inner HTML
+  alertCloseButton.innerHTML = `&times;`;
+
+  // Append Elements
+  appendChild(messageParent, alert);
+  appendChild(container1Message, img);
+  appendChild(container1Message, para);
+  appendChild(container1, container1Message);
+  appendChild(container1, alertCloseButton);
+  appendChild(container2, acceptButton);
+  appendChild(alert, container1);
+  appendChild(alert, container2);
+
+  // Register accept button click handler
   addClickHandler(acceptButton, () => {
     acceptCall(user._id, callee, conntype);
   });
+
+  addClickHandler(alertCloseButton, (e) => {
+    const target = e.target;
+    const parent = target.parentElement;
+    const grandParent = parent.parentElement;
+    grandParent.remove();
+  });
+};
+
+export const __showCallRequest = (userDetails, acceptCall) => {
+  const { user, conntype, callee } = userDetails;
+  const name = user.fname;
+  const msg = `${name} wants to connect`;
+  const messageParent = getElement(`li-${callee.trim()}`)
+    ? getElement(`li-${callee.trim()}`).parentElement
+    : getElement("my-body");
+
+  // Elements
+  const alert = newElement("div");
+  const container1 = newElement("div");
+  const container1Message = newElement("div");
+  const container2 = newElement("div");
+  const img = newElement("img");
+  const para = newElement("p");
+  const acceptButton = newElement("button");
+  const alertCloseButton = newElement("span");
+
+  dlog(
+    `${name} is requesting a ${conntype} connection with you`,
+    "ui.js: showCallRequest"
+  );
+  dlog(`user object: ${stringify(user)}`, "ui.js: showCallRequest");
+  dlog(`callee object: ${stringify(callee)}`, "ui: showCallRequest");
+
+  if (user.photoUrl) {
+    img.src = user.photoUrl;
+  } else {
+    img.src = "/assets/graphics/silhouette.png";
+  }
+
+  // Element Attributes
+  addAttribute(
+    alert,
+    "class",
+    "w3-panel w3-border w3-border-blue w3-card-4 w3-round w3-center w3-display-container"
+  );
+  addAttribute(alertCloseButton, "class", "w3-button w3-display-topright");
+  addAttribute(container1, "class", "w3-cell-row");
+  addAttribute(container2, "class", "w3-cell-row");
+  addAttribute(container2, "style", "margin:5px 0px;");
+  addAttribute(container1Message, "class", "w3-display-container");
+  addAttribute(img, "class", "w3-image w3-margin 0");
+  addAttribute(para, "class", "w3-display-topcenter w3-margin 0");
+  addAttribute(acceptButton, "class", "w3-cell-middle");
+  addAttribute(img, "style", "max-width:calc(100vw / 10);margin:0;");
+  addAttribute(
+    acceptButton,
+    "class",
+    "w3-button w3-border w3-border-green w3-tiny"
+  );
+
+  // Element Inner Text
+  acceptButton.innerText = `Ok`;
+  para.innerText = `${name} wants to connect with you`;
+
+  // Element Inner HTML
+  alertCloseButton.innerHTML = `&times;`;
+
+  // Append Elements
+  appendChild(messageParent, alert);
+  appendChild(container1Message, img);
+  appendChild(container1Message, para);
+  appendChild(container1, container1Message);
+  appendChild(container1, alertCloseButton);
+  appendChild(container2, acceptButton);
+  appendChild(alert, container1);
+  appendChild(alert, container2);
+
+  // Register accept button click handler
+  addClickHandler(acceptButton, () => {
+    acceptCall(user._id, callee, conntype);
+  });
+
+  addClickHandler(alertCloseButton, (e) => {
+    const target = e.target;
+    const parent = target.parentElement;
+    const grandParent = parent.parentElement;
+    grandParent.remove();
+  });
+};
+
+export const showCallRequest = (userDetails, acceptCall) => {
+  const { user, conntype, callee } = userDetails;
+  const name = user.fname;
+  const msg = `${name} wants to connect`;
+  dlog(`${msg}`, `ui.js: showCallRequest`);
+
+  const li = getElement(`li-${user.uid}`);
+
+  if (li) {
+    const divMsg = newElement("div");
+    const divButtons = newElement("div");
+    const panel = newElement("div");
+    const acceptButton = newElement("button");
+    const closeButton = newElement("span");
+    const para = newElement("p");
+
+    // Element Attributes
+    addAttribute(divMsg, "class", "w3-cell-row");
+    addAttribute(divButtons, "class", "w3-mobile w3-cell-middle");
+    addAttribute(panel, "class", "w3-panel w3-round-large");
+    addAttribute(
+      closeButton,
+      "class",
+      "w3-button w3-display-topright w3-text-white w3-background-transparent w3-round-large w3-hover-red"
+    );
+    addAttribute(closeButton, "style", "background-color:rgba(10,10,10,0.5);");
+    addAttribute(
+      panel,
+      "style",
+      "background-color:rgba(10,10,10,0.5);background-size:cover;position:absolute;left:0;top:0;height:100%;width:100%;margin:0;"
+    );
+    addAttribute(para, "class", "w3-text-white w3-center");
+    addAttribute(
+      acceptButton,
+      "class",
+      "w3-button w3-text-white w3-border w3-border-white w3-round-large w3-hover-green"
+    );
+    addAttribute(acceptButton, "style", "background:transparent;");
+
+    // Inner Text
+    para.innerText = `${name} wants to connect`;
+    closeButton.innerHTML = `&times;`;
+    acceptButton.innerText = `Ok`;
+
+    // Append Elements
+    appendChild(li, panel);
+    appendChild(panel, divMsg);
+    appendChild(panel, closeButton);
+    appendChild(panel, divButtons);
+    appendChild(divButtons, acceptButton);
+    appendChild(divMsg, para);
+
+    // Register click handler
+    addClickHandler(acceptButton, () => {
+      acceptCall(user._id, callee, conntype);
+    });
+
+    addClickHandler(closeButton, (e) => {
+      const target = e.target;
+      const parent = target.parentElement;
+      // const grandParent = parent.parentElement;
+      parent.remove();
+    });
+  }
 };

@@ -153,7 +153,7 @@ export const updateUserProfile = asyncHandler(async (req, res) => {
   } else if (gender == "female") {
     profileUpdate.gender = "female";
   } else {
-    profileUpdate.gender = "other";
+    profileUpdate.gender = "";
   }
 
   if (dob) {
