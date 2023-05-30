@@ -201,7 +201,7 @@ export const updateUsersList = async (
           liImg.alt = `${displayName}`;
 
           // Add attributes
-          addAttribute(li, "class", "w3-bar w3-round-small");
+          addAttribute(li, "class", "w3-bar w3-round-small w3-mobile");
           addAttribute(li, "id", `li-${userObject._id}`);
           addAttribute(li, "style", "position:relative;");
 
@@ -674,7 +674,7 @@ export const __showCallRequest = (userDetails, acceptCall) => {
 
 export const showCallRequest = (userDetails, acceptCall) => {
   const { user, conntype, callee } = userDetails;
-  const name = user.fname;
+  const name = user.displayName.fname ? `${user.fname}` : `${user.uname}`;
   const msg = `${name} wants to connect`;
   dlog(`${msg}`, `ui.js: showCallRequest`);
 
