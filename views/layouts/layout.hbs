@@ -12,33 +12,39 @@
     <script type="javascript" src="https://www.w3schools.com/lib/w3.js"></script>
 </head>
 
-<body class="my-body container">
+<body class="my-body">
     {{>menu}}
     {{>messages}}
-    <div class="container-fluid">
-        {{{body}}}
+    <div class="w3-container">
+        <div class="w3-cell-row root">
+            {{{body}}}
+        </div>
     </div>
-
 </body>
 <link rel="stylesheet" href="/assets/css/style.css">
 <script src="/assets/js/bootstrap.bundle.min.js"></script>
 <script src="/assets/js/utils.js" type="module"></script>
 <script src="/assets/js/computils.js" type="module"></script>
-<script src="/assets/js/clientutils.js" type="module"></script>
+<script src="/assets/js/clientutils.js" type="module">
+</script>
+<script src="/assets/js/menueffects.js" type="module"></script>
 {{#if signedin}}
 
+{{else}} {{!-- end if signedin --}}
+
+{{/if}} {{!-- end if --}}
 {{#if enteredroom}}
 <script src="/socket.io/socket.io.js"></script>
 <script src="/assets/js/ui.js" type="module"></script>
 <script src="/assets/js/wss.js" type="module"></script>
 <script src="/assets/js/room.js" type="module"></script>
 
+{{/if}} {{!-- end enteredroom --}}
+
 {{#if peers}}
 <script src="/twilio-video.js"></script>
 <script src="/assets/js/peers.js" type="module"></script>
 {{/if}} {{!-- end peers --}}
-
-{{/if}} {{!-- end enteredroom --}}
 
 {{#if chatprofile}}
 <script src="/assets/js/chatprofile.js" type="module"></script>
@@ -48,7 +54,6 @@
 <script src="/assets/js/userprofile.js" type="module"></script>
 {{/if}} {{!-- end userprofile --}}
 
-{{else}} {{!-- end if signedin --}}
 
 {{#if landing}}
 <script src="/assets/js/main.js" type="module"></script>
@@ -61,7 +66,5 @@
 {{#if resetpassword}}
 <script src="/assets/js/resetpassword.js" type="module"></script>
 {{/if}} {{!-- end resetpassword --}}
-
-{{/if}} {{!-- end if --}}
 
 </html>

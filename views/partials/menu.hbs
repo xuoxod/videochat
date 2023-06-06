@@ -1,19 +1,21 @@
-{{#if landing}}
-{{>mainmenu}}
-{{/if}}
+<div class="w3-bar w3-light-gray w3-text-black w3-card-4 m4 s1 menu">
+    {{#if landing}}
+    {{>mainmenu}}
+    {{/if}}
 
-{{#if signedin}}
-{{>signedinmenu}}
-{{/if}}
+    {{#if signedin}}
+    {{>signedinmenu}}
+    {{/if}}
 
-{{#if userprofile}}
-{{>profilemenu}}
-{{/if}}
+    {{#if userprofile}}
+    {{>profilemenu}}
+    {{/if}}
 
-{{#if enteredroom}}
-{{>enteredroommenu}}
-{{/if}}
+    {{#if enteredroom}}
+    {{>enteredroommenu}}
+    {{/if}}
 
-{{#if chatprofile}}
-{{>chatprofilemenu}}
-{{/if}}
+    {{#if chatprofile}}
+    {{>chatprofilemenu}}
+    {{/if}}
+</div>

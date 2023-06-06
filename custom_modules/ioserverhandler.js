@@ -584,6 +584,23 @@ export default (io) => {
         }
       }
     });
+
+    socket.on("sendprivatemessage", (data) => {
+      const { from, to, message } = data;
+
+      const messageSender = userManager.getUser(from);
+      const messageReceiver = userManager.getUser(to);
+
+      if (messageSender && messageReceiver) {
+        log(
+          `${messageSender.fname} sent ${message} to ${messageReceiver.fname}\n`
+        );
+
+        io.to(messageReceiver.sid).emit("privatemessage", {
+          messageDetails: stringify({ from: messageSender, text: message }),
+        });
+      }
+    });
   });
 };
 

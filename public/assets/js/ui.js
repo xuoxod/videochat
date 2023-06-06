@@ -11,13 +11,15 @@ import {
   countChildren,
   removeChild,
   append,
+  getLastChild,
 } from "./computils.js";
 
 export const updateUsersList = async (
   userList,
   listItemClickHandler,
   detectWebcam,
-  blockUser
+  blockUser,
+  sendMessage
 ) => {
   const usersParent = document.querySelector("#users-parent");
   const currentUser = getElement("rmtid-input").value;
@@ -55,6 +57,8 @@ export const updateUsersList = async (
           const divConnectIcon = newElement("div");
           const divBlockIcon = newElement("div");
           const divFriendIcon = newElement("div");
+          const divSendMessage = newElement("div");
+          const iconSendMessage = newElement("i");
 
           const displayName = userObject.displayName.fname
             ? `${cap(userObject.fname)}`
@@ -77,13 +81,34 @@ export const updateUsersList = async (
           addAttribute(divName, "class", "w3-bar-item");
           addAttribute(divConnect, "class", "w3-bar-item");
           addAttribute(divBlock, "class", "w3-bar-item");
+          addAttribute(divSendMessage, "class", "w3-bar-item");
 
           addAttribute(iconBlock, "id", `block-${userObject._id}`);
-          addAttribute(iconBlock, "class", "bi bi-eye-slash-fill");
+          addAttribute(
+            iconBlock,
+            "class",
+            "bi bi-eye-slash-fill w3-hover-opacity"
+          );
           addAttribute(iconBlock, "data-toggle", "tooltip");
           addAttribute(iconBlock, "data-placement", "top");
           addAttribute(iconBlock, "data-html", "true");
           addAttribute(iconBlock, "title", `Block ${displayName}`);
+
+          addAttribute(
+            iconSendMessage,
+            "class",
+            "bi bi-chat-square-dots w3-hover-opacity"
+          );
+          addAttribute(iconSendMessage, "id", `send-${userObject._id}`);
+          addAttribute(iconSendMessage, "data-connectiontype", "message");
+          addAttribute(iconSendMessage, "data-toggle", "tooltip");
+          addAttribute(iconSendMessage, "data-placement", "top");
+          addAttribute(iconSendMessage, "data-html", "true");
+          addAttribute(
+            iconSendMessage,
+            "title",
+            `Send ${displayName} a message`
+          );
 
           addAttribute(acceptCallIcon, "class", "bi bi-check-lg text-success");
 
@@ -98,7 +123,9 @@ export const updateUsersList = async (
           appendChild(li, liImg);
           appendChild(li, divName);
           appendChild(li, divConnect);
+          appendChild(li, divSendMessage);
           appendChild(li, divBlock);
+          appendChild(divSendMessage, iconSendMessage);
           appendChild(divName, spanName);
           appendChild(divConnect, iconConnect);
           appendChild(divBlock, iconBlock);
@@ -109,7 +136,11 @@ export const updateUsersList = async (
             if (!results) {
               addAttribute(iconConnect, "id", `connect-${userObject._id}`);
               addAttribute(iconConnect, "data-connectiontype", "audio");
-              addAttribute(iconConnect, "class", "bi bi-mic-fill");
+              addAttribute(
+                iconConnect,
+                "class",
+                "bi bi-mic-fill w3-hover-opacity"
+              );
               addAttribute(iconConnect, "data-toggle", "tooltip");
               addAttribute(iconConnect, "data-placement", "top");
               addAttribute(iconConnect, "data-html", "true");
@@ -117,7 +148,11 @@ export const updateUsersList = async (
             } else {
               addAttribute(iconConnect, "id", `connect-${userObject._id}`);
               addAttribute(iconConnect, "data-connectiontype", "video");
-              addAttribute(iconConnect, "class", "bi bi-camera-video-fill");
+              addAttribute(
+                iconConnect,
+                "class",
+                "bi bi-camera-video-fill w3-hover-opacity"
+              );
               addAttribute(iconConnect, "data-toggle", "tooltip");
               addAttribute(iconConnect, "data-placement", "top");
               addAttribute(iconConnect, "data-html", "true");
@@ -134,6 +169,39 @@ export const updateUsersList = async (
             const blocker = currentUser;
             blockUser(blocker, blockee);
           });
+
+          addClickHandler(iconSendMessage, () => {
+            if (getElement("messenger")) {
+              const messengerElement = getElement("messenger");
+              const messengerHeader = getElement("messenger-header");
+
+              messengerElement.style.width = "50%";
+              messengerElement.style.display = "block";
+              messengerHeader.innerText = `Send ${displayName} a message`;
+            }
+          });
+
+          if (getElement("messenger-send-button")) {
+            addClickHandler(getElement("messenger-send-button"), () => {
+              if (getElement("messenger-message").value) {
+                const messengerElement = getElement("messenger");
+                const messengerHeader = getElement("messenger-header");
+                const messengerMessage = getElement("messenger-message");
+                const messageDetails = {};
+
+                messageDetails.from = `${currentUser}`;
+                messageDetails.to = userObject._id;
+                messageDetails.message = messengerMessage.value;
+
+                sendMessage(messageDetails);
+
+                messengerHeader.innerText = "";
+                messengerMessage.value = "";
+                messengerElement.style.width = "0%";
+                messengerElement.style.display = "none";
+              }
+            });
+          }
         }
       }
     }
@@ -376,49 +444,57 @@ export const showCallRequest = (userDetails, acceptCall) => {
 
   const li = getElement(`li-${user.uid}`);
 
+  if (countChildren(li) > 5) {
+    removeChild(li, getLastChild(li));
+  }
+
   if (li) {
-    const divMsg = newElement("div");
-    const divButtons = newElement("div");
-    const panel = newElement("div");
+    const panelMsg = newElement("div");
+    const panelButtons = newElement("div");
+    const panelMain = newElement("div");
+    const panelContent = newElement("div");
     const acceptButton = newElement("button");
     const closeButton = newElement("span");
     const para = newElement("p");
 
+    // Panel Attributes
+    addAttribute(panelMsg, "class", "w3-mobile w3-round-large w3-cell-row");
+    addAttribute(panelButtons, "class", "w3-mobile w3-round-large w3-cell-row");
+    addAttribute(panelMain, "class", "w3-mobile w3-round-large w3-container");
+    addAttribute(
+      panelMain,
+      "style",
+      "background-color:rgba(5,5,5,0.5);background-size:cover;position:absolute;left:0;top:0;height:100%;width:100%;margin:0;"
+    );
+
     // Element Attributes
-    addAttribute(divMsg, "class", "w3-cell-row");
-    addAttribute(divButtons, "class", "w3-mobile w3-cell-center");
-    addAttribute(panel, "class", "w3-panel w3-round-large w3-cell-row");
     addAttribute(
       closeButton,
       "class",
-      "w3-button w3-display-topright w3-text-white w3-opacity-min w3-circle w3-hover-white w3-text-hover-black"
+      "w3-button w3-display-topright w3-center-align w3-text-white w3-opacity-min w3-circle w3-hover-white w3-text-hover-black"
     );
     addAttribute(closeButton, "style", "background-color:rgba(10,10,10,0.5);");
-    addAttribute(
-      panel,
-      "style",
-      "background-color:rgba(10,10,10,0.5);background-size:cover;position:absolute;left:0;top:0;height:100%;width:100%;margin:0;"
-    );
-    addAttribute(para, "class", "w3-text-white w3-center-align");
+    addAttribute(para, "class", "w3-text-white w3-center-align w3-cell-middle");
     addAttribute(
       acceptButton,
       "class",
-      "w3-button w3-text-white w3-border w3-border-white w3-hover-border-black w3-opacity-min w3-round-large w3-hover-white w3-cell-center"
+      "w3-button w3-text-white w3-border w3-border-white w3-opacity-min w3-round-large w3-hover-white w3-cell-middle"
     );
     addAttribute(acceptButton, "style", "background:transparent;");
 
     // Inner Text
-    para.innerText = `${name} wants to connect`;
+    para.innerHTML = `<strong>${cap(name)} wants to connect</strong>`;
     closeButton.innerHTML = `&times;`;
-    acceptButton.innerText = `Ok`;
+    acceptButton.innerHTML = `<strong>Accept</strong>`;
 
     // Append Elements
-    appendChild(li, panel);
-    appendChild(panel, divMsg);
-    appendChild(panel, closeButton);
-    appendChild(panel, divButtons);
-    appendChild(divButtons, acceptButton);
-    appendChild(divMsg, para);
+    appendChild(li, panelMain);
+    appendChild(panelMain, panelContent);
+    appendChild(panelContent, panelMsg);
+    appendChild(panelContent, closeButton);
+    appendChild(panelMain, panelButtons);
+    appendChild(panelButtons, acceptButton);
+    appendChild(panelMsg, para);
 
     // Register click handler
     addClickHandler(acceptButton, () => {
@@ -428,8 +504,165 @@ export const showCallRequest = (userDetails, acceptCall) => {
     addClickHandler(closeButton, (e) => {
       const target = e.target;
       const parent = target.parentElement;
-      // const grandParent = parent.parentElement;
-      parent.remove();
+      const grandParent = parent.parentElement;
+      grandParent.remove();
+    });
+  }
+};
+
+export const showPrivateMessageAlert = (userDetails) => {
+  const { from, text } = parse(userDetails);
+  const userName = from.displayName.fname ? from.fname : from.uname;
+  const userId = from._id;
+  const li = getElement(`li-${userId}`);
+
+  if (countChildren(li) > 5) {
+    removeChild(li, getLastChild(li));
+  }
+
+  if (li) {
+    const panelMsg = newElement("div");
+    const panelButtons = newElement("div");
+    const panelMain = newElement("div");
+    const panelContent = newElement("div");
+    const showMessageButton = newElement("button");
+    const closeButton = newElement("span");
+    const para = newElement("p");
+
+    // Panel Attributes
+    addAttribute(panelMsg, "class", "w3-mobile w3-round-large w3-cell-row");
+    addAttribute(panelButtons, "class", "w3-mobile w3-round-large w3-cell-row");
+    addAttribute(panelMain, "class", "w3-mobile w3-round-large w3-container");
+    addAttribute(
+      panelMain,
+      "style",
+      "background-color:rgba(5,5,5,0.5);background-size:cover;position:absolute;left:0;top:0;height:100%;width:100%;margin:0;"
+    );
+
+    // Element Attributes
+    addAttribute(
+      closeButton,
+      "class",
+      "w3-button w3-display-topright w3-center-align w3-text-white w3-opacity-min w3-circle w3-hover-white w3-text-hover-black"
+    );
+    addAttribute(closeButton, "style", "background-color:rgba(10,10,10,0.5);");
+    addAttribute(para, "class", "w3-text-white w3-center-align w3-cell-middle");
+    addAttribute(
+      showMessageButton,
+      "class",
+      "w3-button w3-text-white w3-border w3-border-white w3-opacity-min w3-round-large w3-hover-white w3-middle"
+    );
+    addAttribute(showMessageButton, "style", "background:transparent;");
+
+    // Inner Text
+    para.innerHTML = `<strong>${cap(userName)} sent you a message`;
+    closeButton.innerHTML = `&times;`;
+    showMessageButton.innerHTML = `<strong>Accept</strong>`;
+
+    // Append Elements
+    appendChild(li, panelMain);
+    appendChild(panelMain, panelContent);
+    appendChild(panelContent, panelMsg);
+    appendChild(panelContent, closeButton);
+    appendChild(panelMain, panelButtons);
+    appendChild(panelButtons, showMessageButton);
+    appendChild(panelMsg, para);
+
+    // Register click handler
+
+    addClickHandler(showMessageButton, () => {
+      dlog(
+        `\n\tMessage from ${userName}\n\tMessage:  ${text}\n`,
+        `ui.js: showPrivateMessageAlert`
+      );
+
+      panelMain.remove();
+
+      if (!getElement(`messenger-${from._id}`)) {
+        const messengerContainer = newElement("div");
+        const messageContainer = newElement("div");
+        const inputContainer = newElement("div");
+        const messagePara = newElement("p");
+        const input = newElement("input");
+        const sendButton = newElement("button");
+        const messengerCloseButton = newElement("span");
+
+        // add attributes
+
+        addAttribute(
+          messengerContainer,
+          "class",
+          "w3-mobile w3-round-large w3-container"
+        );
+        addAttribute(messengerContainer, "id", `messenger-${from._id}`);
+        addAttribute(
+          messengerContainer,
+          "style",
+          "background-color:rgba(5,5,5,0.5);background-size:cover;position:absolute;top:0;left:0;height:100%;width:100%;margin:0;overflow:scroll;"
+        );
+
+        addAttribute(inputContainer, "class", "w3-row");
+
+        addAttribute(messageContainer, "class", "w3-row");
+        addAttribute(messageContainer, "id", `message-${from._id}`);
+
+        addAttribute(
+          para,
+          "class",
+          "w3-card w3-round-xxlarge w3-text-white w3-middle"
+        );
+        addAttribute(para, "style", "word-wrap:break-word;width:27%;");
+
+        addAttribute(
+          messengerCloseButton,
+          "class",
+          "w3-button w3-display-topright w3-center-align w3-text-white w3-opacity-min w3-circle w3-hover-white w3-text-hover-black"
+        );
+        addAttribute(messengerCloseButton, "style", "margin:10px;");
+
+        addAttribute(
+          input,
+          "class",
+          "w3-input w3-left w3-small w3-round-xxlarge"
+        );
+        addAttribute(input, "type", "text");
+        addAttribute(input, "style", "width:50%; height:35px;");
+
+        addAttribute(
+          sendButton,
+          "class",
+          "w3-button w3-border w3-border-white w3-text-white w3-round-xxlarge w3-small w3-margin-left w3-hover-white w3-text-hover-black w3-middle"
+        );
+
+        // inner HTML
+        messagePara.innerHTML = `<small class="w3-text-white"><strong>${text}</strong></small>`;
+        sendButton.innerHTML = `<small class="w3-text-white"><strong>Send</strong></small>`;
+
+        // inner text
+        messengerCloseButton.innerHTML = `&times;`;
+
+        // append elements
+
+        appendChild(li, messengerContainer);
+        appendChild(messengerContainer, messengerCloseButton);
+        appendChild(messengerContainer, messageContainer);
+        appendChild(messageContainer, messagePara);
+        appendChild(messengerContainer, inputContainer);
+        appendChild(inputContainer, input);
+        appendChild(inputContainer, sendButton);
+
+        // register click events
+        addClickHandler(messengerCloseButton, () => {
+          messengerContainer.remove();
+        });
+      }
+    });
+
+    addClickHandler(closeButton, (e) => {
+      const target = e.target;
+      const parent = target.parentElement;
+      const grandParent = parent.parentElement;
+      grandParent.remove();
     });
   }
 };

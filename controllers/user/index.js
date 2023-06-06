@@ -55,7 +55,7 @@ export const readUserProfile = asyncHandler(async (req, res) => {
     user: req.user.withoutPassword(),
     hasDoc: doc != null,
     userprofile: true,
-    signedin: true,
+    // signedin: true,
   });
 });
 

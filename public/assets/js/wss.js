@@ -7,6 +7,7 @@ import {
   showCallAlert,
   showCallResponse,
   showCallRequest,
+  showPrivateMessageAlert,
 } from "./ui.js";
 
 let socketIO = null,
@@ -98,7 +99,23 @@ export const registerSocketEvents = (socket) => {
       socket.emit("userclicked", userDetails);
     };
 
-    updateUsersList(arrUsers, listItemClickHandler, detectWebcam, blockUser);
+    const sendMessage = (messageDetails) => {
+      const { from, to, message } = messageDetails;
+
+      dlog(
+        `\tMessage Details\n\t\tFrom:  ${from}\n\t\tTo:  ${to}\n\t\tMessage:  ${message}\n\n`
+      );
+
+      socket.emit("sendprivatemessage", messageDetails);
+    };
+
+    updateUsersList(
+      arrUsers,
+      listItemClickHandler,
+      detectWebcam,
+      blockUser,
+      sendMessage
+    );
   });
 
   socket.on("registered", (data) => {
@@ -175,6 +192,11 @@ export const registerSocketEvents = (socket) => {
     userDetails = parse(data);
     const { roomName, connectionType, sender, receiver } = userDetails;
     getRoomTokenAndEnterRoom(roomName, connectionType, sender, receiver._id);
+  });
+
+  socket.on("privatemessage", (data) => {
+    log(data.messageDetails);
+    showPrivateMessageAlert(data.messageDetails);
   });
 };
 
@@ -566,4 +588,4 @@ if (getElement("cloak") && getElement("cloak-label")) {
   });
 }
 
-window.onload = setTimeout(() => checkOnlineStatus(), [1500]);
+window.onload = setTimeout(() => checkOnlineStatus(), [500]);

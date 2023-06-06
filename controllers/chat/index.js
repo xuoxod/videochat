@@ -159,7 +159,7 @@ export const enterRoom = asyncHandler(async (req, res) => {
           uid: doc.user._id,
           fname: doc.user.fname,
           enteredroom: true,
-          signedin: true,
+          // signedin: true,
           theUnblockedUser: `${unblockeduserid}`,
           online: doc.online,
           haveAnUnblockedUser: true,
@@ -170,7 +170,7 @@ export const enterRoom = asyncHandler(async (req, res) => {
           uid: doc.user._id,
           fname: doc.user.fname,
           enteredroom: true,
-          signedin: true,
+          // signedin: true,
           online: doc.online,
           haveAnUnblockedUser: false,
         });
@@ -201,7 +201,7 @@ export const enterRoom = asyncHandler(async (req, res) => {
             uid: newDoc.user,
             fname: req.user.fname,
             enteredroom: true,
-            signedin: true,
+            // signedin: true,
             online: newDoc.online,
             haveAnUnblockedUser: false,
           });
@@ -453,7 +453,7 @@ export const viewProfile = asyncHandler(async (req, res) => {
       title: `Profile`,
       hasDoc: false,
       chatprofile: true,
-      signedin: true,
+      // signedin: true,
     });
   } else {
     const docs = await Chat.find().select("uname");
@@ -466,7 +466,7 @@ export const viewProfile = asyncHandler(async (req, res) => {
       profile: doc,
       uid,
       chatprofile: true,
-      signedin: true,
+      // signedin: true,
       unames: docs,
       unblockedUser: unblockeduser != null,
       unblockeduser,
