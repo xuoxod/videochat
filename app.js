@@ -70,6 +70,7 @@ const sessionMiddleware = session({
   saveUninitialized: true,
   store: store,
   expires: expiryDate,
+  cookie: { secure: true },
 });
 const nanoid = customAlphabet("02468ouqtyminv", 13);
 const __dirname = path.resolve(".");
@@ -98,17 +99,6 @@ app.engine(
 );
 
 app.set("view engine", ".hbs");
-
-/* app.use(
-  cookieSession({
-    name: "__session",
-    keys: ["key1"],
-    maxAge: 24 * 60 * 60 * 100,
-    secure: true,
-    httpOnly: true,
-    sameSite: "none",
-  })
-); */
 
 // Middleware setup
 app.use(bodyParser.urlencoded({ extended: false }));

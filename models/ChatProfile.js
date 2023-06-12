@@ -34,11 +34,20 @@ const chatSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    friendsOnly: {
+      type: Boolean,
+      default: false,
+    },
     description: {
       type: String,
       default: "",
     },
     friends: [
+      {
+        type: String,
+      },
+    ],
+    befriendedBy: [
       {
         type: String,
       },

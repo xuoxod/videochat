@@ -30,6 +30,15 @@
     cursor: pointer;
 }
 
+.bi,
+.fs {
+    font-size: 2rem;
+}
+
+.bi {
+    margin-left: 25px;
+}
+
 
 .local-video-container {
     position: absolute;

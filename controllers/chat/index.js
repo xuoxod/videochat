@@ -391,6 +391,46 @@ export const unblockUser = asyncHandler(async (req, res) => {
   }
 });
 
+//  @desc           Add user ID to friend list
+//  @route          POST /chat/befriend/
+//  @access         Private
+//  @returns        json
+export const befriendUser = asyncHandler(async (req, res) => {
+  logger.info(`POST: /chat/user/befriend`);
+
+  const { befriender, befriendee } = req.body;
+
+  try {
+    // Add blockee to blocker's blockedUsers list
+    const befrienderFriendList = await Chat.findOneAndUpdate(
+      { user: `${befriender}` },
+      { $push: { friends: `${befriendee}` } },
+      { new: true }
+    ).populate("user");
+
+    // dlog(`Blocker List:\t${blockerBlockedUserList} `);
+
+    // Add blocker to blockee's blockedBy list
+    const befriendeeBefriendedByList = await Chat.findOneAndUpdate(
+      { user: `${befriendee}` },
+      { $push: { befriendedBy: `${befriender}` } },
+      { new: true }
+    ).populate("user");
+
+    // dlog(`Blocked By List:\t${blockeeBlockedByList} `);
+
+    return res.json({
+      status: true,
+      befrienderdoc: befrienderFriendList,
+      befriendeedoc: befriendeeBefriendedByList,
+    });
+  } catch (err) {
+    dlog(`Server side error happened while attempting to block user`);
+    dlog(err);
+    return res.json({ status: false, cause: err });
+  }
+});
+
 //  @desc           Create user chat profile
 //  @route          GET /chat/profile/create/:uid
 //  @access         Private

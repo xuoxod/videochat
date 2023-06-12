@@ -3,6 +3,7 @@ import { log, dlog, tlog } from "./clientutils.js";
 import { getElement, addAttribute, addClickHandler } from "./computils.js";
 import {
   updateUsersList,
+  updateFriendsList,
   showMessage,
   showCallAlert,
   showCallResponse,
@@ -72,6 +73,9 @@ export const registerSocketEvents = (socket) => {
     const currentUser = pUsers[currentUserInputValue];
     const currentUserBlockedUsers = currentUser.blockedUsers;
     const arrUsers = [];
+
+    /* TODO:
+        Check if current user visibility to only friends is true */
 
     for (const u in pUsers) {
       const user = pUsers[u];
@@ -310,6 +314,103 @@ function unblockUser(blockerUid, blockeeUid) {
     };
 
     xmlHttp.send(`blocker=${blockerUid}&blockee=${blockeeUid}`, true);
+  } catch (err) {
+    tlog(err);
+    return;
+  }
+}
+
+function befriendUser(befrienderUid, befriendeeUid) {
+  let xmlHttp;
+  try {
+    xmlHttp = new XMLHttpRequest();
+
+    xmlHttp.open("POST", "/chat/befriend", true);
+
+    xmlHttp.setRequestHeader(
+      "Content-type",
+      "application/x-www-form-urlencoded"
+    );
+
+    xmlHttp.onload = () => {
+      const responseText = xmlHttp.responseText;
+
+      if (responseText) {
+        const responseJson = parse(responseText);
+        const status = responseJson.status;
+
+        if (status) {
+          const { befrienderdoc, befriendeedoc } = responseJson;
+
+          userDetails = {};
+
+          userDetails.befriender = {
+            befrienderUid,
+            befrienderDoc: befrienderdoc,
+          };
+
+          userDetails.befriendee = {
+            befriendeeUid,
+            befriendeeDoc: befriendeedoc,
+          };
+
+          socketIO.emit("ibefriendedauser", userDetails);
+        } else {
+          dlog(`Something went wrong befriending user`);
+        }
+        return;
+      }
+    };
+
+    xmlHttp.send(
+      `befriender=${befrienderUid}&befriendee=${befriendeeUid}`,
+      true
+    );
+  } catch (err) {
+    tlog(err);
+    return;
+  }
+}
+
+function unbefriendUser(unbefrienderUid, unbefriendeeUid) {
+  let xmlHttp;
+
+  try {
+    xmlHttp = new XMLHttpRequest();
+
+    xmlHttp.open("POST", "/chat/unbefriend", true);
+
+    xmlHttp.setRequestHeader(
+      "Content-type",
+      "application/x-www-form-urlencoded"
+    );
+
+    xmlHttp.onload = () => {
+      const responseText = xmlHttp.responseText;
+
+      if (responseText) {
+        // log(`\n\tResponse Text: ${stringify(responseText)}\n`);
+        const responseJson = parse(responseText);
+        const status = responseJson.status;
+
+        if (status) {
+          userDetails = {};
+
+          userDetails.unbefriender = unbefrienderUid;
+          userDetails.unbefriendee = unbefriendeeUid;
+
+          socketIO.emit("iunbefriendedauser", userDetails);
+        } else {
+          dlog(`Something went wrong unbefriending user`);
+        }
+        return;
+      }
+    };
+
+    xmlHttp.send(
+      `unbefriender=${unbefrienderUid}&unbefriendee=${unbefriendeeUid}`,
+      true
+    );
   } catch (err) {
     tlog(err);
     return;
@@ -588,4 +689,4 @@ if (getElement("cloak") && getElement("cloak-label")) {
   });
 }
 
-window.onload = setTimeout(() => checkOnlineStatus(), [500]);
+window.onload = setTimeout(() => checkOnlineStatus(), [250]);

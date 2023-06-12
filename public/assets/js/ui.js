@@ -14,7 +14,7 @@ import {
   getLastChild,
 } from "./computils.js";
 
-export const updateUsersList = async (
+export const _updateUsersList = async (
   userList,
   listItemClickHandler,
   detectWebcam,
@@ -40,12 +40,17 @@ export const updateUsersList = async (
         );
 
         if (blockedByIndex == -1) {
+          const friendsIndex = userObject.friends.findIndex(
+            (x) => x == currentUser
+          );
+
           // Create comps
           const li = newElement("li");
           const liImg = newElement("img");
           const divName = newElement("div");
           const spanName = newElement("span");
           const divConnect = newElement("div");
+          const divIconFriend = newElement("div");
           const iconConnect = newElement("i");
           const divBlock = newElement("div");
           const iconBlock = newElement("i");
@@ -59,6 +64,7 @@ export const updateUsersList = async (
           const divFriendIcon = newElement("div");
           const divSendMessage = newElement("div");
           const iconSendMessage = newElement("i");
+          const iconFriend = newElement("i");
 
           const displayName = userObject.displayName.fname
             ? `${cap(userObject.fname)}`
@@ -67,7 +73,29 @@ export const updateUsersList = async (
           liImg.alt = `${displayName}`;
 
           // Add attributes
-          addAttribute(li, "class", "w3-bar w3-round-small w3-mobile");
+          if (friendsIndex !== -1) {
+            addAttribute(iconFriend, "class", "bi bi-person-fill-dash");
+            addAttribute(iconFriend, "data-toggle", "tooltip");
+            addAttribute(iconFriend, "data-placement", "top");
+            addAttribute(iconFriend, "data-html", "true");
+            addAttribute(
+              iconFriend,
+              "title",
+              `Add ${displayName} to friend list`
+            );
+          } else {
+            addAttribute(iconFriend, "class", "bi bi-person-fill-plus");
+            addAttribute(iconFriend, "class", "bi bi-person-dash");
+            addAttribute(iconFriend, "data-toggle", "tooltip");
+            addAttribute(iconFriend, "data-placement", "top");
+            addAttribute(iconFriend, "data-html", "true");
+            addAttribute(
+              iconFriend,
+              "title",
+              `Remove ${displayName} from friend list`
+            );
+          }
+          addAttribute(li, "class", "w3-bar w3-round-large w3-mobile");
           addAttribute(li, "id", `li-${userObject._id}`);
           addAttribute(li, "style", "position:relative;");
 
@@ -82,13 +110,10 @@ export const updateUsersList = async (
           addAttribute(divConnect, "class", "w3-bar-item");
           addAttribute(divBlock, "class", "w3-bar-item");
           addAttribute(divSendMessage, "class", "w3-bar-item");
+          addAttribute(divFriendIcon, "class", "w3-bar-item");
 
           addAttribute(iconBlock, "id", `block-${userObject._id}`);
-          addAttribute(
-            iconBlock,
-            "class",
-            "bi bi-eye-slash-fill w3-hover-opacity"
-          );
+          addAttribute(iconBlock, "class", "bi bi-person-fill-slash");
           addAttribute(iconBlock, "data-toggle", "tooltip");
           addAttribute(iconBlock, "data-placement", "top");
           addAttribute(iconBlock, "data-html", "true");
@@ -125,12 +150,14 @@ export const updateUsersList = async (
           appendChild(li, divConnect);
           appendChild(li, divSendMessage);
           appendChild(li, divBlock);
+          appendChild(li, divFriendIcon);
           appendChild(divSendMessage, iconSendMessage);
           appendChild(divName, spanName);
           appendChild(divConnect, iconConnect);
           appendChild(divBlock, iconBlock);
+          appendChild(divFriendIcon, iconFriend);
 
-          spanName.innerHTML = `<strong>${displayName}</strong>`;
+          spanName.innerHTML = `<strong class="fs">${displayName}</strong>`;
 
           detectWebcam((results) => {
             if (!results) {
@@ -201,6 +228,504 @@ export const updateUsersList = async (
                 messengerElement.style.display = "none";
               }
             });
+          }
+        }
+      }
+    }
+  }
+};
+
+export const updateUsersList = async (
+  userList,
+  listItemClickHandler,
+  detectWebcam,
+  blockUser,
+  sendMessage
+) => {
+  const usersParent = document.querySelector("#users-parent");
+  const currentUser = getElement("rmtid-input").value;
+
+  // if (userList.length > 0) {
+  removeChildren(usersParent);
+  for (const user in userList) {
+    const userObject = userList[user];
+
+    if (userObject.online) {
+      const blockedUsersIndex = userObject.blockedUsers.findIndex(
+        (x) => x == currentUser
+      );
+
+      if (blockedUsersIndex == -1) {
+        const blockedByIndex = userObject.blockedBy.findIndex(
+          (x) => x == currentUser
+        );
+
+        if (blockedByIndex == -1) {
+          // Create comps
+          const li = newElement("li");
+
+          const liImg = newElement("img");
+          const divLiImg = newElement("div");
+
+          const spanName = newElement("span");
+          const divName = newElement("div");
+
+          const divTop = newElement("div");
+          const divBottom = newElement("div");
+          const divContent = newElement("div");
+
+          const divConnect = newElement("div");
+          const divSendMessage = newElement("div");
+          const divBlock = newElement("div");
+          const divFriendIcon = newElement("div");
+
+          const iconConnect = newElement("i");
+          const iconSendMessage = newElement("i");
+          const iconBlock = newElement("i");
+          const iconFriend = newElement("i");
+
+          const acceptCallIcon = newElement("i");
+
+          const displayName = userObject.displayName.fname
+            ? `${cap(userObject.fname)}`
+            : `${cap(userObject.uname)}`;
+
+          liImg.alt = `${displayName}`;
+
+          const friendsIndex = userObject.friends.findIndex(
+            (x) => x == currentUser
+          );
+
+          /* add attributes  */
+
+          detectWebcam((results) => {
+            if (!results) {
+              addAttribute(iconConnect, "id", `connect-${userObject._id}`);
+              addAttribute(iconConnect, "data-connectiontype", "audio");
+              addAttribute(
+                iconConnect,
+                "class",
+                "bi bi-mic-fill w3-hover-opacity w3-cell"
+              );
+              addAttribute(iconConnect, "data-toggle", "tooltip");
+              addAttribute(iconConnect, "data-placement", "top");
+              addAttribute(iconConnect, "data-html", "true");
+              addAttribute(iconConnect, "title", `Connect with ${displayName}`);
+            } else {
+              addAttribute(iconConnect, "id", `connect-${userObject._id}`);
+              addAttribute(iconConnect, "data-connectiontype", "video");
+              addAttribute(
+                iconConnect,
+                "class",
+                "bi bi-camera-video-fill w3-hover-opacity w3-cell"
+              );
+              addAttribute(iconConnect, "data-toggle", "tooltip");
+              addAttribute(iconConnect, "data-placement", "top");
+              addAttribute(iconConnect, "data-html", "true");
+              addAttribute(iconConnect, "title", `Connect with ${displayName}`);
+            }
+          });
+
+          if (friendsIndex !== -1) {
+            addAttribute(iconFriend, "class", "bi bi-person-fill-dash w3-cell");
+            addAttribute(iconFriend, "data-toggle", "tooltip");
+            addAttribute(iconFriend, "data-placement", "top");
+            addAttribute(iconFriend, "data-html", "true");
+            addAttribute(
+              iconFriend,
+              "title",
+              `Add ${displayName} to friend list`
+            );
+          } else {
+            addAttribute(iconFriend, "class", "bi bi-person-fill-add w3-cell");
+            // addAttribute(iconFriend, "class", "bi bi-person-dash");
+            addAttribute(iconFriend, "data-toggle", "tooltip");
+            addAttribute(iconFriend, "data-placement", "top");
+            addAttribute(iconFriend, "data-html", "true");
+            addAttribute(
+              iconFriend,
+              "title",
+              `Remove ${displayName} from friend list`
+            );
+          }
+
+          // list item
+          addAttribute(li, "class", "w3-bar w3-round-large w3-mobile");
+          addAttribute(li, "id", `li-${userObject._id}`);
+          addAttribute(li, "style", "position:relative;width:100%;");
+
+          // div containers
+          addAttribute(divContent, "class", "w3-container");
+          addAttribute(divTop, "class", "w3-cell-row");
+          addAttribute(divBottom, "class", "w3-cell-row");
+
+          addAttribute(divLiImg, "class", "w3-cell w3-cell-middle");
+          addAttribute(divName, "class", "w3-cell w3-mobile");
+
+          addAttribute(divConnect, "class", "w3-container w3-cell");
+          addAttribute(divConnect, "style", "display:inline-block;");
+          addAttribute(divSendMessage, "class", "w3-container w3-cell");
+          addAttribute(divSendMessage, "style", "display:inline-block;");
+          addAttribute(divBlock, "class", "w3-container w3-cell");
+          addAttribute(divBlock, "style", "display:inline-block;");
+          addAttribute(divFriendIcon, "class", "w3-container w3-cell");
+          addAttribute(divFriendIcon, "style", "display:inline-block;");
+
+          /* components */
+
+          // list image
+          addAttribute(
+            liImg,
+            "class",
+            "w3-bar-item w3-circle w3-middle w3-margin-bottom w3-cell"
+          );
+          addAttribute(liImg, "style", "width:85px;margin:0;margin:0;");
+          addAttribute(liImg, "data-toggle", "tooltip");
+          addAttribute(liImg, "data-placement", "top");
+          addAttribute(liImg, "data-html", "true");
+          addAttribute(liImg, "title", `${displayName}`);
+
+          // span name
+          addAttribute(spanName, "class", "w3-right");
+
+          // block icon
+          addAttribute(iconBlock, "id", `block-${userObject._id}`);
+          addAttribute(iconBlock, "class", "bi bi-person-fill-slash w3-cell");
+          addAttribute(iconBlock, "data-toggle", "tooltip");
+          addAttribute(iconBlock, "data-placement", "top");
+          addAttribute(iconBlock, "data-html", "true");
+          addAttribute(iconBlock, "title", `Block ${displayName}`);
+
+          // send message icon
+          addAttribute(
+            iconSendMessage,
+            "class",
+            "bi bi-chat-square-dots w3-hover-opacity w3-cell"
+          );
+          addAttribute(iconSendMessage, "id", `send-${userObject._id}`);
+          addAttribute(iconSendMessage, "data-connectiontype", "message");
+          addAttribute(iconSendMessage, "data-toggle", "tooltip");
+          addAttribute(iconSendMessage, "data-placement", "top");
+          addAttribute(iconSendMessage, "data-html", "true");
+          addAttribute(
+            iconSendMessage,
+            "title",
+            `Send ${displayName} a message`
+          );
+
+          // accept connection icon
+          addAttribute(acceptCallIcon, "class", "bi bi-check-lg text-success");
+
+          // image src
+          if (userObject.photoUrl) {
+            liImg.src = userObject.photoUrl;
+          } else {
+            liImg.src = "/assets/graphics/silhouette.png";
+          }
+
+          // Append comps
+          appendChild(usersParent, li);
+          appendChild(li, divContent);
+          appendChild(divContent, divTop);
+          appendChild(divContent, divBottom);
+
+          // top div
+          appendChild(divTop, divLiImg);
+          appendChild(divTop, divName);
+
+          // bottom div
+          appendChild(divBottom, divConnect);
+          appendChild(divBottom, divSendMessage);
+          appendChild(divBottom, divBlock);
+          appendChild(divBottom, divFriendIcon);
+
+          // connect div
+          appendChild(divConnect, iconConnect);
+
+          // send message div
+          appendChild(divSendMessage, iconSendMessage);
+
+          // block user div
+          appendChild(divBlock, iconBlock);
+
+          // friend div
+          appendChild(divFriendIcon, iconFriend);
+
+          // div image
+          appendChild(divLiImg, liImg);
+
+          // div name
+          appendChild(divName, spanName);
+
+          // div send message
+          appendChild(divSendMessage, iconSendMessage);
+
+          // div block user
+          appendChild(divBlock, iconBlock);
+
+          // div friend icon
+          appendChild(divFriendIcon, iconFriend);
+
+          // inner HTML
+          spanName.innerHTML = `<strong class="fs">${displayName}</strong>`;
+
+          /* Register click handlers */
+
+          // icon connect
+          addClickHandler(iconConnect, listItemClickHandler);
+
+          // icon block user
+          addClickHandler(iconBlock, (e) => {
+            const blockee = e.target.id.split("-")[1];
+            const blocker = currentUser;
+            blockUser(blocker, blockee);
+          });
+
+          // icon send message
+          addClickHandler(iconSendMessage, () => {
+            if (getElement("messenger")) {
+              const messengerElement = getElement("messenger");
+              const messengerHeader = getElement("messenger-header");
+
+              messengerElement.style.width = "50%";
+              messengerElement.style.display = "block";
+              messengerHeader.innerText = `Send ${displayName} a message`;
+            }
+          });
+
+          // send message button
+          if (getElement("messenger-send-button")) {
+            addClickHandler(getElement("messenger-send-button"), () => {
+              if (getElement("messenger-message").value) {
+                const messengerElement = getElement("messenger");
+                const messengerHeader = getElement("messenger-header");
+                const messengerMessage = getElement("messenger-message");
+                const messageDetails = {};
+
+                messageDetails.from = `${currentUser}`;
+                messageDetails.to = userObject._id;
+                messageDetails.message = messengerMessage.value;
+
+                sendMessage(messageDetails);
+
+                messengerHeader.innerText = "";
+                messengerMessage.value = "";
+                messengerElement.style.width = "0%";
+                messengerElement.style.display = "none";
+              }
+            });
+          }
+        }
+      }
+    }
+  }
+};
+
+export const updateFriendsList = async (
+  userList,
+  listItemClickHandler,
+  detectWebcam,
+  blockUser,
+  sendMessage
+) => {
+  const usersParent = document.querySelector("#users-parent");
+  const currentUser = getElement("rmtid-input").value;
+
+  // if (userList.length > 0) {
+  removeChildren(usersParent);
+  for (const user in userList) {
+    const userObject = userList[user];
+
+    if (userObject.online) {
+      const blockedUsersIndex = userObject.blockedUsers.findIndex(
+        (x) => x == currentUser
+      );
+
+      if (blockedUsersIndex == -1) {
+        const blockedByIndex = userObject.blockedBy.findIndex(
+          (x) => x == currentUser
+        );
+
+        if (blockedByIndex == -1) {
+          const friendsIndex = userObject.friends.findIndex(
+            (x) => x == currentUser
+          );
+
+          if (friendsIndex !== -1) {
+            // Create comps
+            const li = newElement("li");
+            const liImg = newElement("img");
+            const divName = newElement("div");
+            const spanName = newElement("span");
+            const divConnect = newElement("div");
+            const iconConnect = newElement("i");
+            const divBlock = newElement("div");
+            const iconBlock = newElement("i");
+            const spanConnect = newElement("span");
+            const cardBody = newElement("div");
+            const cardBodyLayout = newElement("div");
+            const cardTitle = newElement("h5");
+            const acceptCallIcon = newElement("i");
+            const divConnectIcon = newElement("div");
+            const divBlockIcon = newElement("div");
+            const divFriendIcon = newElement("div");
+            const divSendMessage = newElement("div");
+            const iconSendMessage = newElement("i");
+
+            const displayName = userObject.displayName.fname
+              ? `${cap(userObject.fname)}`
+              : `${cap(userObject.uname)}`;
+
+            liImg.alt = `${displayName}`;
+
+            // Add attributes
+            addAttribute(li, "class", "w3-bar w3-round-large w3-mobile");
+            addAttribute(li, "id", `li-${userObject._id}`);
+            addAttribute(li, "style", "position:relative;");
+
+            addAttribute(liImg, "class", "w3-bar-item w3-circle");
+            addAttribute(liImg, "style", "width:85px;margin:0;");
+            addAttribute(liImg, "data-toggle", "tooltip");
+            addAttribute(liImg, "data-placement", "top");
+            addAttribute(liImg, "data-html", "true");
+            addAttribute(liImg, "title", `${displayName}`);
+
+            addAttribute(divName, "class", "w3-bar-item");
+            addAttribute(divConnect, "class", "w3-bar-item");
+            addAttribute(divBlock, "class", "w3-bar-item");
+            addAttribute(divSendMessage, "class", "w3-bar-item");
+
+            addAttribute(iconBlock, "id", `block-${userObject._id}`);
+            addAttribute(
+              iconBlock,
+              "class",
+              "bi bi-eye-slash-fill w3-hover-opacity"
+            );
+            addAttribute(iconBlock, "data-toggle", "tooltip");
+            addAttribute(iconBlock, "data-placement", "top");
+            addAttribute(iconBlock, "data-html", "true");
+            addAttribute(iconBlock, "title", `Block ${displayName}`);
+
+            addAttribute(
+              iconSendMessage,
+              "class",
+              "bi bi-chat-square-dots w3-hover-opacity"
+            );
+            addAttribute(iconSendMessage, "id", `send-${userObject._id}`);
+            addAttribute(iconSendMessage, "data-connectiontype", "message");
+            addAttribute(iconSendMessage, "data-toggle", "tooltip");
+            addAttribute(iconSendMessage, "data-placement", "top");
+            addAttribute(iconSendMessage, "data-html", "true");
+            addAttribute(
+              iconSendMessage,
+              "title",
+              `Send ${displayName} a message`
+            );
+
+            addAttribute(
+              acceptCallIcon,
+              "class",
+              "bi bi-check-lg text-success"
+            );
+
+            if (userObject.photoUrl) {
+              liImg.src = userObject.photoUrl;
+            } else {
+              liImg.src = "/assets/graphics/silhouette.png";
+            }
+
+            // Append comps
+            appendChild(usersParent, li);
+            appendChild(li, liImg);
+            appendChild(li, divName);
+            appendChild(li, divConnect);
+            appendChild(li, divSendMessage);
+            appendChild(li, divBlock);
+            appendChild(divSendMessage, iconSendMessage);
+            appendChild(divName, spanName);
+            appendChild(divConnect, iconConnect);
+            appendChild(divBlock, iconBlock);
+
+            spanName.innerHTML = `<strong>${displayName}</strong>`;
+
+            detectWebcam((results) => {
+              if (!results) {
+                addAttribute(iconConnect, "id", `connect-${userObject._id}`);
+                addAttribute(iconConnect, "data-connectiontype", "audio");
+                addAttribute(
+                  iconConnect,
+                  "class",
+                  "bi bi-mic-fill w3-hover-opacity"
+                );
+                addAttribute(iconConnect, "data-toggle", "tooltip");
+                addAttribute(iconConnect, "data-placement", "top");
+                addAttribute(iconConnect, "data-html", "true");
+                addAttribute(
+                  iconConnect,
+                  "title",
+                  `Connect with ${displayName}`
+                );
+              } else {
+                addAttribute(iconConnect, "id", `connect-${userObject._id}`);
+                addAttribute(iconConnect, "data-connectiontype", "video");
+                addAttribute(
+                  iconConnect,
+                  "class",
+                  "bi bi-camera-video-fill w3-hover-opacity"
+                );
+                addAttribute(iconConnect, "data-toggle", "tooltip");
+                addAttribute(iconConnect, "data-placement", "top");
+                addAttribute(iconConnect, "data-html", "true");
+                addAttribute(
+                  iconConnect,
+                  "title",
+                  `Connect with ${displayName}`
+                );
+              }
+            });
+
+            // Register click handlers
+
+            addClickHandler(iconConnect, listItemClickHandler);
+
+            addClickHandler(iconBlock, (e) => {
+              const blockee = e.target.id.split("-")[1];
+              const blocker = currentUser;
+              blockUser(blocker, blockee);
+            });
+
+            addClickHandler(iconSendMessage, () => {
+              if (getElement("messenger")) {
+                const messengerElement = getElement("messenger");
+                const messengerHeader = getElement("messenger-header");
+
+                messengerElement.style.width = "50%";
+                messengerElement.style.display = "block";
+                messengerHeader.innerText = `Send ${displayName} a message`;
+              }
+            });
+
+            if (getElement("messenger-send-button")) {
+              addClickHandler(getElement("messenger-send-button"), () => {
+                if (getElement("messenger-message").value) {
+                  const messengerElement = getElement("messenger");
+                  const messengerHeader = getElement("messenger-header");
+                  const messengerMessage = getElement("messenger-message");
+                  const messageDetails = {};
+
+                  messageDetails.from = `${currentUser}`;
+                  messageDetails.to = userObject._id;
+                  messageDetails.message = messengerMessage.value;
+
+                  sendMessage(messageDetails);
+
+                  messengerHeader.innerText = "";
+                  messengerMessage.value = "";
+                  messengerElement.style.width = "0%";
+                  messengerElement.style.display = "none";
+                }
+              });
+            }
           }
         }
       }
@@ -626,7 +1151,7 @@ export const showPrivateMessageAlert = (userDetails) => {
           "w3-input w3-left w3-small w3-round-xxlarge"
         );
         addAttribute(input, "type", "text");
-        addAttribute(input, "style", "width:50%; height:35px;");
+        addAttribute(input, "style", "width:80%; height:35px;");
 
         addAttribute(
           sendButton,

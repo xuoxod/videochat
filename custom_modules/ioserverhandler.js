@@ -393,7 +393,7 @@ export default (io) => {
 
           dlog(
             `${userBlocker.fname} blocked ${userBlockee.fname}`,
-            `ioserver: line 246`
+            `ioserver event: iblockedauser`
           );
 
           if (addedBlocker && addedBlockee) {
@@ -483,7 +483,171 @@ export default (io) => {
 
           dlog(
             `${userBlocker.fname} unblocked ${userBlockee.fname}`,
-            `ioserver: line 246`
+            `ioserver event: iunblockedauser`
+          );
+
+          if (addedBlocker && addedBlockee) {
+            io.emit("updateonlineuserlist", stringify(userManager.getUsers()));
+          }
+        }
+      }
+    });
+
+    socket.on("ibefriendedauser", (data) => {
+      dlog(`ibefriendedauser event fired`, `ioserverhandler`);
+      const { befriender, befriendee } = data;
+      const { befrienderUid, befrienderDoc } = befriender;
+      const { befriendeeUid, befriendeeDoc } = befriendee;
+
+      const userBefriender = userManager.getUser(befrienderUid);
+      const userBefriendee = userManager.getUser(befriendeeUid);
+
+      if (userBefriender && userBefriendee) {
+        const addBefrienderDoc = Object.assign({
+          ...{
+            fname: befrienderDoc.user.fname,
+            lname: befrienderDoc.user.lname,
+            email: befrienderDoc.email,
+            _id: befrienderDoc.user._id,
+            uid: befrienderDoc.user._id,
+            uname: befrienderDoc.uname,
+            displayName: befrienderDoc.displayName,
+            isVisible: befrienderDoc.isVisible,
+            photoUrl: befrienderDoc.photoUrl,
+            public: befrienderDoc.public,
+            description: befrienderDoc.description,
+            friends: befrienderDoc.friends,
+            blockedUsers: befrienderDoc.blockedUsers,
+            blockedBy: befrienderDoc.blockedBy,
+            online: befrienderDoc.online,
+          },
+          ...{ sid: userBefriender.sid },
+        });
+
+        const addBefriendeeDoc = Object.assign({
+          ...{
+            fname: befriendeeDoc.user.fname,
+            lname: befriendeeDoc.user.lname,
+            email: befriendeeDoc.email,
+            _id: befriendeeDoc.user._id,
+            uid: befriendeeDoc.user._id,
+            uname: befriendeeDoc.uname,
+            displayName: befriendeeDoc.displayName,
+            isVisible: befriendeeDoc.isVisible,
+            photoUrl: befriendeeDoc.photoUrl,
+            public: befriendeeDoc.public,
+            description: befriendeeDoc.description,
+            friends: befriendeeDoc.friends,
+            blockedUsers: befriendeeDoc.blockedUsers,
+            blockedBy: befriendeeDoc.blockedBy,
+            online: befriendeeDoc.online,
+          },
+          ...{ sid: userBefriendee.sid },
+        });
+
+        dlog(`\n\tAdd Befriender Doc\n\t${stringify(addBefrienderDoc)}\n`);
+        dlog(`\n\tAdd Befriendee Doc\n\t${stringify(addBefriendeeDoc)}\n`);
+
+        const removedBefrienderDoc = userManager.removeUser(befrienderUid);
+        const removedBefriendeeDoc = userManager.removeUser(befriendeeUid);
+
+        if (removedBefrienderDoc && removedBefriendeeDoc) {
+          const addedBefriender = userManager.addUser(addBefrienderDoc);
+          const addedBefriendee = userManager.addUser(addBefriendeeDoc);
+
+          dlog(
+            `${userBefriender.fname} befriended ${userBefriendee.fname}`,
+            `ioserver event: ibefriendedauser`
+          );
+
+          if (addedBefriender && addedBefriendee) {
+            io.to(addBefrienderDoc.sid).emit("updateonlineuserlist", {
+              users: stringify(userManager.getUsers()),
+            });
+
+            io.to(addBefriendeeDoc.sid).emit("updateonlineuserlist", {
+              users: stringify(userManager.getUsers()),
+            });
+          }
+        }
+      }
+    });
+
+    socket.on("iunbefriendedauser", async (data) => {
+      dlog(`iunblockedauser event fired`, `ioserverhandler`);
+      const { blocker, blockee } = data;
+
+      const blockerDoc = await Chat.findOneAndUpdate(
+        { user: `${blocker}` },
+        { $pop: { blockedUsers: `${blockee}` } },
+        { new: true }
+      ).populate("user");
+
+      const blockeeDoc = await Chat.findOneAndUpdate(
+        { user: `${blockee}` },
+        { $pop: { blockedBy: `${blocker}` } },
+        { new: true }
+      ).populate("user");
+
+      const userBlocker = userManager.getUser(blocker);
+      const userBlockee = userManager.getUser(blockee);
+
+      if (userBlocker && userBlockee) {
+        dlog(`\n\tBlocker Doc\n\t${stringify(blockerDoc)}\n`);
+        dlog(`\n\tBlockee Doc\n\t${stringify(blockeeDoc)}\n`);
+
+        const addedBlockerDoc = Object.assign({
+          ...{
+            fname: blockerDoc.user.fname,
+            lname: blockerDoc.user.lname,
+            email: blockerDoc.email,
+            _id: blockerDoc.user._id,
+            uid: blockerDoc.user._id,
+            uname: blockerDoc.uname,
+            displayName: blockerDoc.displayName,
+            isVisible: blockerDoc.isVisible,
+            photoUrl: blockerDoc.photoUrl,
+            public: blockerDoc.public,
+            description: blockerDoc.description,
+            friends: blockerDoc.friends,
+            blockedUsers: blockerDoc.blockedUsers,
+            blockedBy: blockerDoc.blockedBy,
+            online: blockerDoc.online,
+          },
+          ...{ sid: userBlocker.sid },
+        });
+
+        const addedBlockeeDoc = Object.assign({
+          ...{
+            fname: blockeeDoc.user.fname,
+            lname: blockeeDoc.user.lname,
+            email: blockeeDoc.email,
+            _id: blockeeDoc.user._id,
+            uid: blockeeDoc.user._id,
+            uname: blockeeDoc.uname,
+            displayName: blockeeDoc.displayName,
+            isVisible: blockeeDoc.isVisible,
+            photoUrl: blockeeDoc.photoUrl,
+            public: blockeeDoc.public,
+            description: blockeeDoc.description,
+            friends: blockeeDoc.friends,
+            blockedUsers: blockeeDoc.blockedUsers,
+            blockedBy: blockeeDoc.blockedBy,
+            online: blockeeDoc.online,
+          },
+          ...{ sid: userBlockee.sid },
+        });
+
+        const removedBlockerDoc = userManager.removeUser(blocker);
+        const removedBlockeeDoc = userManager.removeUser(blockee);
+
+        if (removedBlockerDoc && removedBlockeeDoc) {
+          const addedBlocker = userManager.addUser(addedBlockerDoc);
+          const addedBlockee = userManager.addUser(addedBlockeeDoc);
+
+          dlog(
+            `${userBlocker.fname} unblocked ${userBlockee.fname}`,
+            `ioserver event: iunbefriendedauser`
           );
 
           if (addedBlocker && addedBlockee) {
