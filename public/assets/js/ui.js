@@ -338,7 +338,6 @@ export const updateUsersList = async (
             );
           } else {
             addAttribute(iconFriend, "class", "bi bi-person-fill-add w3-cell");
-            // addAttribute(iconFriend, "class", "bi bi-person-dash");
             addAttribute(iconFriend, "data-toggle", "tooltip");
             addAttribute(iconFriend, "data-placement", "top");
             addAttribute(iconFriend, "data-html", "true");
