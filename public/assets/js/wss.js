@@ -193,14 +193,15 @@ export const registerSocketEvents = (socket) => {
   });
 
   socket.on("enterroom", (data) => {
+    dlog(`enterroom event fired`, `wss.js`);
     userDetails = parse(data);
     const { roomName, connectionType, sender, receiver } = userDetails;
     getRoomTokenAndEnterRoom(roomName, connectionType, sender, receiver._id);
   });
 
   socket.on("privatemessage", (data) => {
-    log(data.messageDetails);
-    showPrivateMessageAlert(data.messageDetails);
+    dlog(`privatemessage event fired`, `wss.js`);
+    showPrivateMessageAlert(data.messageDetails, privateMessageReplyHandler);
   });
 };
 
@@ -557,6 +558,10 @@ function getChatUserProfile(cb) {
     tlog(err);
     return cb({ status: false, err: err, msg: `Got nothing` });
   }
+}
+
+function privateMessageReplyHandler(replyDetails) {
+  socketIO.emit("privatemessageresponse", replyDetails);
 }
 
 const cloakMe = () => {

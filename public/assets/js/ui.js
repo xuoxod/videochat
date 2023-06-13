@@ -1034,11 +1034,15 @@ export const showCallRequest = (userDetails, acceptCall) => {
   }
 };
 
-export const showPrivateMessageAlert = (userDetails) => {
+export const showPrivateMessageAlert = (
+  userDetails,
+  privateMessageReplyHandler
+) => {
   const { from, text } = parse(userDetails);
   const userName = from.displayName.fname ? from.fname : from.uname;
   const userId = from._id;
   const li = getElement(`li-${userId}`);
+  const currentUser = getElement("rmtid-input").value;
 
   if (countChildren(li) > 5) {
     removeChild(li, getLastChild(li));
@@ -1108,7 +1112,7 @@ export const showPrivateMessageAlert = (userDetails) => {
         const inputContainer = newElement("div");
         const messagePara = newElement("p");
         const input = newElement("input");
-        const sendButton = newElement("button");
+        const replyButton = newElement("button");
         const messengerCloseButton = newElement("span");
 
         // add attributes
@@ -1125,7 +1129,7 @@ export const showPrivateMessageAlert = (userDetails) => {
           "background-color:rgba(5,5,5,0.5);background-size:cover;position:absolute;top:0;left:0;height:100%;width:100%;margin:0;overflow:scroll;"
         );
 
-        addAttribute(inputContainer, "class", "w3-row");
+        addAttribute(inputContainer, "class", "w3-row w3-margin-top");
 
         addAttribute(messageContainer, "class", "w3-row");
         addAttribute(messageContainer, "id", `message-${from._id}`);
@@ -1133,34 +1137,34 @@ export const showPrivateMessageAlert = (userDetails) => {
         addAttribute(
           para,
           "class",
-          "w3-card w3-round-xxlarge w3-text-white w3-middle"
+          "w3-card w3-round-xxlarge w3-text-white w3-middle w3-marging-right"
         );
         addAttribute(para, "style", "word-wrap:break-word;width:27%;");
 
         addAttribute(
           messengerCloseButton,
           "class",
-          "w3-button w3-display-topright w3-center-align w3-text-white w3-opacity-min w3-circle w3-hover-white w3-text-hover-black"
+          "w3-button w3-display-topright w3-center-align w3-text-white w3-opacity-min w3-circle w3-hover-white w3-text-hover-black w3-cell"
         );
         addAttribute(messengerCloseButton, "style", "margin:10px;");
 
         addAttribute(
           input,
           "class",
-          "w3-input w3-left w3-small w3-round-xxlarge"
+          "w3-mobile w3-input w3-left w3-small w3-round-xxlarge w3-cell"
         );
         addAttribute(input, "type", "text");
         addAttribute(input, "style", "width:80%; height:35px;");
 
         addAttribute(
-          sendButton,
+          replyButton,
           "class",
-          "w3-button w3-border w3-border-white w3-text-white w3-round-xxlarge w3-small w3-margin-left w3-hover-white w3-text-hover-black w3-middle"
+          "w3-button w3-border w3-border-white w3-text-white w3-round-xxlarge w3-small w3-cell w3-hover-white w3-text-hover-black w3-middle w3-margin-top"
         );
 
         // inner HTML
         messagePara.innerHTML = `<small class="w3-text-white"><strong>${text}</strong></small>`;
-        sendButton.innerHTML = `<small class="w3-text-white"><strong>Send</strong></small>`;
+        replyButton.innerHTML = `<small class="w3-text-white"><strong>Reply</strong></small>`;
 
         // inner text
         messengerCloseButton.innerHTML = `&times;`;
@@ -1173,11 +1177,24 @@ export const showPrivateMessageAlert = (userDetails) => {
         appendChild(messageContainer, messagePara);
         appendChild(messengerContainer, inputContainer);
         appendChild(inputContainer, input);
-        appendChild(inputContainer, sendButton);
+        appendChild(inputContainer, replyButton);
 
         // register click events
         addClickHandler(messengerCloseButton, () => {
           messengerContainer.remove();
+        });
+
+        addClickHandler(replyButton, () => {
+          if (input.value) {
+            const replyDetails = {};
+
+            replyDetails.replyFrom = currentUser;
+            replyDetails.replyTo = from._id;
+            replyDetails.replyMessage = input.value;
+
+            privateMessageReplyHandler(replyDetails);
+            messengerContainer.remove();
+          }
         });
       }
     });

@@ -750,6 +750,7 @@ export default (io) => {
     });
 
     socket.on("sendprivatemessage", (data) => {
+      dlog(`sendprivatemessage event fired`, `ioserverhandler`);
       const { from, to, message } = data;
 
       const messageSender = userManager.getUser(from);
@@ -762,6 +763,24 @@ export default (io) => {
 
         io.to(messageReceiver.sid).emit("privatemessage", {
           messageDetails: stringify({ from: messageSender, text: message }),
+        });
+      }
+    });
+
+    socket.on("privatemessageresponse", (data) => {
+      dlog(`privatemessageresponse event fired`, `ioserverhandler`);
+      const { replyFrom, replyTo, replyMessage } = data;
+
+      const replySender = userManager.getUser(replyFrom);
+      const replyReceiver = userManager.getUser(replyTo);
+
+      if (replySender && replyReceiver) {
+        log(
+          `${replySender.fname} sent response ${replyMessage} to ${replyReceiver.fname}\n`
+        );
+
+        io.to(replyReceiver.sid).emit("privatemessage", {
+          messageDetails: stringify({ from: replySender, text: replyMessage }),
         });
       }
     });
