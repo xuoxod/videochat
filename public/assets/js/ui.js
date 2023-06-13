@@ -1081,6 +1081,7 @@ export const showPrivateMessageAlert = (
       "w3-button w3-text-white w3-border w3-border-white w3-opacity-min w3-round-large w3-hover-white w3-middle"
     );
     addAttribute(showMessageButton, "style", "background:transparent;");
+    addAttribute(panelContent, "class", "w3-row w3-margin");
 
     // Inner Text
     para.innerHTML = `<strong>${cap(userName)} sent you a message`;
@@ -1131,7 +1132,7 @@ export const showPrivateMessageAlert = (
 
         addAttribute(inputContainer, "class", "w3-row w3-margin-top");
 
-        addAttribute(messageContainer, "class", "w3-row");
+        addAttribute(messageContainer, "class", "w3-row w3-margin w3-cell");
         addAttribute(messageContainer, "id", `message-${from._id}`);
 
         addAttribute(
@@ -1159,7 +1160,7 @@ export const showPrivateMessageAlert = (
         addAttribute(
           replyButton,
           "class",
-          "w3-button w3-border w3-border-white w3-text-white w3-round-xxlarge w3-small w3-cell w3-hover-white w3-text-hover-black w3-middle w3-margin-top"
+          "w3-button w3-border w3-border-white w3-text-white w3-round-xxlarge w3-small w3-cell w3-hover-white w3-text-hover-black"
         );
 
         // inner HTML
