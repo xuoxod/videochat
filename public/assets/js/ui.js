@@ -990,12 +990,13 @@ export const showCallRequest = (userDetails, acceptCall) => {
       "style",
       "background-color:rgba(5,5,5,0.5);background-size:cover;position:absolute;left:0;top:0;height:100%;width:100%;margin:0;"
     );
+    addAttribute(panelContent, "class", "w3-section");
 
     // Element Attributes
     addAttribute(
       closeButton,
       "class",
-      "w3-button w3-display-topright w3-center-align w3-text-white w3-opacity-min w3-circle w3-hover-white w3-text-hover-black"
+      "w3-button w3-display-topright w3-center-align w3-text-white w3-opacity-min w3-circle w3-hover-white w3-text-hover-black w3-margin-right w3-margin-top"
     );
     addAttribute(closeButton, "style", "background-color:rgba(10,10,10,0.5);");
     addAttribute(para, "class", "w3-text-white w3-center-align w3-cell-middle");
@@ -1071,7 +1072,7 @@ export const showPrivateMessageAlert = (
     addAttribute(
       closeButton,
       "class",
-      "w3-button w3-display-topright w3-center-align w3-text-white w3-opacity-min w3-circle w3-hover-white w3-text-hover-black"
+      "w3-button w3-display-topright w3-center-align w3-text-white w3-opacity-min w3-circle w3-hover-white w3-text-hover-black w3-margin-right w3-margin-top"
     );
     addAttribute(closeButton, "style", "background-color:rgba(10,10,10,0.5);");
     addAttribute(para, "class", "w3-text-white w3-center-align w3-cell-middle");
