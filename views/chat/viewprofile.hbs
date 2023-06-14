@@ -1,110 +1,136 @@
-<div class="w3-row observe">
-    <div class="col-sm-5 col-md-2">
-        <div class="chat-profile-primary-photo-container d-flex">
+<div class="w3-container w3-margin">
+    <div class="w3-cell-row">
+        <div class="w3-container w3-cell w3-quarter">
             <i id="primary-photo" class="bi bi-person-fill d-inline-flex m-auto" style="font-size:8rem;"></i>
         </div>
-    </div>
 
-    <div class="col-sm-5 col-md-8">
         {{#if hasDoc}}
-        <form id="chat-profile-form" method="post" action="/chat/profile/update" style="margin:1rem 0 5rem 0;">
-            <div class="container">
-                <div class="row">
-                    <div class="col-12 mb-3">
-                        <strong>ID</strong>
-                        <div class="input-group">
-                            <input type="text" id="rmtId" name="rmtid" value="{{uid}}" class="form-control"
-                                placeholder="First Name" readonly />
+        <div class="w3-container w3-cell w3-threequarter">
+            <form id="chat-profile-form" method="post" action="/chat/profile/update">
+                <div class="w3-container w3-cell">
+                    <div class="w3-cell-row">
+                        <div class="w3-cell w3-col w3-margin">
+                            <div class="input-group">
+                                <div class="input-group-text">
+                                    <strong>ID</strong>
+                                </div>
+                                <input type="text" id="rmtId" name="rmtid" value="{{uid}}" class="form-control"
+                                    placeholder="First Name" readonly />
+                            </div>
+                        </div>
+
+                        <div class="w3-cell w3-col w3-margin">
+                            <div class="input-group">
+                                <div class="input-group-text">
+                                    <strong>Username</strong>
+                                </div>
+                                <input type="text" id="uName" name="uname" value="{{profile.uname}}"
+                                    class="form-control text-input" placeholder="First Name" />
+                                <br>
+                                <p id="uname-error" class="m-0 text-danger d-none"></p>
+                            </div>
                         </div>
                     </div>
 
-                    <div class="col-12 mb-3">
-                        <strong>Username</strong>
-                        <br class="input-group">
-                        <input type="text" id="uName" name="uname" value="{{profile.uname}}"
-                            class="form-control text-input" placeholder="First Name" />
-                        <br>
-                        <p id="uname-error" class="m-0 text-danger d-none"></p>
-                    </div>
-                </div>
-
-                <div class="col-12 mb-3">
-                    <strong>Display Name</strong>
-                    <select name="displayName" id="displayName">
-                        <option value="fname" {{#if profile.displayName.fname}}selected{{/if}}>First name
-                        </option>
-                        <option value="uname" {{#if profile.displayName.uname}}selected{{/if}}>Username</option>
-                    </select>
-                </div>
-
-                <div class="col-12 mb-3">
-                    <div class="form-check">
-                        <input class="form-check-input cb-input" type="checkbox" value="" {{#if
-                            profile.isVisible}}checked{{/if}} id="isVisible" name="isVisible" />
-                        <label class="form-check-label" for="isVisible">
-                            <strong>Visible</strong>
-                        </label>
-                    </div>
-                </div>
-
-                <div class="col-12 mb-3">
-                    <div class="form-check">
-                        <input class="form-check-input cb-input" type="checkbox" value="" {{#if
-                            profile.public}}checked{{/if}} id="public" name="public" />
-                        <label class="form-check-label" for="isVisible">
-                            <strong>Public</strong>
-                        </label>
-                    </div>
-                </div>
-
-                {{#if profile.friends}}
-                <div class="col-12 mb-4">
-                    <strong>Friends</strong>
-                    <ul class="list-group">
-                        {{#each profile.friends}}
-                        <li class="list-group-item">
-                            {{.}}
-                        </li>
-                        {{/each}}
-                    </ul>
-                </div>
-                {{/if}}
-
-                {{#if profile.blockedUsers}}
-                <div class="col-12 mb-4">
-                    <strong>Blocked Users</strong>
-                    <ul class="list-group">
-                        {{#each profile.blockedUsers}}
-                        <li class="list-group-item">
-                            <div class="input-group">
-                                <span class="input-group-text">
-                                    {{.}}
-                                </span>
-                                <i id="i-{{.}}" class="bi bi-trash-fill unblock"></i>
+                    <div class="w3-cell w3-col w3-margin">
+                        <div class="input-group">
+                            <div class="input-group-text">
+                                <strong>Display Name</strong>
                             </div>
-                        </li>
-                        {{/each}}
-                    </ul>
+                            <select name="displayName" id="displayName">
+                                <option value="fname" {{#if profile.displayName.fname}}selected{{/if}}>First name
+                                </option>
+                                <option value="uname" {{#if profile.displayName.uname}}selected{{/if}}>Username</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="w3-cell w3-col w3-margin">
+                        <div class="input-group">
+                            <div class="input-group-text">
+                                <strong>Visible</strong>
+                            </div>
+                            <div class="form-check w3-margin-left" style="margin-top:7px;">
+                                <input class="form-check-input cb-input" type="checkbox" value="" {{#if
+                                    profile.isVisible}}checked{{/if}} id="isVisible" name="isVisible" />
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="w3-cell w3-col w3-margin">
+                        <div class="input-group">
+                            <div class="input-group-text">
+                                <strong>Public</strong>
+                            </div>
+                            <div class="form-check w3-margin-left" style="margin-top:7px;">
+                                <input class="form-check-input cb-input" type="checkbox" value="" {{#if
+                                    profile.public}}checked{{/if}} id="public" name="public" />
+                            </div>
+                        </div>
+                    </div>
+
+                    {{#if profile.friends}}
+                    <div class="w3-cell w3-col w3-margin">
+                        <div class="input-group">
+                            <div class="input-group-text">
+                                <strong>Friends</strong>
+                            </div>
+                            <ul class="list-group">
+                                {{#each profile.friends}}
+                                <li class="list-group-item">
+                                    <div class="input-group">
+                                        <span class="input-group-text">
+                                            {{.}}
+                                        </span>
+                                        <i id="unbefriend-{{.}}" class="bi bi-trash-fill unbefriend w3-margin-left"></i>
+                                    </div>
+                                </li>
+                                {{/each}}
+                            </ul>
+                        </div>
+                    </div>
+                    {{/if}}
+
+                    {{#if profile.blockedUsers}}
+                    <div class="w3-cell w3-col w3-margin">
+                        <div class="input-group">
+                            <div class="input-group-text">
+                                <strong>Blocked Users</strong>
+                            </div>
+                            <ul class="list-group">
+                                {{#each profile.blockedUsers}}
+                                <li class="list-group-item">
+                                    <div class="input-group">
+                                        <span class="input-group-text">
+                                            {{.}}
+                                        </span>
+                                        <i id="i-{{.}}" class="bi bi-trash-fill unblock w3-margin-left"></i>
+                                    </div>
+                                </li>
+                                {{/each}}
+                            </ul>
+                        </div>
+                    </div>
+                    {{/if}}
                 </div>
-                {{/if}}
-            </div>
 
-            <button id="submit-button" type="submit" class="btn btn-success" style="border-radius: 15px;">
-                Submit
-            </button>
+                <button id="submit-button" type="submit" class="btn btn-success" style="border-radius: 15px;">
+                    Submit
+                </button>
 
-            <button type="button" class="btn btn-info" style="border-radius: 15px;">
-                <a class="text-white" style="text-decoration:none;" href="/user">Cancel</a>
-            </button>
+                <button type="button" class="btn btn-info" style="border-radius: 15px;">
+                    <a class="text-white" style="text-decoration:none;" href="/user">Cancel</a>
+                </button>
 
 
-            {{#each unames}}
-            <p class="username d-none">{{uname}}</p>
-            {{/each}}
+                {{#each unames}}
+                <p class="username d-none">{{uname}}</p>
+                {{/each}}
 
 
-            <input type="hidden" id="unblocked-user" value="{{#if unblockedUser}}{{unblockeduser}}{{/if}}">
-        </form>
+                <input type="hidden" id="unblocked-user" value="{{#if unblockedUser}}{{unblockeduser}}{{/if}}">
+            </form>
+        </div>
         {{/if}}
     </div>
 </div>
