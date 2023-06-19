@@ -431,6 +431,48 @@ export const befriendUser = asyncHandler( async ( req, res ) => {
   }
 } );
 
+//  @desc           Remove user ID from friend list
+//  @route          POST /chat/user/unbefriend/
+//  @access         Private
+//  @returns        json
+export const unbefriendUser = asyncHandler( async ( req, res ) => {
+  logger.info( `POST: /chat/user/unbefriend` );
+
+  const { unbefriender, unbefriendee } = req.body;
+
+  dlog( `${ unbefriender }\t${ unbefriendee }`, `\nunbefriendUser` );
+
+  try {
+    // Add blockee to blocker's blockedUsers list
+    const unbefrienderFriendList = await Chat.findOneAndUpdate(
+      { user: `${ unbefriender }` },
+      { $pull: { friends: `${ unbefriendee }` } },
+      { new: true }
+    ).populate( "user" );
+
+    // dlog(`Blocker List:\t${blockerBlockedUserList} `);
+
+    // Add blocker to blockee's blockedBy list
+    const unbefriendeeBefriendedByList = await Chat.findOneAndUpdate(
+      { user: `${ unbefriendee }` },
+      { $pull: { befriendedBy: `${ unbefriender }` } },
+      { new: true }
+    ).populate( "user" );
+
+    // dlog(`Blocked By List:\t${blockeeBlockedByList} `);
+
+    return res.json( {
+      status: true,
+      unbefrienderdoc: unbefrienderFriendList,
+      unbefriendeedoc: unbefriendeeBefriendedByList,
+    } );
+  } catch ( err ) {
+    dlog( `Server side error happened while attempting to unbefriend user` );
+    dlog( err );
+    return res.json( { status: false, cause: err } );
+  }
+} );
+
 //  @desc           Create user chat profile
 //  @route          GET /chat/profile/create/:uid
 //  @access         Private
@@ -461,8 +503,10 @@ export const createProfile = asyncHandler( async ( req, res ) => {
       isVisible: true,
       public: false,
       online: true,
+      friendsOnly: false,
       blockedUsers: [],
       friends: [],
+      befriendedBy: [],
       blockedBy: [],
     } );
     res.json( { status: true, hasDoc: true, doc: createdDoc } );

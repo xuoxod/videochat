@@ -240,7 +240,9 @@ export const updateUsersList = async (
   listItemClickHandler,
   detectWebcam,
   blockUser,
-  sendMessage
+  sendMessage,
+  befriend,
+  unbefriend
 ) => {
   const usersParent = document.querySelector( "#users-parent" );
   const currentUser = getElement( "rmtid-input" ).value;
@@ -292,9 +294,9 @@ export const updateUsersList = async (
 
           liImg.alt = `${ displayName }`;
 
-          const friendsIndex = userObject.friends.findIndex(
+          const friendsIndex = userObject.befriendedBy ? userObject.befriendedBy.findIndex(
             ( x ) => x == currentUser
-          );
+          ) : -1;
 
           /* add attributes  */
 
@@ -327,6 +329,7 @@ export const updateUsersList = async (
           } );
 
           if ( friendsIndex !== -1 ) {
+            addAttribute( iconFriend, 'id', `friend-${ userObject._id }` );
             addAttribute( iconFriend, "class", "bi bi-person-fill-dash w3-cell" );
             addAttribute( iconFriend, "data-toggle", "tooltip" );
             addAttribute( iconFriend, "data-placement", "top" );
@@ -334,9 +337,10 @@ export const updateUsersList = async (
             addAttribute(
               iconFriend,
               "title",
-              `Add ${ displayName } to friend list`
+              `Remove ${ displayName } from friend list`
             );
           } else {
+            addAttribute( iconFriend, 'id', `friend-${ userObject._id }` );
             addAttribute( iconFriend, "class", "bi bi-person-fill-add w3-cell" );
             addAttribute( iconFriend, "data-toggle", "tooltip" );
             addAttribute( iconFriend, "data-placement", "top" );
@@ -344,7 +348,7 @@ export const updateUsersList = async (
             addAttribute(
               iconFriend,
               "title",
-              `Remove ${ displayName } from friend list`
+              `Add ${ displayName } to friend list`
             );
           }
 
@@ -483,23 +487,12 @@ export const updateUsersList = async (
           // icon befriend user 
           addClickHandler( iconFriend, e => {
             const icon = e.target;
+            const target = icon.id.split( '-' )[ 1 ];
 
             if ( icon.classList.contains( "bi-person-fill-dash" ) ) {
-              icon.classList.remove( "bi-person-fill-dash" );
-              icon.classList.add( "bi-person-fill-add" );
-              addAttribute(
-                icon,
-                "title",
-                `Remove ${ displayName } from friend list`
-              );
+              unbefriend( currentUser, target );
             } else {
-              icon.classList.add( "bi-person-fill-dash" );
-              icon.classList.remove( "bi-person-fill-add" );
-              addAttribute(
-                icon,
-                "title",
-                `Add ${ displayName } to friend list`
-              );
+              befriend( currentUser, target );
             }
           } );
 

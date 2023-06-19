@@ -118,7 +118,9 @@ export const registerSocketEvents = ( socket ) => {
       listItemClickHandler,
       detectWebcam,
       blockUser,
-      sendMessage
+      sendMessage,
+      befriendUser,
+      unbefriendUser
     );
   } );
 
@@ -341,7 +343,10 @@ function befriendUser ( befrienderUid, befriendeeUid ) {
         const status = responseJson.status;
 
         if ( status ) {
-          const { befrienderdoc, befriendeedoc } = responseJson;
+          // const { befrienderdoc, befriendeedoc } = responseJson;
+
+          const befrienderdoc = responseJson.befrienderdoc;
+          const befriendeedoc = responseJson.befriendeedoc;
 
           userDetails = {};
 
@@ -379,7 +384,7 @@ function unbefriendUser ( unbefrienderUid, unbefriendeeUid ) {
   try {
     xmlHttp = new XMLHttpRequest();
 
-    xmlHttp.open( "POST", "/chat/unbefriend", true );
+    xmlHttp.open( "POST", "/chat/user/unbefriend", true );
 
     xmlHttp.setRequestHeader(
       "Content-type",
@@ -393,12 +398,20 @@ function unbefriendUser ( unbefrienderUid, unbefriendeeUid ) {
         // log(`\n\tResponse Text: ${stringify(responseText)}\n`);
         const responseJson = parse( responseText );
         const status = responseJson.status;
+        const unbefrienderdoc = responseJson.unbefrienderdoc;
+        const unbefriendeedoc = responseJson.unbefriendeedoc;
 
         if ( status ) {
           userDetails = {};
 
-          userDetails.unbefriender = unbefrienderUid;
-          userDetails.unbefriendee = unbefriendeeUid;
+          userDetails.unbefriender = {};
+          userDetails.unbefriendee = {};
+
+          userDetails.unbefriender.unbefrienderUid = unbefrienderUid;
+          userDetails.unbefriender.unbefrienderDoc = unbefrienderdoc;
+
+          userDetails.unbefriendee.unbefriendeeUid = unbefriendeeUid;
+          userDetails.unbefriendee.unbefriendeeDoc = unbefriendeedoc;
 
           socketIO.emit( "iunbefriendedauser", userDetails );
         } else {
