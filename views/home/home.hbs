@@ -1,7 +1,7 @@
-<div class="w3-row">
-    <div class="col-10">
+<div class="w3-container">
+    <div class="w3-cell-row">
 
-        <div class="row">
+        <div class="w3-container w3-row">
             <div class="col auto text-center">
                 <h3>Site Still Under Construction</h3>
                 <p>Some features may not work as expected</p>
@@ -14,12 +14,12 @@
             </div>
         </div>
 
-        <div class="row">
+        <div class="w3-container w3-row">
             <form style="margin:6rem auto;" action="/auth/signin" method="post">
 
-                <div class="container">
-                    <div class="row">
-                        <div class="col-12 my-4">
+                <div class="w3-container">
+                    <div class="w3-row">
+                        <div class="my-4">
                             <div class="input-group">
                                 <span class="input-group-text" id="basic-addon1">
                                     <i class="bi bi-envelope"></i>
@@ -29,7 +29,7 @@
                             </div>
                         </div>
 
-                        <div class="col-12 mt-4">
+                        <div class="mt-4">
                             <div class="input-group">
                                 <span class="input-group-text" id="basic-addon1">
                                     <i class="bi bi-key"></i>
@@ -39,7 +39,7 @@
                             </div>
                         </div>
 
-                        <div class="col-12 my-0 mt-1">
+                        <div class="mt-1">
                             <label>
                                 <a href="/forgotpassword" class="nav-link text-primary">Forgot password?</a>
                             </label>
@@ -47,7 +47,7 @@
 
                         <input type="hidden" name="_csrf" value="{{csrfToken}}" readonly>
 
-                        <div class="col-12 my-4">
+                        <div class="my-4">
                             <button class="btn btn-lg btn-primary" type="submit">Sign in</button>
                         </div>
                     </div>
