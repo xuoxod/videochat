@@ -1,70 +1,58 @@
 import { stringify, parse, stripTags } from "./utils.js";
-import { log, cls, dlog, addClickHandler } from "./clientutils.js";
-import { addKeyupHandler, addOnFocusHandler, getElement } from "./computils.js";
+import { log, cls, dlog } from "./clientutils.js";
+import { addClickHandler, addKeyupHandler, addOnFocusHandler, getElement } from "./computils.js";
 
-if (window) {
+if ( window ) {
   cls();
-  const nav = navigator;
-  const platform = nav.platform;
-  const lang = nav.language;
-  const langs = nav.languages;
-  const userAgent = nav.userAgent;
-  const vendor = nav.vendor;
 
-  log(`Platform:\t${platform}`);
-  log(`Languages:\t${langs}`);
-  log(`Language:\t${lang}`);
-  log(`UAgent:\t${userAgent}`);
-  log(`Vendor:\t${vendor}`);
-  log(`--------------------------------------------------------\n\n`);
-  log(`Validate email`);
+  log( `Validate email` );
 
-  addEventListener("beforeunload", (event) => {
-    log(`\n\tBefore unload\n`);
-  });
+  addEventListener( "beforeunload", ( event ) => {
+    log( `\n\tBefore unload\n` );
+  } );
 }
 
 // Comps
-const emailInput = getElement("email");
-const submitButton = getElement("reset-submit-button");
-const divEmailError = getElement("divemailerror");
-const emailErrorInput = getElement("emailerror");
-const resetForm = getElement("reset-password");
+const emailInput = getElement( "email" );
+const submitButton = getElement( "reset-submit-button" );
+const divEmailError = getElement( "divemailerror" );
+const emailErrorInput = getElement( "emailerror" );
+const resetForm = getElement( "reset-password" );
 // const emailPattern = /(\w)+(\.(\w)+)?@(\w)+\.(\w){2,3}/i;
 
 submitButton.disabled = true;
 // emailInput.pattern = emailPattern;
 
-addKeyupHandler(emailInput, (e) => {
+addKeyupHandler( emailInput, ( e ) => {
   const target = e.target;
   const value = target.value.trim();
-  const sanitizedValue = stripTags(value);
+  const sanitizedValue = stripTags( value );
   target.value = sanitizedValue;
   cls();
-  dlog(`${sanitizedValue}\n`);
+  dlog( `${ sanitizedValue }\n` );
 
   submitButton.disabled = sanitizedValue.length > 0 ? false : true;
-});
+} );
 
-addOnFocusHandler(emailInput, (e) => {
-  if (!divEmailError.classList.contains("d-none")) {
-    divEmailError.classList.add("d-none");
+addOnFocusHandler( emailInput, ( e ) => {
+  if ( !divEmailError.classList.contains( "d-none" ) ) {
+    divEmailError.classList.add( "d-none" );
     emailErrorInput.value = "";
   }
-});
+} );
 
-resetForm.addEventListener("submit", (e) => {
+resetForm.addEventListener( "submit", ( e ) => {
   e.preventDefault();
   validateEmail();
-});
+} );
 
-function validateEmail() {
+function validateEmail () {
   let xmlHttp;
 
   try {
     xmlHttp = new XMLHttpRequest();
 
-    xmlHttp.open("POST", "/auth/validateuser", true);
+    xmlHttp.open( "POST", "/auth/validateuser", true );
 
     xmlHttp.setRequestHeader(
       "Content-type",
@@ -75,37 +63,37 @@ function validateEmail() {
       const responseText = xmlHttp.responseText;
       submitButton.disabled = true;
 
-      if (responseText) {
-        const responseJson = parse(responseText);
+      if ( responseText ) {
+        const responseJson = parse( responseText );
         const status = responseJson.status;
 
-        if (status) {
-          dlog(`User validated`);
+        if ( status ) {
+          dlog( `User validated` );
 
-          if (!divEmailError.classList.contains("d-none")) {
-            divEmailError.classList.add("d-none");
+          if ( !divEmailError.classList.contains( "d-none" ) ) {
+            divEmailError.classList.add( "d-none" );
           }
 
           emailErrorInput.value = "";
-          location.href = `/resetpassword/${emailInput.value}`;
+          location.href = `/resetpassword/${ emailInput.value }`;
           //   location.href = `/chat/profile/view/${blockerUid}`;
         } else {
           const cause = responseJson.cause;
-          dlog(`${cause}`);
+          dlog( `${ cause }` );
 
-          if (divEmailError.classList.contains("d-none")) {
-            divEmailError.classList.remove("d-none");
+          if ( divEmailError.classList.contains( "d-none" ) ) {
+            divEmailError.classList.remove( "d-none" );
           }
 
-          emailErrorInput.value = `${cause}`;
+          emailErrorInput.value = `${ cause }`;
         }
         return;
       }
     };
 
-    xmlHttp.send(`email=${emailInput.value}`, true);
-  } catch (err) {
-    tlog(err);
+    xmlHttp.send( `email=${ emailInput.value }`, true );
+  } catch ( err ) {
+    tlog( err );
     return;
   }
 }

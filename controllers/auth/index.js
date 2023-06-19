@@ -6,52 +6,52 @@ import User from "../../models/UserModel.js";
 import { stringify, parse } from "../../custom_modules/index.js";
 import { createHash } from "../../custom_modules/index.js";
 
-const logger = bunyan.createLogger({ name: "Auth Controller" });
+const logger = bunyan.createLogger( { name: "Auth Controller" } );
 
 // @desc        signin user
 // @route       POST /auth/signin
 // @access      Public
-export const signinUser = asyncHandler(async (req, res, next) => {
-  logger.info(`Post: /auth/signin`);
+export const signinUser = asyncHandler( async ( req, res, next ) => {
+  logger.info( `Post: /auth/signin` );
 
   const { email, pwd } = req.body;
-  console.log(`\nEmail: ${email}\tPassword: ${pwd}`);
+  console.log( `\nEmail: ${ email }\tPassword: ${ pwd }` );
 
-  passport.authenticate("local", {
+  passport.authenticate( "local", {
     successRedirect: "/user",
     failureRedirect: "/",
     failureFlash: true,
-  })(req, res, next);
+  } )( req, res, next );
   // }
-});
+} );
 
 // @desc        User Signin
 // @route       GET /auth/signin
 // @access      Public
-export const userSignin = asyncHandler(async (req, res) => {
-  logger.info(`GET: /auth/signin`);
+export const userSignin = asyncHandler( async ( req, res ) => {
+  logger.info( `GET: /auth/signin` );
 
   try {
-    res.render("auth/signin", {
+    res.render( "auth/signin", {
       title: "Signin",
       csrfToken: req.csrfToken,
       signin: true,
-    });
-  } catch (err) {
-    logger.error(err);
-    res.status(500).json({
+    } );
+  } catch ( err ) {
+    logger.error( err );
+    res.status( 500 ).json( {
       status: "failure",
       message: err.message,
       cause: err.stackTrace,
-    });
+    } );
   }
-});
+} );
 
 // @desc        User Registration
 // @route       GET /auth/register
 // @access      Public
-export const userRegister = asyncHandler(async (req, res) => {
-  logger.info(`GET: /auth/register`);
+export const userRegister = asyncHandler( async ( req, res ) => {
+  logger.info( `GET: /auth/register` );
 
   /* const captchaUrl = "../../captcha.jpg";
   const captchaId = "captcha";
@@ -59,155 +59,155 @@ export const userRegister = asyncHandler(async (req, res) => {
   const captcha = create({ cookie: captchaId }); */
 
   try {
-    res.render("auth/register", {
+    res.render( "auth/register", {
       title: "Register",
       csrfToken: req.csrfToken,
-      signup: true,
+      registration: true,
       // imgsrc: captchaUrl,
       // captchaFieldName,
-    });
-  } catch (err) {
-    logger.error(err);
-    res.status(500).json({
+    } );
+  } catch ( err ) {
+    logger.error( err );
+    res.status( 500 ).json( {
       status: "failure",
       message: err.message,
       cause: err.stackTrace,
-    });
+    } );
   }
-});
+} );
 
 // @desc        User Sign Out
 // @route       GET /auth/signout
 // @access      Private
-export const userSignout = asyncHandler(async (req, res) => {
-  logger.info(`GET: /auth/signout`);
-  req.logout((err) => {
-    if (err) {
-      console.log(err);
+export const userSignout = asyncHandler( async ( req, res ) => {
+  logger.info( `GET: /auth/signout` );
+  req.logout( ( err ) => {
+    if ( err ) {
+      console.log( err );
     }
-    delete req["user"];
-    res.redirect("/");
-  });
-});
+    delete req[ "user" ];
+    res.redirect( "/" );
+  } );
+} );
 
 // @desc        Register user
 // @route       POST /auth/register
 // @access      Public
-export const registerUser = (req, res, next) => {
-  logger.info(`Post: /auth/register`);
+export const registerUser = ( req, res, next ) => {
+  logger.info( `Post: /auth/register` );
 
-  const errorFormatter = ({ location, msg, param, value, nestedErrors }) => {
+  const errorFormatter = ( { location, msg, param, value, nestedErrors } ) => {
     // Build your resulting errors however you want! String, object, whatever - it works!
-    return `${location}[${param}]: ${msg}`;
+    return `${ location }[${ param }]: ${ msg }`;
   };
 
-  const result = validationResult(req).formatWith(errorFormatter);
-  if (!result.isEmpty()) {
+  const result = validationResult( req ).formatWith( errorFormatter );
+  if ( !result.isEmpty() ) {
     // logger.error(`Registration Failure: ${JSON.stringify(result.array())}`);
 
     const err = result.array();
-    console.log(err);
+    console.log( err );
     const arrResult = [];
 
-    for (const e in err) {
-      const objE = err[e];
-      const arrObjE = objE.split(":");
-      const head = arrObjE[0];
-      const value = arrObjE[1];
-      const key = head.replace("body", "").replace("[", "").replace("]", "");
+    for ( const e in err ) {
+      const objE = err[ e ];
+      const arrObjE = objE.split( ":" );
+      const head = arrObjE[ 0 ];
+      const value = arrObjE[ 1 ];
+      const key = head.replace( "body", "" ).replace( "[", "" ).replace( "]", "" );
       const newObj = {};
-      newObj[`${key}`] = value;
-      arrResult.push(newObj);
+      newObj[ `${ key }` ] = value;
+      arrResult.push( newObj );
     }
 
-    console.log(`${stringify(arrResult)}\n`);
+    console.log( `${ stringify( arrResult ) }\n` );
 
-    return res.status(200).render("auth/register", {
+    return res.status( 200 ).render( "auth/register", {
       title: "Error",
       error: true,
       errors: arrResult,
-    });
+    } );
   } else {
-    passport.authenticate("local-register", {
+    passport.authenticate( "local-register", {
       successRedirect: "/user",
       failureRedirect: "/auth/register",
       failureFlash: true,
-    })(req, res, next);
+    } )( req, res, next );
   }
 };
 
 // @desc        Forgot password
 // @route       POST /auth/validateuser
 // @access      Public
-export const validateUser = asyncHandler(async (req, res) => {
-  logger.info(`POST: /auth/validateuser`);
+export const validateUser = asyncHandler( async ( req, res ) => {
+  logger.info( `POST: /auth/validateuser` );
   const { email } = req.body;
 
-  const client = await User.findOne({ email });
+  const client = await User.findOne( { email } );
 
-  if (!client) {
+  if ( !client ) {
     return res
-      .status(200)
-      .json({ status: false, cause: `User ${email} does not exist` });
+      .status( 200 )
+      .json( { status: false, cause: `User ${ email } does not exist` } );
   }
 
-  return res.status(200).json({ status: true });
-});
+  return res.status( 200 ).json( { status: true } );
+} );
 
 // @desc        Reset user's password
 // @route       POST /auth/resetpassword
 // @access      Public
-export const resetPassword = asyncHandler(async (req, res) => {
-  logger.info(`POST: /auth/resetpassword`);
+export const resetPassword = asyncHandler( async ( req, res ) => {
+  logger.info( `POST: /auth/resetpassword` );
   const { email, pwd1, pwd2 } = req.body;
 
-  if (pwd1 !== pwd2) {
+  if ( pwd1 !== pwd2 ) {
     return res
-      .status(200)
-      .json({ status: false, cause: `Passwords don't match` });
+      .status( 200 )
+      .json( { status: false, cause: `Passwords don't match` } );
   }
 
   try {
-    const client = await User.findOne({ email });
+    const client = await User.findOne( { email } );
 
-    createHash(pwd1, (data) => {
+    createHash( pwd1, ( data ) => {
       const { status, original, payload } = data;
 
-      if (status) {
+      if ( status ) {
         client.password = payload;
         const saved = client.save();
-        return res.status(200).json({ status: true });
+        return res.status( 200 ).json( { status: true } );
       } else {
-        return res.status(200).json({ status: false });
+        return res.status( 200 ).json( { status: false } );
       }
-    });
-  } catch (err) {
+    } );
+  } catch ( err ) {
     return res
-      .status(200)
-      .json({ status: false, cause: `Passwords don't match` });
+      .status( 200 )
+      .json( { status: false, cause: `Passwords don't match` } );
   }
-});
+} );
 
-export const testGenerateToken = asyncHandler(async (req, res) => {
-  generateToken("test", (resp) => {
-    if (resp.status) {
+export const testGenerateToken = asyncHandler( async ( req, res ) => {
+  generateToken( "test", ( resp ) => {
+    if ( resp.status ) {
       const { status, original, hash } = resp;
-      res.json({ original, hash });
+      res.json( { original, hash } );
     } else {
       const { status, error } = resp;
-      res.json({ status, error });
+      res.json( { status, error } );
     }
-  });
-});
+  } );
+} );
 
-export const generatePasswordResetToken = asyncHandler(async (req, res) => {
-  generateToken((resp) => {
-    if (resp.status) {
+export const generatePasswordResetToken = asyncHandler( async ( req, res ) => {
+  generateToken( ( resp ) => {
+    if ( resp.status ) {
       const { status, original, hash } = resp;
-      res.json({ original, hash });
+      res.json( { original, hash } );
     } else {
       const { status, error } = resp;
-      res.json({ status, error });
+      res.json( { status, error } );
     }
-  });
-});
+  } );
+} );
