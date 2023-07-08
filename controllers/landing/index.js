@@ -3,33 +3,13 @@ import bunyan from "bunyan";
 import { dlog, log, stringify } from "../../custom_modules/index.js";
 const logger = bunyan.createLogger({ name: "Landing Controller" });
 
+// const clients = [];
+
 // @desc        Home page
 // @route       GET /
 // @access      Public
 export const landingPage = asyncHandler(async (req, res) => {
   logger.info(`GET /`);
-  const method = req.method;
-  const url = req.url;
-  const host = req.headers["host"];
-  const dnt = req.headers["dnt"];
-  const accept = req.headers["accept"];
-  const agent = req.headers["user-agent"];
-  const secSite = req.headers["sec-fetch-site"];
-  const secMobile = req.headers["sec-ch-ua-mobile"] == "?1" ? true : false;
-  const platform = req.headers["sec-ch-ua-platform"];
-  const referer = req.headers["referer"] || "none";
-  const acceptedEnc = req.headers["accept-encoding"];
-  const cookie = req.headers["cookie"];
-  const ua = req.headers["sec-ch-ua"];
-
-  log(`\nHost:\t${host}`);
-  log(`User Agent:\t${ua}`);
-  log(`Referer:\t${referer}`);
-  log(`Cookie:\t${cookie}`);
-  log(`Platform:\t${platform}`);
-  log(`Mobile:\t${secMobile}`);
-  log(`Encoding:\t${acceptedEnc}`);
-  log(`Fetch Site:\t${secSite}\n`);
 
   try {
     req.flash("success_msg", "Hey there");
@@ -76,4 +56,49 @@ export const resetPassword = asyncHandler(async (req, res) => {
     signedin: false,
     resetpassword: true,
   });
+});
+
+export const landing = asyncHandler(async (req, res) => {
+  logger.info(`SUBSCRIBE /landing`);
+  log(`Clients: ${clients.length}`);
+
+  const method = req.method;
+  const url = req.url;
+  const host = req.headers["host"];
+  const dnt = req.headers["dnt"];
+  const accept = req.headers["accept"];
+  const agent = req.headers["user-agent"];
+  const secSite = req.headers["sec-fetch-site"];
+  const secMobile = req.headers["sec-ch-ua-mobile"] == "?1" ? true : false;
+  const platform = req.headers["sec-ch-ua-platform"];
+  const referer = req.headers["referer"] || "none";
+  const acceptedEnc = req.headers["accept-encoding"];
+  const cookie = req.headers["cookie"];
+  const ua = req.headers["sec-ch-ua"];
+
+  const client = {};
+
+  if (clients.length > 0) {
+    const clientIndex = clients.findIndex((x) => x.address === host);
+
+    if (clientIndex == -1) {
+      client.address = host;
+      client.platform = platform;
+      client.stamp = new Date().toLocaleString();
+      clients.push(client);
+    }
+  } else {
+    client.address = host;
+    client.platform = platform;
+    client.stamp = new Date().toLocaleString();
+    clients.push(client);
+  }
+
+  /* res.writeHead(200, {
+    "Content-Type": "text/event-stream",
+    Connection: "keep-alive",
+  }); */
+  res.write("event:connected");
+  res.write(`data:${JSON.stringify(clients)}`);
+  req.on("close", () => res.end("See Ya!"));
 });

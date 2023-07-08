@@ -6,7 +6,7 @@
   "type": "module",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "sudo ~/.nvm/versions/node/v18.16.0/bin/node app.js"
+    "start": "sudo ~/.nvm/versions/node/v18.16.0/bin/node --trace-deprecation app.js"
   },
   "keywords": [],
   "author": "",
@@ -37,6 +37,7 @@
     "passport": "^0.6.0",
     "passport-local": "^1.0.0",
     "socket.io": "^4.5.2",
+    "spdy": "^4.0.2",
     "twilio": "^4.8.0",
     "twilio-video": "^2.24.3"
   },

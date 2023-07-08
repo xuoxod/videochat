@@ -1,4 +1,5 @@
 import express from "express";
+// import spdy from "spdy";
 import { Server } from "socket.io";
 import https from "https";
 import path from "path";
@@ -55,7 +56,13 @@ store.on("error", (err) => {
 });
 
 store.on("connected", () => {
-  const msg = dbMessage("\tStore connected to DB");
+  cls();
+  const msg = dbMessage("\t\tStore connected to DB");
+  dlog(
+    successMessage(
+      `\n\t\tServer listening on *:${PORT}\n\t\tServer Address: ${server._connectionKey}`
+    )
+  );
   log(msg);
 });
 
@@ -120,7 +127,8 @@ app.use((req, res, next) => {
   res.setHeader("x-powered-by", "Deez Nuts");
   res.setHeader("ETag", `${nanoid()}`);
   res.header("Access-Control-Allow-Origin", "*");
-  res.header("Access-Control-Allow-Methods", "GET,PUT,POST,DELETE,OPTIONS");
+  // res.header("Access-Control-Allow-Methods", "GET,PUT,POST,DELETE,OPTIONS");
+  res.header("Access-Control-Allow-Methods", "GET,PUT,POST,DELETE");
   res.header(
     "Access-Control-Allow-Headers",
     "Content-Type, Authorization, Content-Length, X-Requested-With, *"
@@ -171,6 +179,67 @@ app.get(["/*"], csrfProtection, (req, res, next) => {
   next();
 });
 
+let clients = [];
+app.get(["/landing"], (req, res, next) => {
+  logger.info(`SUBSCRIBE /landing`);
+  log(`Clients: ${clients.length}`);
+
+  const clientRes = res;
+  const method = req.method;
+  const url = req.url;
+  const host = req.headers["host"];
+  const dnt = req.headers["dnt"];
+  const accept = req.headers["accept"];
+  const agent = req.headers["user-agent"];
+  const secSite = req.headers["sec-fetch-site"];
+  const secMobile = req.headers["sec-ch-ua-mobile"] == "?1" ? true : false;
+  const platform = req.headers["sec-ch-ua-platform"];
+  const referer = req.headers["referer"] || "none";
+  const acceptedEnc = req.headers["accept-encoding"];
+  const cookie = req.headers["cookie"];
+  const ua = req.headers["sec-ch-ua"];
+
+  const client = {};
+
+  if (clients.length > 0) {
+    const clientIndex = clients.findIndex((x) => x.address === host);
+
+    if (clientIndex == -1) {
+      client.address = host;
+      client.platform = platform.replace('"', "").replace('"', "");
+      client.stamp = new Date().toLocaleString();
+      clients.push(client);
+    }
+  } else {
+    client.address = host;
+    client.platform = platform.replace('"', "").replace('"', "");
+    client.stamp = new Date().toLocaleString();
+    clients.push(client);
+  }
+
+  clientRes.writeHead(200, {
+    "Content-Type": "text/event-stream",
+    "Cache-Control": "no-cache",
+    Connection: "keep-alive",
+  });
+  clientRes.flushHeaders();
+  clientRes.write("retry: 10000\n\n");
+  clientRes.write(`event:message\n`);
+  clientRes.write(`data:${JSON.stringify(clients)}\n\n`);
+  clientRes.write("event:connected\n");
+  clientRes.write(`data:${JSON.stringify(clients)}\n\n`);
+  clientRes.flushHeaders();
+  req.on("close", () => {
+    clients = clients.filter((client) => client.address != host);
+    clientRes.end("See Ya!");
+  });
+
+  setInterval(() => {
+    clientRes.write(`event:message\n`);
+    clientRes.write(`data:${JSON.stringify(clients)}\n\n`);
+  }, [1000]);
+});
+
 // Routes
 app.use("/", landing);
 app.use("/auth", auth);
@@ -178,17 +247,27 @@ app.use("/user", user);
 app.use("/chat", chat);
 
 const server = https.createServer(options, app);
+// const server = spdy.createServer(options, app);
 const io = new Server(server);
 ioserverhandler(io);
 
-server.listen(PORT, "0.0.0.0", () => {
-  cls();
-  dlog(
-    successMessage(
-      `\n\t\tServer listening on *:${PORT}\n\t\tServer Address: ${server._connectionKey}\n\n`
-    )
-  );
-});
+server.listen(
+  PORT,
+  "0.0.0.0",
+  () => {
+    cls();
+    dlog(
+      successMessage(
+        `\n\t\tServer listening on *:${PORT}\n\t\tServer Address: ${server._connectionKey}\n\n`
+      )
+    );
+  },
+  (err) => {
+    if (err) {
+      console.log(err.message);
+    }
+  }
+);
 
 function letsencryptOptions(domain = null) {
   let certPath;
