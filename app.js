@@ -182,7 +182,6 @@ app.get(["/*"], csrfProtection, (req, res, next) => {
 let clients = [];
 app.get(["/landing"], (req, res, next) => {
   logger.info(`SUBSCRIBE /landing`);
-  log(`Clients: ${clients.length}`);
 
   const clientRes = res;
   const method = req.method;
@@ -228,15 +227,18 @@ app.get(["/landing"], (req, res, next) => {
   clientRes.write(`data:${JSON.stringify(clients)}\n\n`);
   clientRes.write("event:connected\n");
   clientRes.write(`data:${JSON.stringify(clients)}\n\n`);
-  clientRes.flushHeaders();
+
   req.on("close", () => {
     clients = clients.filter((client) => client.address != host);
     clientRes.end("See Ya!");
   });
 
+  log(`Clients: ${clients.length}`);
+
   setInterval(() => {
     clientRes.write(`event:message\n`);
     clientRes.write(`data:${JSON.stringify(clients)}\n\n`);
+    clientRes.flushHeaders();
   }, [1000]);
 });
 
