@@ -183,7 +183,6 @@ let clients = [];
 app.get(["/landing"], (req, res, next) => {
   logger.info(`SUBSCRIBE /landing`);
 
-  const clientRes = res;
   const method = req.method;
   const url = req.url;
   const host = req.headers["host"];
@@ -198,48 +197,57 @@ app.get(["/landing"], (req, res, next) => {
   const cookie = req.headers["cookie"];
   const ua = req.headers["sec-ch-ua"];
 
-  const client = {};
-
   if (clients.length > 0) {
-    const clientIndex = clients.findIndex((x) => x.address === host);
+    const clientIndex = clients.findIndex((x) => x.id === host);
 
     if (clientIndex == -1) {
+      const client = {};
+      const user = {};
       client.address = host;
       client.platform = platform.replace('"', "").replace('"', "");
       client.stamp = new Date().toLocaleString();
-      clients.push(client);
+      user.id = host;
+      user.details = client;
+      clients.push(user);
     }
   } else {
+    const client = {};
+    const user = {};
     client.address = host;
     client.platform = platform.replace('"', "").replace('"', "");
     client.stamp = new Date().toLocaleString();
-    clients.push(client);
+    user.id = host;
+    user.details = client;
+    clients.push(user);
   }
 
-  clientRes.writeHead(200, {
+  console.log(`\n\tUsers:\n\t${JSON.stringify(clients)}\n\n`);
+
+  res.writeHead(200, {
     "Content-Type": "text/event-stream",
     "Cache-Control": "no-cache",
     Connection: "keep-alive",
   });
-  clientRes.flushHeaders();
-  clientRes.write("retry: 10000\n\n");
-  clientRes.write(`event:message\n`);
-  clientRes.write(`data:${JSON.stringify(clients)}\n\n`);
-  clientRes.write("event:connected\n");
-  clientRes.write(`data:${JSON.stringify(clients)}\n\n`);
+  res.write("retry: 10000\n");
+  res.write(`event:message\n`);
+  res.write(`data:${JSON.stringify(clients)}\n`);
+  res.write(`id:${host}\n\n`);
+  res.flushHeaders();
 
   req.on("close", () => {
-    clients = clients.filter((client) => client.address != host);
-    clientRes.end("See Ya!");
+    clients = clients.filter((client) => client.id != host);
+    console.log(`\n\tUsers:\n\t${JSON.stringify(clients)}\n\n`);
+    res.end("See Ya!");
   });
 
   log(`Clients: ${clients.length}`);
 
   setInterval(() => {
-    clientRes.write(`event:message\n`);
-    clientRes.write(`data:${JSON.stringify(clients)}\n\n`);
-    clientRes.flushHeaders();
-  }, [1000]);
+    res.write(`event:message\n`);
+    res.write(`data:${JSON.stringify(clients)}\n`);
+    res.write(`id:${host}\n\n`);
+    res.flushHeaders();
+  }, [300]);
 });
 
 // Routes
