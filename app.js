@@ -236,6 +236,7 @@ app.get(["/landing"], (req, res, next) => {
 
   req.on("close", () => {
     clients = clients.filter((client) => client.id != host);
+    log(`Clients: ${clients.length}`);
     console.log(`\n\tUsers:\n\t${JSON.stringify(clients)}\n\n`);
     res.end("See Ya!");
   });

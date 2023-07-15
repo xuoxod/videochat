@@ -1,0 +1,32 @@
+<nav class="navbar sticky-top navbar-expand bg-light m-0 p-0">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="#">
+            RMT
+        </a>
+
+        <div class="container-fluid">
+            <ul class="navbar-nav me-auto my-2 my-lg-0 navbar-nav-scroll" style="--bs-scroll-height: 100px;">
+                <li class="nav-item">
+                    <a id="exit-link" class="nav-link active" aria-current="page" href="/chat/room/enter">Exit</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<div class="row m-4">
+    <div class="col-md-2 mb-sm-4 d-none">
+        <ul id="users-parent" class="list-group list-group-flush online-users"></ul>
+    </div>
+
+    <div class="col-md-6 col-sm-12 conn-parent position-relative">
+    </div>
+
+    <div id="local-media-controls-parent" class="col-md-6 col-sm-12 postition-fixed"></div>
+</div>
+<input type="hidden" id="rmtid-input" value="{{senderId}}">
+<input type="hidden" id="roomname-input" value="{{roomName}}">
+<input type="hidden" id="connectiontype-input" value="{{connectionType}}">
+<input type="hidden" id="senderid-input" value="{{senderId}}">
+<input type="hidden" id="receiverid-input" value="{{receiverId}}">
+<input type="hidden" id="token-input" value="{{token}}">

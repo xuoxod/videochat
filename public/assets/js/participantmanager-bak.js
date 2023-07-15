@@ -194,7 +194,7 @@ export const remoteParticipantHandler = (participant) => {
   // Add element attributes
 
   addAttribute(localPart, "id", participant.identity);
-  addAttribute(localPart, "class", "w3-row remote-video-container");
+  addAttribute(localPart, "class", "remote-video-container");
 
   // Append elements
 
